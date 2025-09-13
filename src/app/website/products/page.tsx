@@ -1,3 +1,4 @@
+
 "use client";
 
 export const dynamic = 'force-dynamic';
@@ -69,8 +70,8 @@ const priceRanges = [
   { label: "Above $200", min: 200, max: Infinity },
 ];
 
-export default function ProductsPage() {
-  const searchParams = useSearchParams(); // Next.js requires suspense wrapping for CSR hooks during prerender
+function ProductsPageContent() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -279,8 +280,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <Suspense fallback={<div className="text-center py-5"><LoadingSpinner /></div>}>
-      <Container className="py-4">
+    <Container className="py-4">
       <Row>
         {/* Filters Sidebar */}
         <Col lg={3} className="mb-4 d-none">
@@ -363,16 +363,16 @@ export default function ProductsPage() {
                   Sort by
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => setSortBy("name")}>
+                  <Dropdown.Item onClick={() => setSortBy("name")}> 
                     Name
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setSortBy("price-low")}>
+                  <Dropdown.Item onClick={() => setSortBy("price-low")}> 
                     Price: Low to High
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setSortBy("price-high")}>
+                  <Dropdown.Item onClick={() => setSortBy("price-high")}> 
                     Price: High to Low
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setSortBy("rating")}>
+                  <Dropdown.Item onClick={() => setSortBy("rating")}> 
                     Rating
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -550,6 +550,13 @@ export default function ProductsPage() {
         </Col>
       </Row>
     </Container>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-5"><LoadingSpinner /></div>}>
+      <ProductsPageContent />
     </Suspense>
   );
 }
