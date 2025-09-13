@@ -42,7 +42,7 @@ import { FadeUpOnScroll, FlipYOnScroll } from "../constants/FadeUpOnScroll";
 // Category mapping for display names and API values
 // Values must match backend category names in your DB
 const categoryMapping = {
-  All: { display: "All", value: "" },
+  All: { display: "All", value: "All" },
   "T-Shirts": { display: "T-Shirts", value: "T-Shirt" },
   "Oversize T-Shirts": {
     display: "Oversize T-Shirts",
@@ -89,29 +89,25 @@ function ProductsPageContent() {
     const categoryParam = searchParams.get("category");
     if (categoryParam) {
       // 1) First, try to match backend names directly (e.g., T-Shirt, Over_Size)
-      const direct = (Object.entries(categoryMapping) as [CategoryKey, {display: string; value: string}][]).find(
-        ([_, m]) => m.value.toLowerCase() === categoryParam.toLowerCase()
-      );
+      const direct = (Object.entries(categoryMapping) as [CategoryKey, { display: string; value: string }][])
+        .find(([_, m]) => m.value.toLowerCase() === categoryParam.toLowerCase());
+
       if (direct) {
         setSelectedCategory(direct[0]);
-        return;
+      } else {
+        // 2) Accept slugs like "t-shirt" or "over-size" or variations
+        const normalized = categoryParam.toLowerCase().replace(/\s+|-|_/g, "");
+        if (normalized.includes("oversize")) {
+          setSelectedCategory("Oversize T-Shirts");
+        } else if (normalized.includes("tshirt")) {
+          setSelectedCategory("T-Shirts");
+        } else {
+          // 3) Fallback: if unknown, keep "All"
+          setSelectedCategory("All");
+        }
       }
-
-      // 2) Accept slugs like "t-shirt" or "over-size" or variations
-      const normalized = categoryParam.toLowerCase().replace(/\s+|-|_/g, '');
-      if (normalized.includes('oversize')) {
-        setSelectedCategory('Oversize T-Shirts');
-        return;
-      }
-      if (normalized.includes('tshirt')) {
-        setSelectedCategory('T-Shirts');
-        return;
-      }
-
-      // 3) Fallback: if unknown, keep "All"
-      setSelectedCategory('All');
     }
-    // mark initialized after first param parse
+    // mark initialized after first param parse (must always run)
     setInitialized(true);
   }, [searchParams]);
 
@@ -163,8 +159,15 @@ function ProductsPageContent() {
 
       if (rawCategoryParam) {
         console.log("Using category endpoint with raw param:", rawCategoryParam);
-        const { category: _omit, ...rest } = filters as any;
-        response = await productService.getProductsByCategory(rawCategoryParam, rest);
+        if(rawCategoryParam.toLowerCase() === "all") {
+          const { category: _omit, ...rest } = filters as any;
+          response = await productService.getProducts(rest);
+        }
+        else {
+          const { category: _omit, ...rest } = filters as any;
+          response = await productService.getProductsByCategory(rawCategoryParam, rest);
+        }
+       
       } else if (selectedCategory !== "All") {
         const apiCategory = categoryMapping[selectedCategory]?.value || selectedCategory;
         console.log("Using category endpoint with mapped value:", apiCategory);

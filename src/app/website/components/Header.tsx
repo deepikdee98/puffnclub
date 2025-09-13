@@ -59,7 +59,7 @@ export default function Header() {
             </Nav.Link>
             <Nav.Link
               as={Link}
-              href="/website/products"
+              href="/website/products?category=All"
               className="text-white fw-medium"
             >
               Products
