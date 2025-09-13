@@ -77,13 +77,21 @@ export const useBanners = (): UseBannersReturn => {
       setLoading(true);
       setError(null);
       
-      const response = await bannerAPI.getBanners(params);
-      
-      if (response.success) {
+      const response = await bannerAPI.getBanners(params) as unknown as {
+        success?: boolean;
+        data?: Banner[];
+        pagination?: any;
+        message?: string;
+      } | Banner[];
+
+      if (Array.isArray(response)) {
+        setBanners(response);
+        setPagination(null);
+      } else if (response && (response as any).success) {
         setBanners(response.data || []);
         setPagination(response.pagination || null);
       } else {
-        throw new Error(response.message || 'Failed to fetch banners');
+        throw new Error((response as any)?.message || 'Failed to fetch banners');
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch banners';
@@ -115,7 +123,11 @@ export const useBanners = (): UseBannersReturn => {
         formData.append('image', data.image);
       }
 
-      const response = await bannerAPI.createBanner(formData, onProgress);
+      const response = await bannerAPI.createBanner(formData, onProgress) as unknown as {
+        success?: boolean;
+        data: Banner;
+        message?: string;
+      };
       
       if (response.success) {
         const newBanner = response.data;
@@ -158,7 +170,11 @@ export const useBanners = (): UseBannersReturn => {
         formData.append('image', data.image);
       }
 
-      const response = await bannerAPI.updateBanner(id, formData, onProgress);
+      const response = await bannerAPI.updateBanner(id, formData, onProgress) as unknown as {
+        success?: boolean;
+        data: Banner;
+        message?: string;
+      };
       
       if (response.success) {
         const updatedBanner = response.data;
@@ -186,7 +202,10 @@ export const useBanners = (): UseBannersReturn => {
       setLoading(true);
       setError(null);
 
-      const response = await bannerAPI.deleteBanner(id);
+      const response = await bannerAPI.deleteBanner(id) as unknown as {
+        success?: boolean;
+        message?: string;
+      };
       
       if (response.success) {
         setBanners(prev => prev.filter(banner => banner._id !== id));
@@ -210,7 +229,11 @@ export const useBanners = (): UseBannersReturn => {
     try {
       setError(null);
 
-      const response = await bannerAPI.toggleBannerStatus(id);
+      const response = await bannerAPI.toggleBannerStatus(id) as unknown as {
+        success?: boolean;
+        data: Banner;
+        message?: string;
+      };
       
       if (response.success) {
         const updatedBanner = response.data;
@@ -235,7 +258,11 @@ export const useBanners = (): UseBannersReturn => {
     try {
       setError(null);
 
-      const response = await bannerAPI.moveBanner(id, direction);
+      const response = await bannerAPI.moveBanner(id, direction) as unknown as {
+        success?: boolean;
+        data?: Banner[];
+        message?: string;
+      };
       
       if (response.success) {
         setBanners(response.data || []);
@@ -257,7 +284,11 @@ export const useBanners = (): UseBannersReturn => {
     try {
       setError(null);
 
-      const response = await bannerAPI.reorderBanners(bannerOrders);
+      const response = await bannerAPI.reorderBanners(bannerOrders) as unknown as {
+        success?: boolean;
+        data?: Banner[];
+        message?: string;
+      };
       
       if (response.success) {
         setBanners(response.data || []);

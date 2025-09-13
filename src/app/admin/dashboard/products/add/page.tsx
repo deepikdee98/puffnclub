@@ -159,9 +159,12 @@ export default function AddProductPage() {
           // Add variant images
           if (variant.images && Array.isArray(variant.images)) {
             variant.images.forEach((file, fileIndex) => {
-              if (file instanceof File || file instanceof Blob) {
-                console.log(`Adding image ${fileIndex} for variant ${index}:`, file.name);
-                formData.append(`variants[${index}][images]`, file);
+              // Accept only Blob/File objects; skip strings or other types
+              const isBlobLike = file && typeof file === 'object' && ((file as any) instanceof Blob);
+              if (isBlobLike) {
+                const f = file as Blob & { name?: string };
+                console.log(`Adding image ${fileIndex} for variant ${index}:`, f?.name || '(blob)');
+                formData.append(`variants[${index}][images]`, f);
               } else {
                 console.warn(`Skipping non-File image in variant ${index}, image ${fileIndex}:`, file);
               }

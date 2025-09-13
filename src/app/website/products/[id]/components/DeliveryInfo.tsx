@@ -7,7 +7,7 @@ interface DeliveryInfoProps {
     freeDelivery: boolean;
     deliveryTime: string;
     returnPolicy: string;
-    warranty: string;
+    warranty?: string;
   };
 }
 

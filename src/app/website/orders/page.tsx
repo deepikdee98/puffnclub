@@ -82,7 +82,8 @@ export default function OrdersPage() {
 
   const filterOrders = (status: string) => {
     if (status === 'all') return orders;
-    return orders.filter(order => order.status === status);
+    // Use orderStatus from type definition
+    return orders.filter(order => (order as any).status === status || order.orderStatus === status);
   };
 
   const filteredOrders = filterOrders(activeTab);
@@ -95,9 +96,9 @@ export default function OrdersPage() {
           <small className="text-muted">Placed on {formatDate(order.date)}</small>
         </div>
         <div className="d-flex align-items-center gap-2">
-          <Badge bg={getStatusVariant(order.status)} className="d-flex align-items-center gap-1">
-            {getStatusIcon(order.status)}
-            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+          <Badge bg={getStatusVariant(order.orderStatus || (order as any).status)} className="d-flex align-items-center gap-1">
+            {getStatusIcon(order.orderStatus || (order as any).status)}
+            {(order.orderStatus || (order as any).status).charAt(0).toUpperCase() + (order.orderStatus || (order as any).status).slice(1)}
           </Badge>
           <Button variant="outline-primary" size="sm">
             <FiEye className="me-1" />
@@ -160,18 +161,18 @@ export default function OrdersPage() {
                 </div>
               )}
               <div className="d-flex gap-2">
-                {order.status === 'shipped' && (
+                {(order.orderStatus === 'shipped' || (order as any).status === 'shipped') && (
                   <Button variant="outline-primary" size="sm" className="flex-fill">
                     Track Order
                   </Button>
                 )}
-                {order.status === 'delivered' && (
+                {(order.orderStatus === 'delivered' || (order as any).status === 'delivered') && (
                   <Button variant="outline-secondary" size="sm" className="flex-fill">
                     <FiDownload className="me-1" />
                     Invoice
                   </Button>
                 )}
-                {(order.status === 'pending' || order.status === 'processing') && (
+                {((order.orderStatus === 'pending' || order.orderStatus === 'processing') || ((order as any).status === 'pending' || (order as any).status === 'processing')) && (
                   <Button 
                     variant="outline-danger" 
                     size="sm" 

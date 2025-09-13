@@ -30,13 +30,19 @@ export const usePendingOrders = (): UsePendingOrdersReturn => {
       setLoading(true);
       setError(null);
       
-      const response = await ordersAPI.getPendingOrders();
+      const response = await ordersAPI.getPendingOrders() as unknown as {
+        success?: boolean;
+        data?: { orders?: Order[] } | Order[];
+        orders?: Order[];
+        message?: string;
+      };
       
       console.log('Pending orders API response:', response);
       
-      if (response.success) {
+      if (response?.success) {
         // Handle different response structures
-        const ordersData = response.data?.orders || response.data || response.orders || [];
+        const dataPart = Array.isArray(response.data) ? response.data : (response.data as any)?.orders;
+        const ordersData = dataPart || response.orders || [];
         const ordersArray = Array.isArray(ordersData) ? ordersData : [];
         
         // Debug: Log payment statuses
@@ -49,7 +55,7 @@ export const usePendingOrders = (): UsePendingOrdersReturn => {
         
         setOrders(ordersArray);
       } else {
-        throw new Error(response.message || 'Failed to fetch pending orders');
+        throw new Error(response?.message || 'Failed to fetch pending orders');
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.message || 'Failed to fetch pending orders';
@@ -71,7 +77,7 @@ export const usePendingOrders = (): UsePendingOrdersReturn => {
         updateData.paymentStatus = paymentStatus;
       }
 
-      const response = await ordersAPI.updateOrderStatus(orderId, updateData);
+      const response = await ordersAPI.updateOrderStatus(orderId, updateData) as unknown as { success?: boolean; message?: string };
       
       if (response.success) {
         toast.success('Order status updated successfully');
@@ -79,7 +85,7 @@ export const usePendingOrders = (): UsePendingOrdersReturn => {
         setOrders(prevOrders => 
           prevOrders.map(order => 
             order._id === orderId 
-              ? { ...order, status: status as any, paymentStatus: paymentStatus as any || order.paymentStatus }
+              ? { ...order, status: status as any, paymentStatus: (paymentStatus as any) || order.paymentStatus }
               : order
           ).filter(order => 
             // Remove from pending list if status is no longer pending
@@ -87,7 +93,7 @@ export const usePendingOrders = (): UsePendingOrdersReturn => {
           )
         );
       } else {
-        throw new Error('Failed to update order status');
+        throw new Error(response?.message || 'Failed to update order status');
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.message || 'Failed to update order status';

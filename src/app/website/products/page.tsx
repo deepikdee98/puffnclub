@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect, Suspense } from "react";
 import {
   Container,
   Row,
@@ -45,7 +47,9 @@ const categoryMapping = {
     display: "Oversize T-Shirts",
     value: "Over_Size",
   },
-};
+} as const;
+
+type CategoryKey = keyof typeof categoryMapping;
 
 const categories = Object.keys(categoryMapping);
 
@@ -66,12 +70,12 @@ const priceRanges = [
 ];
 
 export default function ProductsPage() {
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // Next.js requires suspense wrapping for CSR hooks during prerender
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("name");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState<CategoryKey>("All");
   const [selectedBrand, setSelectedBrand] = useState("All");
   const [selectedPriceRange, setSelectedPriceRange] = useState(priceRanges[0]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,7 +88,7 @@ export default function ProductsPage() {
     const categoryParam = searchParams.get("category");
     if (categoryParam) {
       // 1) First, try to match backend names directly (e.g., T-Shirt, Over_Size)
-      const direct = Object.entries(categoryMapping).find(
+      const direct = (Object.entries(categoryMapping) as [CategoryKey, {display: string; value: string}][]).find(
         ([_, m]) => m.value.toLowerCase() === categoryParam.toLowerCase()
       );
       if (direct) {
@@ -158,17 +162,13 @@ export default function ProductsPage() {
 
       if (rawCategoryParam) {
         console.log("Using category endpoint with raw param:", rawCategoryParam);
-        response = await productService.getProductsByCategory(rawCategoryParam, {
-          ...filters,
-          category: undefined,
-        });
+        const { category: _omit, ...rest } = filters as any;
+        response = await productService.getProductsByCategory(rawCategoryParam, rest);
       } else if (selectedCategory !== "All") {
         const apiCategory = categoryMapping[selectedCategory]?.value || selectedCategory;
         console.log("Using category endpoint with mapped value:", apiCategory);
-        response = await productService.getProductsByCategory(apiCategory, {
-          ...filters,
-          category: undefined,
-        });
+        const { category: _omit2, ...rest2 } = filters as any;
+        response = await productService.getProductsByCategory(apiCategory, rest2);
       } else {
         console.log("Using generic products endpoint");
         response = await productService.getProducts(filters);
@@ -279,7 +279,8 @@ export default function ProductsPage() {
   };
 
   return (
-    <Container className="py-4">
+    <Suspense fallback={<div className="text-center py-5"><LoadingSpinner /></div>}>
+      <Container className="py-4">
       <Row>
         {/* Filters Sidebar */}
         <Col lg={3} className="mb-4 d-none">
@@ -294,7 +295,7 @@ export default function ProductsPage() {
               {/* Category Filter */}
               <div className="mb-4">
                 <h6 className="fw-bold mb-3">Category</h6>
-                {categories.map((category) => (
+                {(categories as CategoryKey[]).map((category) => (
                   <Form.Check
                     key={category}
                     type="radio"
@@ -549,5 +550,6 @@ export default function ProductsPage() {
         </Col>
       </Row>
     </Container>
+    </Suspense>
   );
 }

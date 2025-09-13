@@ -3,15 +3,10 @@
 import { Badge } from "react-bootstrap";
 import { FiStar } from "react-icons/fi";
 
+import type { Product } from "../../../services/productService";
+
 interface ProductInfoProps {
-  product: {
-    name: string;
-    brand: string;
-    rating: number;
-    reviews: number;
-    price: number;
-    comparePrice?: number;
-  };
+  product: Pick<Product, "name" | "brand" | "price" | "comparePrice" | "rating" | "reviewsCount">;
   formatCurrency: (amount: number) => string;
   renderStars: (rating: number) => React.ReactNode;
   getDiscountPercentage: () => number;
@@ -30,9 +25,9 @@ export default function ProductInfo({
 
       {/* Rating */}
       {/* <div className="d-flex align-items-center mb-4 p-3 bg-light rounded">
-        <div className="me-3">{renderStars(product.rating)}</div>
-        <span className="me-2 fw-bold">{product.rating}</span>
-        <span className="text-muted">({product.reviews} reviews)</span>
+        <div className="me-3">{renderStars(product.rating || 0)}</div>
+        <span className="me-2 fw-bold">{product.rating || 0}</span>
+        <span className="text-muted">({product.reviewsCount || 0} reviews)</span>
       </div> */}
 
       {/* Price */}

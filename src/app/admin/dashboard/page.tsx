@@ -282,24 +282,24 @@ export default function DashboardPage() {
                           </td>
                           <td>
                             <div className={styles.actionButtons}>
-                              <Button
-                                variant="outline-primary"
-                                size="sm"
-                                as={Link}
-                                href={`/admin/dashboard/orders/${order._id}`}
-                                title="View Order Details"
-                              >
-                                <FiEye size={14} />
-                              </Button>
-                              <Button
-                                variant="outline-secondary"
-                                size="sm"
-                                as={Link}
-                                href={`/admin/dashboard/orders/${order._id}/edit`}
-                                title="Edit Order"
-                              >
-                                <FiEdit size={14} />
-                              </Button>
+                              <Link href={`/admin/dashboard/orders/${order._id}`}> 
+                                <Button
+                                  variant="outline-primary"
+                                  size="sm"
+                                  title="View Order Details"
+                                >
+                                  <FiEye size={14} />
+                                </Button>
+                              </Link>
+                              <Link href={`/admin/dashboard/orders/${order._id}/edit`}>
+                                <Button
+                                  variant="outline-secondary"
+                                  size="sm"
+                                  title="Edit Order"
+                                >
+                                  <FiEdit size={14} />
+                                </Button>
+                              </Link>
                             </div>
                           </td>
                         </tr>
@@ -368,7 +368,7 @@ export default function DashboardPage() {
                               // If SVG fails, show emoji fallback
                               e.currentTarget.style.display = "none";
                               const fallback =
-                                e.currentTarget.nextElementSibling;
+                                e.currentTarget.nextElementSibling as HTMLElement | null;
                               if (fallback) fallback.style.display = "flex";
                             }}
                             style={{

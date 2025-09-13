@@ -1,7 +1,24 @@
 import { apiClient, dashboardAPI, productsAPI, ordersAPI, categoriesAPI, homepageAPI } from './api';
 import { toast } from 'react-toastify';
 import { DashboardMetrics, RecentOrder, TopProduct, SalesChartData, RecentActivity } from '@/types/dashboard';
-import { ProductsResponse, SimpleProduct } from '@/types';
+import type { ProductsResponse } from '@/app/website/services/productService';
+
+// Local SimpleProduct type used by admin sample data
+interface SimpleProduct {
+  id: string;
+  name: string;
+  sku: string;
+  category: string;
+  brand: string;
+  price: number;
+  comparePrice?: number | null;
+  stock: number;
+  status: string;
+  featured: boolean;
+  tags: string[];
+  image: string;
+  createdAt: string;
+}
 
 // Sample/Mock data for fallback
 export const sampleData: {
@@ -388,7 +405,7 @@ export const dataService = {
   },
 
   // Products data
-  async getProducts(params?: any): Promise<ProductsResponse> {
+  async getProducts(params?: any): Promise<any> {
     try {
       // Try to connect to localhost backend first
       const response = await apiClient.get<ProductsResponse>('/products', { params });
@@ -398,11 +415,22 @@ export const dataService = {
       toast.warn('Using sample data - backend not connected');
       // Simulate API delay for consistent UX
       await new Promise(resolve => setTimeout(resolve, 500));
+      const page = params?.page || 1;
+      const limit = params?.limit || 10;
+      const total = sampleData.products.length;
+      const totalPages = Math.max(1, Math.ceil(total / limit));
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      const paged = sampleData.products.slice(start, end) as unknown as SimpleProduct[];
       return {
-        data: sampleData.products,
-        total: sampleData.products.length,
-        page: params?.page || 1,
-        limit: params?.limit || 10,
+        products: paged,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalProducts: total,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1,
+        },
       };
     }
   },
@@ -464,7 +492,21 @@ export const dataService = {
       toast.error('Failed to update product - backend not connected');
       // Simulate API delay for consistent UX
       await new Promise(resolve => setTimeout(resolve, 600));
-      return { id, ...data };
+      return {
+        id,
+        name: data.name || '',
+        sku: data.sku || '',
+        category: data.category || '',
+        brand: data.brand || '',
+        price: data.price || 0,
+        comparePrice: data.comparePrice ?? null,
+        stock: data.stock || 0,
+        status: data.status || 'draft',
+        featured: data.featured || false,
+        tags: data.tags || [],
+        image: data.image || '',
+        createdAt: data.createdAt || new Date().toISOString(),
+      };
     }
   },
 

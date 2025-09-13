@@ -71,8 +71,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (data: any) => {
     try {
       const response = await authService.register(data);
-      setCustomer(response.customer);
-      toast.success('Registration successful!');
+      if ('customer' in response && response.customer) {
+        setCustomer(response.customer);
+        toast.success('Registration successful!');
+      } else {
+        // OTP flow: customer not returned yet
+        toast.info('OTP sent. Please verify to complete registration.');
+      }
     } catch (error: any) {
       toast.error(error.message || 'Registration failed');
       throw error;

@@ -290,9 +290,9 @@ export default function CartPage() {
               {/* Delivery Address */}
               <div className="mb-3">
                 <small className="text-muted">Delivering to:</small>
-                <div className="small fw-bold">{selectedAddress.name}</div>
+                <div className="small fw-bold">{selectedAddress?.name || '—'}</div>
                 <div className="small text-muted">
-                  {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.pincode}
+                  {selectedAddress?.city || '—'}, {selectedAddress?.state || '—'} - {selectedAddress?.pincode || '—'}
                 </div>
               </div>
               <hr />

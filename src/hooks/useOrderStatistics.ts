@@ -48,18 +48,23 @@ export const useOrderStatistics = (): UseOrderStatisticsReturn => {
       setError(null);
       
       // Fetch basic statistics from the orders API
-      const response = await ordersAPI.getOrders({ limit: 1 }); // Just get 1 order to get statistics
+      const response = await ordersAPI.getOrders({ limit: 1 }) as unknown as {
+        success?: boolean;
+        data?: { statistics?: Partial<OrderStatistics> };
+        statistics?: Partial<OrderStatistics>;
+      }; // Just get 1 order to get statistics
       
-      if (response.success && response.data.statistics) {
+      const stats = response?.data?.statistics || (response as any)?.statistics;
+      if (stats) {
         setStatistics({
-          totalOrders: response.data.statistics.totalOrders || 0,
-          pendingOrders: response.data.statistics.pendingOrders || 0,
+          totalOrders: stats.totalOrders ?? 0,
+          pendingOrders: stats.pendingOrders ?? 0,
           processingOrders: 0, // Not provided by API yet
           shippedOrders: 0, // Not provided by API yet
           deliveredOrders: 0, // Not provided by API yet
-          completedOrders: response.data.statistics.completedOrders || 0,
+          completedOrders: stats.completedOrders ?? 0,
           cancelledOrders: 0, // Not provided by API yet
-          totalRevenue: response.data.statistics.totalRevenue || 0,
+          totalRevenue: stats.totalRevenue ?? 0,
         });
       } else {
         throw new Error('Failed to fetch statistics');

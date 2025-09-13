@@ -64,8 +64,9 @@ export const useDashboard = () => {
   // Fetch dashboard metrics
   const fetchMetrics = async () => {
     try {
-      const response = await dashboardAPI.getMetrics();
-      setMetrics(response);
+      const response = await dashboardAPI.getMetrics() as unknown as DashboardMetrics | { data?: DashboardMetrics };
+      const metricsData = (response as any)?.data ?? response;
+      setMetrics(metricsData as DashboardMetrics);
     } catch (error: any) {
       console.error('Error fetching metrics:', error);
       // Use fallback metrics if API call fails
@@ -108,16 +109,16 @@ export const useDashboard = () => {
   // Fetch recent orders
   const fetchRecentOrders = async () => {
     try {
-      const response = await dashboardAPI.getRecentOrders(5);
+      const response = await dashboardAPI.getRecentOrders(5) as unknown as any;
       
       // Handle different response formats
-      let ordersData = [];
-      if (response?.data) {
-        ordersData = response.data;
+      let ordersData: any[] = [];
+      if (response && typeof response === 'object' && 'data' in response) {
+        ordersData = (response as any).data;
       } else if (Array.isArray(response)) {
-        ordersData = response;
-      } else if (response?.orders) {
-        ordersData = response.orders;
+        ordersData = response as any[];
+      } else if (response && typeof response === 'object' && 'orders' in response) {
+        ordersData = (response as any).orders;
       }
       
       setRecentOrders(ordersData);
@@ -130,12 +131,12 @@ export const useDashboard = () => {
           limit: 5, 
           sortBy: 'createdAt', 
           sortOrder: 'desc' 
-        });
+        }) as unknown as any;
         
-        if (fallbackResponse?.data?.orders) {
-          setRecentOrders(fallbackResponse.data.orders);
-        } else if (fallbackResponse?.orders) {
-          setRecentOrders(fallbackResponse.orders);
+        if (fallbackResponse && typeof fallbackResponse === 'object' && 'data' in fallbackResponse && (fallbackResponse as any).data?.orders) {
+          setRecentOrders((fallbackResponse as any).data.orders);
+        } else if (fallbackResponse && typeof fallbackResponse === 'object' && 'orders' in fallbackResponse) {
+          setRecentOrders((fallbackResponse as any).orders);
         }
       } catch (fallbackError) {
         console.error('Fallback API also failed:', fallbackError);
@@ -147,16 +148,16 @@ export const useDashboard = () => {
   // Fetch top products
   const fetchTopProducts = async () => {
     try {
-      const response = await dashboardAPI.getTopProducts(4);
+      const response = await dashboardAPI.getTopProducts(4) as unknown as any;
       
       // Handle different response formats
-      let productsData = [];
-      if (response?.data) {
-        productsData = response.data;
+      let productsData: any[] = [];
+      if (response && typeof response === 'object' && 'data' in response) {
+        productsData = (response as any).data;
       } else if (Array.isArray(response)) {
-        productsData = response;
-      } else if (response?.products) {
-        productsData = response.products;
+        productsData = response as any[];
+      } else if (response && typeof response === 'object' && 'products' in response) {
+        productsData = (response as any).products;
       }
       
       setTopProducts(productsData);

@@ -317,8 +317,9 @@ export const websiteDataService = {
   // Products
   async getFeaturedProducts(limit: number = 8): Promise<any[]> {
     try {
-      const response = await websiteProductsAPI.getFeaturedProducts(limit);
-      return response.products || response;
+      const response = await websiteProductsAPI.getFeaturedProducts(limit) as unknown as { products?: any[] } | any[];
+      if (Array.isArray(response)) return response;
+      return (response as any).products || response;
     } catch (error) {
       console.warn('Failed to fetch featured products from API, using mock data:', error);
       toast.warn('Using sample data - backend not connected');
@@ -587,10 +588,10 @@ export const websiteDataService = {
   // Authentication
   async login(credentials: { email: string; password: string }): Promise<any> {
     try {
-      const response = await websiteAuthAPI.login(credentials);
+      const response = await websiteAuthAPI.login(credentials) as unknown as { token?: string; refreshToken?: string } & Record<string, any>;
       
       // Store token
-      if (response.token) {
+      if (response?.token) {
         localStorage.setItem('customer_token', response.token);
         if (response.refreshToken) {
           localStorage.setItem('customer_refresh_token', response.refreshToken);
@@ -623,10 +624,10 @@ export const websiteDataService = {
 
   async register(userData: any): Promise<any> {
     try {
-      const response = await websiteAuthAPI.register(userData);
+      const response = await websiteAuthAPI.register(userData) as unknown as { token?: string; refreshToken?: string } & Record<string, any>;
       
       // Store token
-      if (response.token) {
+      if (response?.token) {
         localStorage.setItem('customer_token', response.token);
         if (response.refreshToken) {
           localStorage.setItem('customer_refresh_token', response.refreshToken);

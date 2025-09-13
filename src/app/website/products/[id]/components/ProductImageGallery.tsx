@@ -248,18 +248,18 @@ export default function ProductImageGallery({
   >(null);
   const [initialZoom, setInitialZoom] = useState(1);
 
-  const getPinchDistance = (touches: TouchList) => {
-    const touch1 = touches[0];
-    const touch2 = touches[1];
+  const getPinchDistance = (touches: React.TouchList | TouchList) => {
+    const t0 = (touches as any)[0];
+    const t1 = (touches as any)[1];
     return Math.sqrt(
-      Math.pow(touch2.clientX - touch1.clientX, 2) +
-        Math.pow(touch2.clientY - touch1.clientY, 2)
+      Math.pow(t1.clientX - t0.clientX, 2) +
+        Math.pow(t1.clientY - t0.clientY, 2)
     );
   };
 
   const handlePinchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
-      setInitialPinchDistance(getPinchDistance(e.touches));
+      setInitialPinchDistance(getPinchDistance(e.touches as any));
       setInitialZoom(zoomLevel);
     }
   };
@@ -267,7 +267,7 @@ export default function ProductImageGallery({
   const handlePinchMove = (e: React.TouchEvent) => {
     if (e.touches.length === 2 && initialPinchDistance) {
       e.preventDefault();
-      const currentDistance = getPinchDistance(e.touches);
+      const currentDistance = getPinchDistance(e.touches as any);
       const scale = currentDistance / initialPinchDistance;
       const newZoom = Math.max(1, Math.min(4, initialZoom * scale));
       setZoomLevel(newZoom);

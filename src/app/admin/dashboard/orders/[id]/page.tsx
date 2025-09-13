@@ -520,7 +520,7 @@ export default function OrderDetailPage() {
       }
 
       try {
-        let response;
+        let response: any;
         console.log("🔍 Fetching order with ID/Number:", params.id);
 
         // Always try both methods to ensure we get the data
@@ -538,7 +538,7 @@ export default function OrderDetailPage() {
               "❌ MongoDB ID failed, trying to extract order number..."
             );
             // If ID fails, try to get the order number from the database
-            const allOrdersResponse = await ordersAPI.getOrders({ limit: 50 });
+            const allOrdersResponse: any = await ordersAPI.getOrders({ limit: 50 });
             if (allOrdersResponse?.success && allOrdersResponse?.data?.orders) {
               const matchingOrder = allOrdersResponse.data.orders.find(
                 (o: any) => o._id === params.id
@@ -580,7 +580,7 @@ export default function OrderDetailPage() {
 
           // Special handling for the problematic ORD-1006 ID
           if (params.id === "68903b1bf4bc026f5892b8b7") {
-            const fallbackResponse = await ordersAPI.getOrderByNumber(
+            const fallbackResponse: any = await ordersAPI.getOrderByNumber(
               "ORD-1006"
             );
             console.log(
@@ -606,7 +606,7 @@ export default function OrderDetailPage() {
 
           // Try to use ORD-1003 as fallback for testing
           if (params.id !== "ORD-1003" && params.id !== "ORD-1006") {
-            const fallbackResponse = await ordersAPI.getOrderByNumber(
+            const fallbackResponse: any = await ordersAPI.getOrderByNumber(
               "ORD-1003"
             );
             if (fallbackResponse?.success && fallbackResponse?.order) {
@@ -642,7 +642,7 @@ export default function OrderDetailPage() {
             console.log(
               "🎯 Detected problematic ORD-1006 ID, using direct fallback..."
             );
-            const fallbackResponse = await ordersAPI.getOrderByNumber(
+            const fallbackResponse: any = await ordersAPI.getOrderByNumber(
               "ORD-1006"
             );
             console.log(
@@ -671,7 +671,7 @@ export default function OrderDetailPage() {
 
         // Strategy 2: Try ORD-1003 which we know has good data
         try {
-          const fallbackResponse = await ordersAPI.getOrderByNumber("ORD-1003");
+          const fallbackResponse: any = await ordersAPI.getOrderByNumber("ORD-1003");
           if (fallbackResponse?.success && fallbackResponse?.order) {
             const transformedOrder = transformOrderData(fallbackResponse.order);
             setOrder(transformedOrder);

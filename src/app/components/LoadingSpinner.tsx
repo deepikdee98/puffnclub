@@ -3,7 +3,7 @@ import { Spinner } from 'react-bootstrap';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'lg';
-  variant?: string;
+  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
   text?: string;
   centered?: boolean;
 }
@@ -19,7 +19,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       <Spinner
         animation="border"
         variant={variant}
-        size={size}
+        size={size === 'sm' ? 'sm' : undefined}
         role="status"
         aria-hidden="true"
       />

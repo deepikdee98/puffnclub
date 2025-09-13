@@ -238,7 +238,8 @@ export default function ProductDetailPage() {
 
   // Helper function to get display name for category
   const getCategoryDisplayName = (category: string) => {
-    return categoryMapping[category]?.display || category;
+    const mapping = categoryMapping as Record<string, { display: string; value: string }>;
+    return mapping[category]?.display || category;
   };
 
   // Get available sizes for selected color

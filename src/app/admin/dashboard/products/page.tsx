@@ -51,7 +51,7 @@ const transformProduct = (product: any) => {
 };
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch products from API
@@ -59,8 +59,15 @@ export default function ProductsPage() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await productsAPI.getProducts();
-        const transformedProducts = (response || []).map(transformProduct);
+        const response: any = await productsAPI.getProducts();
+        const list: any[] = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.data)
+            ? response.data
+            : Array.isArray(response?.products)
+              ? response.products
+              : [];
+        const transformedProducts = list.map(transformProduct);
         setProducts(transformedProducts);
       } catch (error) {
         console.error("Error fetching products:", error);

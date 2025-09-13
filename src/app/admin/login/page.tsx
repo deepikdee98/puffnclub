@@ -166,10 +166,11 @@ export default function AdminLoginPage() {
         }
       } catch (error) {
         console.error("Failed to fetch store settings:", error);
+        const err = error as any;
         console.error("Error details:", {
-          message: error.message,
-          name: error.name,
-          stack: error.stack,
+          message: err?.message,
+          name: err?.name,
+          stack: err?.stack,
         });
         // Keep current default settings on error
       } finally {

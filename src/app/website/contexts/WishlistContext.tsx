@@ -114,8 +114,8 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
 
     try {
       setIsLoading(true);
-      await wishlistService.clearWishlist();
-      setWishlist({ customer: '', items: [], totalItems: 0 });
+      const response = await wishlistService.clearWishlist();
+      setWishlist(response.wishlist);
       toast.success('Wishlist cleared!');
     } catch (error: any) {
       toast.error(error.message || 'Failed to clear wishlist');

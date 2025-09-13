@@ -141,9 +141,10 @@ export const productSchemas = {
     price: baseSchemas.price,
     comparePrice: yup
       .number()
-      .positive(validationMessages.positive('Compare price'))
-      .when('price', (price, schema) => 
-        price ? schema.min(price, 'Compare price must be higher than regular price') : schema
+      .nullable()
+      .transform((value, originalValue) => (originalValue === '' || value === null ? undefined : value))
+      .when('price', ([price], schema: any) =>
+        typeof price === 'number' ? schema.min(price, 'Compare price must be higher than regular price') : schema
       ),
     inventory: baseSchemas.quantity,
     categoryId: yup

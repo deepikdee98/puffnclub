@@ -117,8 +117,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
     try {
       setIsLoading(true);
-      await cartService.clearCart();
-      setCart({ customer: '', items: [], totalItems: 0, totalAmount: 0 });
+      const response = await cartService.clearCart();
+      setCart(response.cart);
       toast.success('Cart cleared!');
     } catch (error: any) {
       toast.error(error.message || 'Failed to clear cart');

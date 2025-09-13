@@ -84,13 +84,26 @@ export const useOrders = (params: UseOrdersParams = {}): UseOrdersReturn => {
       setLoading(true);
       setError(null);
       
-      const response: OrdersResponse = await ordersAPI.getOrders(params);
+      const response = await ordersAPI.getOrders(params) as unknown as {
+        success?: boolean;
+        data?: {
+          orders: Order[];
+          pagination: any;
+          statistics: any;
+          filters: any;
+        };
+        orders?: Order[];
+        pagination?: any;
+      };
       
-      if (response.success) {
-        setOrders(response.data.orders);
-        setPagination(response.data.pagination);
-        setStatistics(response.data.statistics);
-        setFilters(response.data.filters);
+      if (response?.success && response.data) {
+        setOrders(response.data.orders || []);
+        setPagination(response.data.pagination || pagination);
+        setStatistics(response.data.statistics || statistics);
+        setFilters(response.data.filters || filters);
+      } else if (Array.isArray(response?.orders)) {
+        setOrders(response.orders);
+        setPagination(response.pagination || pagination);
       } else {
         throw new Error('Failed to fetch orders');
       }
@@ -124,7 +137,7 @@ export const useOrders = (params: UseOrdersParams = {}): UseOrdersReturn => {
         updateData.paymentStatus = paymentStatus;
       }
 
-      const response = await ordersAPI.updateOrderStatus(orderId, updateData);
+      const response = await ordersAPI.updateOrderStatus(orderId, updateData) as unknown as { success?: boolean; message?: string };
       
       if (response.success) {
         toast.success('Order status updated successfully');
@@ -132,12 +145,12 @@ export const useOrders = (params: UseOrdersParams = {}): UseOrdersReturn => {
         setOrders(prevOrders => 
           prevOrders.map(order => 
             order._id === orderId 
-              ? { ...order, status: status as any, paymentStatus: paymentStatus as any || order.paymentStatus }
+              ? { ...order, status: status as any, paymentStatus: (paymentStatus as any) || order.paymentStatus }
               : order
           )
         );
       } else {
-        throw new Error('Failed to update order status');
+        throw new Error(response?.message || 'Failed to update order status');
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.message || 'Failed to update order status';
@@ -148,7 +161,7 @@ export const useOrders = (params: UseOrdersParams = {}): UseOrdersReturn => {
 
   const deleteOrder = async (orderId: string) => {
     try {
-      const response = await ordersAPI.deleteOrder(orderId);
+      const response = await ordersAPI.deleteOrder(orderId) as unknown as { success?: boolean; message?: string };
       
       if (response.success) {
         toast.success('Order deleted successfully');
@@ -160,7 +173,7 @@ export const useOrders = (params: UseOrdersParams = {}): UseOrdersReturn => {
           totalOrders: prev.totalOrders - 1,
         }));
       } else {
-        throw new Error('Failed to delete order');
+        throw new Error(response?.message || 'Failed to delete order');
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || err.message || 'Failed to delete order';
