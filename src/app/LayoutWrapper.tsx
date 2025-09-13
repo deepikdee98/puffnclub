@@ -1,11 +1,11 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import Header from '@/app/website/components/Header';
-import Footer from '@/app/website/components/Footer';
-import { AuthProvider } from '@/app/website/contexts/AuthContext';
-import { CartProvider } from '@/app/website/contexts/CartContext';
-import { WishlistProvider } from '@/app/website/contexts/WishlistContext';
+import Header from './website/components/Header';
+import Footer from './website/components/Footer';
+import { AuthProvider } from './website/contexts/AuthContext';
+import { CartProvider } from './website/contexts/CartContext';
+import { WishlistProvider } from './website/contexts/WishlistContext';
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
