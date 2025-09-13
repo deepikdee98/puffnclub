@@ -1,0 +1,348 @@
+.header {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  height: 70px;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 1.5rem;
+  height: 100%;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebarToggle {
+  background: none;
+  border: none;
+  color: #6c757d;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  }
+}
+
+.searchForm {
+  max-width: 400px;
+  width: 100%;
+  
+  @media (max-width: 768px) {
+    max-width: 200px;
+  }
+  
+  @media (max-width: 576px) {
+    display: none;
+  }
+}
+
+.searchInput {
+  border: 1px solid #e9ecef;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  
+  &:focus {
+    border-color: #007bff;
+    box-shadow: none;
+  }
+}
+
+.searchButton {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #e9ecef;
+    color: #495057;
+  }
+}
+
+.headerDropdown {
+  .dropdown-toggle {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background-color: #f8f9fa;
+    }
+    
+    &:focus {
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+    
+    &::after {
+      display: none;
+    }
+  }
+}
+
+.notificationToggle,
+.messageToggle {
+  color: #6c757d;
+  position: relative;
+}
+
+.notificationIcon,
+.messageIcon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notificationBadge,
+.messageBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 0.6rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 10px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notificationMenu,
+.messageMenu {
+  width: 320px;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  margin-top: 0.5rem;
+}
+
+.notificationHeader,
+.messageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+  
+  h6 {
+    margin: 0;
+    font-weight: 600;
+    color: #495057;
+  }
+}
+
+.notificationList,
+.messageList {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notificationItem,
+.messageItem {
+  padding: 0;
+  border: none;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.notificationContent,
+.messageContent {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f3f4;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.notificationTitle,
+.messageTitle {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #495057;
+  margin-bottom: 0.25rem;
+}
+
+.notificationText,
+.messageText {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.notificationTime,
+.messageTime {
+  font-size: 0.7rem;
+  color: #adb5bd;
+}
+
+.viewAllLink {
+  text-align: center;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+  
+  a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.userToggle {
+  color: #495057;
+  padding: 0.25rem 0.5rem;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #495057;
+  line-height: 1.2;
+}
+
+.userRole {
+  font-size: 0.75rem;
+  color: #6c757d;
+  line-height: 1.2;
+}
+
+.userArrow {
+  color: #adb5bd;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.userMenu {
+  width: 280px;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  margin-top: 0.5rem;
+}
+
+.userMenuHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.userMenuAvatar {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.userMenuInfo {
+  flex: 1;
+}
+
+.userMenuName {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #495057;
+  margin-bottom: 0.25rem;
+}
+
+.userMenuEmail {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.logoutItem {
+  color: #dc3545;
+  
+  &:hover {
+    background-color: #f8f9fa;
+    color: #dc3545;
+  }
+}

@@ -1,0 +1,231 @@
+# PRODUCT EDIT PAGE DOCUMENTATION
+=====================================
+
+## OVERVIEW
+This is a comprehensive product editing system for the eCommerce admin dashboard. 
+It supports variant-based products with images, inventory management, SEO settings, and real-time form validation.
+
+## FOLDER STRUCTURE
+```
+edit/
+├── page.tsx                           # Main edit page component
+├── components/
+│   ├── forms/
+│   │   ├── BasicInfoForm.tsx         # Product name, description, SKU, category, brand
+│   │   ├── PricingInventoryForm.tsx  # Price and compare price
+│   │   ├── ProductImagesForm.tsx     # Product image management
+│   │   ├── ProductStatusForm.tsx     # Status (active/inactive/draft) and featured flag
+│   │   ├── SEOForm.tsx              # Meta title and description
+│   │   ├── TagsManager.tsx          # Product tags management
+│   │   ├── VariantCard.tsx          # Individual variant display/edit
+│   │   └── VariantsSection.tsx      # Complete variants management
+│   ├── hooks/
+│   │   └── useProductForm.ts        # Custom form hook with validation and API handling
+│   └── ui/
+│       ├── EditProductHeader.tsx    # Page header with save buttons and status
+│       └── FormCard.tsx            # Reusable form section wrapper
+├── constants/
+│   └── productConstants.ts         # Product-related constants and options
+└── schemas/
+    └── productValidation.ts        # Yup validation schemas and TypeScript types
+```
+
+## MAIN FUNCTIONALITY
+
+### 1. DATA LOADING
+- **Primary**: Fetches product data via `productsAPI.getProduct(id)`
+- **Fallback**: Uses mock data if API fails (development safety)
+- **Timeout**: 10-second timeout with automatic fallback
+- **Error Handling**: Graceful degradation to sample data
+
+### 2. FORM MANAGEMENT
+- **Library**: React Hook Form with Yup validation
+- **Real-time Validation**: onChange validation mode
+- **Dirty State Tracking**: Warns about unsaved changes
+- **Auto-save Prevention**: beforeunload event handling
+
+### 3. VARIANT SYSTEM
+- **Multi-variant Support**: Each product can have multiple color/size variants
+- **Individual Inventory**: Each variant has its own stock count
+- **Image Management**: Multiple images per variant
+- **Size Options**: Customizable size selection per variant
+
+### 4. IMAGE HANDLING
+- **Multiple Images**: Support for multiple images per variant
+- **File Upload**: New image files handled separately from existing images
+- **Image Previews**: Real-time preview of uploaded images
+- **Existing Images**: Preserves and displays current product images
+
+## API INTEGRATION
+
+### Endpoints Used:
+1. **GET /products/product/{id}** - Fetch product details
+2. **PUT /products/product/{id}** - Update product (via uploadPut with FormData)
+
+### API Data Flow:
+```
+Form Data → Transform → FormData → API → Response → Success/Error Handling
+```
+
+### FormData Structure Sent to API:
+- `name`: Product name
+- `description`: Product description  
+- `sku`: Stock keeping unit
+- `category`: Product category
+- `brand`: Product brand
+- `price`: Product price
+- `comparePrice`: Compare at price (optional)
+- `status`: active/inactive/draft
+- `isFeatured`: Featured product flag
+- `variants`: JSON string of variants array
+- `tags`: JSON string of tags array
+- `metaTitle`: SEO meta title
+- `metaDescription`: SEO meta description
+- `variant_{index}_images`: Image files for each variant
+
+## VALIDATION RULES
+
+### Basic Info:
+- **Name**: Required, 3-100 characters
+- **Description**: Required, 10-1000 characters
+- **SKU**: Required, uppercase letters/numbers only, 3-20 characters
+- **Category**: Required
+- **Brand**: Required
+
+### Pricing:
+- **Price**: Required, positive number, minimum $0.01
+- **Compare Price**: Optional, must be higher than regular price
+
+### Variants:
+- **Minimum**: At least 1 variant required
+- **Color**: Required for each variant
+- **Stock**: Required, non-negative integer
+- **Sizes**: At least 1 size per variant
+- **Images**: At least 1 image per variant
+- **Unique Colors**: Each variant must have unique color
+
+### Tags:
+- **Maximum**: 5 tags allowed
+- **Custom Tags**: Users can add custom tags
+
+### SEO:
+- **Meta Title**: Maximum 60 characters
+- **Meta Description**: Maximum 160 characters
+
+## STATE MANAGEMENT
+
+### Local State:
+- `pageLoading`: Initial data loading state
+- `product`: Current product data
+- `hasImageChanges`: Tracks if images were modified
+- `newImageFiles`: Array of new image files to upload
+
+### Form State (via useProductForm hook):
+- `control`: Form control object
+- `errors`: Form validation errors
+- `isValid`: Form validity status
+- `isDirty`: Tracks unsaved changes
+- `isLoading`: API submission state
+- `uploadProgress`: File upload progress (0-100)
+
+## USER EXPERIENCE FEATURES
+
+### 1. Auto-save Warning:
+- Warns users before leaving page with unsaved changes
+- Prevents accidental data loss
+
+### 2. Loading States:
+- Initial page loading spinner
+- Form submission loading states
+- Upload progress indicator
+
+### 3. Error Handling:
+- Form validation errors displayed inline
+- API error messages via toast notifications
+- Fallback to mock data on server issues
+
+### 4. Success Feedback:
+- Success toast on save
+- Automatic redirect to product detail page
+
+## TECHNICAL DETAILS
+
+### TypeScript Types:
+```typescript
+interface ProductFormData {
+  name: string;
+  description: string;
+  sku: string;
+  category: string;
+  brand: string;
+  price: number;
+  comparePrice?: number | null;
+  variants: Variant[];
+  tags: string[];
+  status: "active" | "inactive" | "draft";
+  featured: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+}
+
+interface Variant {
+  id?: string;
+  color: string;
+  stock: number;
+  sizes: string[];
+  images: File[];
+  imagePreviews: string[];
+  existingImages?: string[];
+}
+```
+
+### Key Dependencies:
+- React Hook Form: Form management
+- Yup: Validation schema
+- React Bootstrap: UI components
+- React Icons: Icons
+- React Toastify: Notifications
+
+## CONSOLE LOGGING
+The system includes comprehensive console logging for debugging:
+
+1. **Form Submission**: Complete form data before processing
+2. **FormData Contents**: All fields being sent to API
+3. **API Response**: Complete server response
+4. **Error Details**: Detailed error information
+5. **Image Handling**: File names and sizes
+
+## DEVELOPMENT NOTES
+
+### Mock Data:
+- 2 sample products (IDs: "1", "2") for offline development
+- Automatic fallback when server unavailable
+- Maintains full functionality during development
+
+### Error Recovery:
+- Graceful handling of network issues
+- User-friendly error messages
+- Maintains form state during errors
+
+### Performance:
+- Efficient re-renders with React Hook Form
+- Progress tracking for file uploads
+- Optimized validation with Yup
+
+## USAGE WORKFLOW
+
+1. **Page Load**: Fetch product data (API or fallback)
+2. **Form Display**: Populate form with existing data
+3. **User Edits**: Real-time validation as user types/changes
+4. **Image Management**: Handle new uploads + existing images
+5. **Validation**: Complete form validation before submission
+6. **API Submission**: Send FormData to backend with progress tracking
+7. **Success Handling**: Show success message and redirect
+8. **Error Handling**: Display errors and maintain form state
+
+## BROWSER SUPPORT
+- Modern browsers with ES6+ support
+- File upload API support required
+- FormData API support required
+
+Last Updated: August 2025

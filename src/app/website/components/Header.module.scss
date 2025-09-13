@@ -1,0 +1,38 @@
+.profileDropdown {
+  position: relative;
+  text-align: center;
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+.profileDropdownMenu,.mobileprofileDropdownMenu {
+  margin-top: 0.5rem;
+  min-width: 180px;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: opacity 0.2s, transform 0.2s;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  background: #fff;
+  position: absolute;
+  right: 0;
+  z-index: 1000;
+  display: block;
+}
+.profileDropdown.show .profileDropdownMenu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.profileDropdown :global(.dropdown-toggle)::after {
+  display: none !important;
+}
+.navbar{
+  z-index: 99999 !important;
+}
+@media screen and (max-width:767px){
+  .mobileprofileDropdownMenu {
+  opacity: 1;
+  position: static;
+}
+}

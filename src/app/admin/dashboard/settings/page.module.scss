@@ -1,0 +1,339 @@
+.settingsContainer {
+  padding: 2rem 0;
+  min-height: calc(100vh - 200px);
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.pageSubtitle {
+  color: #718096;
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.navLink {
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: #4a5568;
+  border: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #f7fafc;
+    color: #2d3748;
+    transform: translateX(4px);
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+
+    &:hover {
+      color: white;
+      transform: translateX(0);
+    }
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.settingsCard {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+  overflow: hidden;
+
+  .card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+    padding: 1.25rem 1.5rem;
+
+    h5 {
+      color: #2d3748;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+
+      svg {
+        color: #667eea;
+      }
+    }
+  }
+
+  .card-body {
+    padding: 2rem 1.5rem;
+  }
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+
+  label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+
+    svg {
+      color: #667eea;
+      margin-right: 0.5rem;
+    }
+  }
+
+  .form-control {
+    border-radius: 0.5rem;
+    border: 2px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+
+    &:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    &.is-invalid {
+      border-color: #e53e3e;
+    }
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+  }
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  color: #718096;
+  padding: 0.5rem;
+  z-index: 10;
+
+  &:hover {
+    color: #2d3748;
+  }
+}
+
+.profileStats {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  color: white;
+  margin-bottom: 2rem;
+
+  .stat {
+    text-align: center;
+
+    .statValue {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .statLabel {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+  }
+}
+
+.permissionCard {
+  background: #f8f9fa;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+
+  &.active {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+  }
+
+  .permissionTitle {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+  }
+
+  .permissionDesc {
+    color: #718096;
+    font-size: 0.875rem;
+    margin-bottom: 0;
+  }
+}
+
+.adminBadge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+
+  svg {
+    margin-right: 0.5rem;
+  }
+
+  &.superAdmin {
+    background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  }
+}
+
+.lastLogin {
+  color: #718096;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+
+  svg {
+    margin-right: 0.5rem;
+    color: #a0aec0;
+  }
+}
+
+.dangerZone {
+  border: 2px solid #fed7d7;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  background: #fef5e7;
+  margin-top: 2rem;
+
+  .dangerTitle {
+    color: #c53030;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+
+    svg {
+      margin-right: 0.5rem;
+    }
+  }
+
+  .dangerDesc {
+    color: #744210;
+    margin-bottom: 1rem;
+  }
+}
+
+.colorPicker {
+  width: 60px;
+  height: 40px;
+  border-radius: 0.5rem;
+  border: 2px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #667eea;
+    transform: scale(1.05);
+  }
+}
+
+.featureCardPreview {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+  }
+
+  .featureIcon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+  }
+
+  .featureTitle {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+  }
+
+  .featureDesc {
+    color: #718096;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .settingsContainer {
+    padding: 1rem 0;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+
+  .navLink {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .settingsCard .card-body {
+    padding: 1.5rem 1rem;
+  }
+}
+
+// Animation classes
+.fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

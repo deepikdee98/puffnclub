@@ -1,0 +1,47 @@
+{
+  "name": "ecommerce-admin-panel",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "setup:backend": "node -e \"console.log('To connect backend: 1) Copy .env.example to .env.local 2) Update API URL 3) Uncomment API calls in src/lib/dataService.ts')\""
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.3.4",
+    "aos": "^2.3.4",
+    "axios": "^1.10.0",
+    "bootstrap": "^5.3.6",
+    "classnames": "^2.5.1",
+    "date-fns": "^3.6.0",
+    "framer-motion": "^12.23.12",
+    "html2pdf.js": "^0.10.3",
+    "js-cookie": "^3.0.5",
+    "jspdf": "^3.0.1",
+    "next": "14.2.5",
+    "nextjs-toploader": "^3.8.16",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "^18.2.0",
+    "react-dropzone": "^14.3.8",
+    "react-hook-form": "^7.58.0",
+    "react-icons": "^5.5.0",
+    "react-otp-input": "^3.1.1",
+    "react-select": "^5.10.1",
+    "react-toastify": "^11.0.5",
+    "sass": "^1.89.2",
+    "yup": "^1.6.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "20.19.11",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.5",
+    "typescript": "5.9.2"
+  }
+}

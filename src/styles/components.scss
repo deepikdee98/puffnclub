@@ -1,0 +1,99 @@
+// Component-specific styles that are shared across multiple components
+
+// Card styles
+.card-custom {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: var(--transition);
+  
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+}
+
+// Button styles
+.btn-custom {
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: var(--transition);
+  border: none;
+  
+  &:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+}
+
+// Form styles
+.form-control-custom {
+  border-radius: var(--border-radius);
+  border: 1px solid #dee2e6;
+  transition: var(--transition);
+  
+  &:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+}
+
+// Table styles
+.table-custom {
+  background: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+  
+  thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: var(--dark-color);
+  }
+  
+  tbody tr {
+    transition: var(--transition);
+    
+    &:hover {
+      background-color: #f8f9fa;
+    }
+  }
+}
+
+// Modal styles
+.modal-custom {
+  .modal-content {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-header {
+    border-bottom: 1px solid #dee2e6;
+    padding: 1.5rem;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding: 1.5rem;
+  }
+}
+
+// Badge styles
+.badge-custom {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+  border-radius: var(--border-radius);
+}
+
+// Alert styles
+.alert-custom {
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 1rem 1.25rem;
+}

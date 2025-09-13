@@ -1,0 +1,46 @@
+.dashboardLayout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.mainContent {
+  flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  
+  &.collapsed {
+    margin-left: 80px;
+  }
+  
+  @media (max-width: 991px) {
+    margin-left: 0;
+    
+    &.collapsed {
+      margin-left: 0;
+    }
+  }
+}
+
+.pageContent {
+  flex: 1;
+  padding: 2rem 0;
+  overflow-x: auto;
+}
+
+.mobileOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  
+  @media (min-width: 992px) {
+    display: none;
+  }
+}

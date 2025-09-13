@@ -1,0 +1,78 @@
+# Node dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Build artifacts
+build/
+dist/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Caches
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+.stylelintcache
+.turbo/
+.pnp
+.pnp.js
+.pnp.cjs
+
+# Environment files (keep example committed)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+!.env.example
+
+# Uploads and user-generated content
+uploads/
+server/uploads/
+
+# Coverage / test outputs
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.Trash-*
+
+# Vercel
+.vercel
+
+# Misc
+*.pem
