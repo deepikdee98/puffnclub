@@ -1,0 +1,26 @@
+.collectionCard {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: none;
+  border: none;
+  min-height: 170px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+/* CSS background images referenced relatively from /public folder */
+.classicBg {
+  background-image: url("/images/tshirt-collection.png");
+  background-position: right center;
+}
+
+.oversizedBg {
+  background-image: url("/images/oversized-collection.png");
+  background-position: right center;
+}
+
+.hoodieBg {
+  background-image: url("/images/hoodies-collection.png");
+  background-position: right center;
+}

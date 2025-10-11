@@ -3,24 +3,7 @@ import { Button, Form } from "react-bootstrap";
 import { FieldErrors } from "react-hook-form";
 import { FiTag, FiX } from "react-icons/fi";
 import { FormCard } from "../ui/FormCard";
-
-interface ProductFormData {
-  name: string;
-  description: string;
-  sku: string;
-  category: string;
-  brand: string;
-  color: string;
-  price: number;
-  comparePrice?: number | null;
-  stock: number;
-  sizes: string[];
-  tags: string[];
-  status: "active" | "inactive" | "draft";
-  featured: boolean;
-  metaTitle?: string;
-  metaDescription?: string;
-}
+import { ProductFormData } from "../../schemas/productValidation";
 
 interface TagsManagerProps {
   selectedTags: string[];

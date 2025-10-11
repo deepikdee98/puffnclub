@@ -1,7 +1,5 @@
 "use client";
-
-import styles from '../styles.module.scss';
-
+import styles from "../styles.module.scss";
 interface ColorSelectorProps {
   variants: any[];
   selectedColor: string;
@@ -15,8 +13,8 @@ export default function ColorSelector({
 }: ColorSelectorProps) {
   // Get default image for a color variant
   const getColorImage = (color: string): string => {
-    const variant = variants.find(v => v.color === color);
-    return variant?.images?.[0] || '/default-image.png';
+    const variant = variants.find((v) => v.color === color);
+    return variant?.images?.[0] || "/default-image.png";
   };
 
   return (
@@ -24,7 +22,7 @@ export default function ColorSelector({
       <h6 className="fw-bold mb-3">
         Color: <span className="fw-normal text-muted">{selectedColor}</span>
       </h6>
-      
+
       {/* Color Thumbnails Row */}
       <div className={`${styles.colorThumbnails} d-flex gap-3`}>
         {variants.map((variant) => (
@@ -51,9 +49,9 @@ export default function ColorSelector({
                 </div>
               )}
             </div>
-            <p className={`${styles.colorName} text-center mt-1 mb-0`}>
+            {/* <p className={`${styles.colorName} text-center mt-1 mb-0`}>
               {variant.color}
-            </p>
+            </p> */}
           </div>
         ))}
       </div>

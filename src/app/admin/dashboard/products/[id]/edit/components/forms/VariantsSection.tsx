@@ -25,6 +25,23 @@ export default function VariantsSection({
 }: VariantsSectionProps) {
   const { fields, append, remove } = fieldArray;
 
+  const createNewVariant = () => {
+    const initialSizeStocks = availableSizes.map((size) => ({
+      size,
+      stock: 0,
+      available: false,
+    }));
+
+    append({
+      color: "",
+      sizeStocks: initialSizeStocks,
+      totalStock: 0,
+      images: [],
+      imagePreviews: [],
+      existingImages: [],
+    });
+  };
+
   return (
     <Card className="mb-4 border-0 shadow-sm">
       <Card.Header className="bg-light border-0 d-flex justify-content-between align-items-center">
@@ -32,16 +49,7 @@ export default function VariantsSection({
         <Button
           variant="primary"
           size="sm"
-          onClick={() =>
-            append({
-              color: "",
-              stock: 0,
-              sizes: [],
-              images: [],
-              imagePreviews: [],
-              existingImages: [],
-            })
-          }
+          onClick={createNewVariant}
           disabled={isLoading}
         >
           Add Color Variant

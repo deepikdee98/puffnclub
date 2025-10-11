@@ -1,0 +1,72 @@
+
+
+/* Add border-left (vertical divider) only to specific columns */
+.withDivider {
+  border-left: 1px solid #ececec;
+}
+
+.contactEmail {
+  font-size: 14.5px;
+  color: #757575;
+  letter-spacing: 0.02em;
+  margin-top: 1rem;
+}
+
+/* Social icons hover effect */
+.socialLink {
+  color: #787878;
+  transition: color 0.2s, transform 0.18s;
+  font-size: 20px;
+
+  &:hover {
+    color: #0072ff;
+    transform: scale(1.18) rotate(-7deg);
+  }
+}
+
+/* Newsletter form style */
+.subscribeForm {
+  background: #f7f8fa;
+  border-radius: 30px;
+  border: 1px solid #e4e7ec;
+  padding: 5px 14px;
+//   max-width: 330px;
+  width: 100%;
+}
+
+.emailInput {
+  border: none;
+  background: transparent;
+  font-size: 15.5px;
+  padding: 7px 2px 7px 0;
+  outline: none;
+  flex-grow: 1; /* allow to fill */
+}
+
+.subscribeButton {
+  margin-left: 7px;
+  background: #0072ff;
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s;
+
+  &:hover {
+    background: #0056c7;
+  }
+
+  svg {
+    stroke: #fff;
+  }
+}
+@media screen and (min-width:768px) and (max-width: 991px){
+  .withDivider {
+    border-left: none;
+    padding-top: 1rem;
+  }
+}

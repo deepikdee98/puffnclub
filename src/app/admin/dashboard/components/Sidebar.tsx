@@ -21,6 +21,7 @@ import {
   FiChevronRight,
   FiBell,
   FiMessageSquare,
+  FiPercent,
 } from "react-icons/fi";
 import { useOrderStatistics } from "@/hooks/useOrderStatistics";
 import styles from "./Sidebar.module.scss";
@@ -125,6 +126,12 @@ export default function Sidebar({ collapsed, visible, onClose }: SidebarProps) {
       label: "Customers",
       icon: <FiUsers size={20} />,
       href: "/admin/dashboard/customers",
+    },
+    {
+      id: "coupons",
+      label: "Coupons",
+      icon: <FiPercent size={20} />,
+      href: "/admin/dashboard/coupons",
     },
     {
       id: "homepage",

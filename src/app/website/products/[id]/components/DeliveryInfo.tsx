@@ -1,31 +1,49 @@
 "use client";
 
-import { FiTruck, FiRefreshCw, FiShield } from "react-icons/fi";
+import Image from "next/image";
+import styles from "../styles.module.scss";
 
-interface DeliveryInfoProps {
-  deliveryInfo: {
-    freeDelivery: boolean;
-    deliveryTime: string;
-    returnPolicy: string;
-    warranty?: string;
-  };
-}
-
-export default function DeliveryInfo({ deliveryInfo }: DeliveryInfoProps) {
+export default function DeliveryInfo() {
   return (
-    <div className="delivery-info bg-light p-3 rounded">
-      <h6 className="fw-bold mb-3">Delivery & Services</h6>
-      <div className="d-flex align-items-center mb-2">
-        <FiTruck className="me-2 text-success" />
-        <span className="small">Free delivery on orders above $50</span>
-      </div>
-      <div className="d-flex align-items-center mb-2">
-        <FiRefreshCw className="me-2 text-info" />
-        <span className="small">{deliveryInfo?.returnPolicy ?? "No return policy available."}</span>
-      </div>
-      <div className="d-flex align-items-center">
-        <FiShield className="me-2 text-warning" />
-        <span className="small">{deliveryInfo?.warranty ?? "No warranty information available."}</span>
+    <div className=" border-top border-bottom px-2 pt-4 pb-4 pb-2 mb-2 mt-2">
+      <h6 className="fw-bold mb-4">Shipping Details</h6>
+      <div className="d-flex justify-content-between text-center">
+        <div className="d-flex flex-column align-items-center flex-grow-1">
+          <Image
+            src="/images/cod-icon.svg"
+            alt="COD available"
+            width={32}
+            height={32}
+            className={styles.deliveryIcon}
+          />
+          <span className="small pt-2 text-dark">COD available</span>
+        </div>
+        <div className="d-flex flex-column align-items-center flex-grow-1">
+          <Image
+            src="/images/returns-icon.svg"
+            alt="Return Policy"
+            width={32}
+            height={32}
+            className={styles.deliveryIcon}
+          />
+          <span className="small pt-2 text-dark">
+            7 days return or replace <br /> the product
+          </span>
+        </div>
+        <div className="d-flex flex-column align-items-center flex-grow-1">
+          <Image
+            src="/images/shipping-icon.svg"
+            alt="Shipping Time"
+            width={32}
+            height={32}
+            className={styles.deliveryIcon}
+          />
+          <span className="small pt-2 text-dark">
+            Usually ships in 3-4
+            <br />
+            business days
+          </span>
+        </div>
       </div>
     </div>
   );

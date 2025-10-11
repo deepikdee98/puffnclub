@@ -1,0 +1,48 @@
+.otpInput {
+  width: 35px !important ;
+  height: 35px !important;
+  font-size: 18px !important ;
+  padding : 6px !important;
+  font-weight: 600;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  background-color: #F6F6F6;
+  transition: all 0.2s ease;
+
+  @media screen and (max-width:767px){
+      font-size: 14px !important ;
+
+  }
+  &:focus {
+    border-color: #000;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.1);
+  }
+  
+  &:hover {
+    border-color: #ccc;
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: #6c757d;
+  padding: 5px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  z-index: 10;
+  
+  &:hover {
+    color: #000;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+}

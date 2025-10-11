@@ -1,0 +1,93 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #ffffff;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.cartCount {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #000000;
+  color: #ffffff;
+  font-size: 0.7rem;
+  min-width: 1.2rem;
+  text-align: center;
+}
+
+.profileDropdown {
+  position: relative;
+  
+  &:hover .profileMenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+.profileDropdownTrigger {
+  // No specific hover styles needed as parent handles it
+}
+
+.profileMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 200px;
+  background: #ffffff;
+  border: 1px solid #f5f5f5;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.2s ease;
+  z-index: 1000;
+  pointer-events: none;
+  
+  // Add small padding at top to bridge the gap
+  &::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: transparent;
+  }
+}
+
+.profileMenuItem {
+  display: block;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f8f9fa;
+    color: #000000;
+  }
+}
+
+.mobileMenu {
+  display: none !important;
+}
+
+@media (max-width: 991px) {
+  .desktopMenu {
+    display: none;
+  }
+  
+  .mobileMenu {
+    display: inline-flex !important;
+  }
+}

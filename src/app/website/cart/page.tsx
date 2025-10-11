@@ -1,9 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
-import { FiShoppingBag, FiArrowLeft, FiArrowRight, FiCheck, FiShield } from "react-icons/fi";
+import {
+  FiShoppingBag,
+  FiArrowLeft,
+  FiArrowRight,
+  FiCheck,
+  FiShield,
+} from "react-icons/fi";
 import { LoadingSpinner } from "@/app/components";
-import { useCart } from '../contexts/CartContext';
+import { useCart } from "../contexts/CartContext";
 import StepIndicator from "./components/StepIndicator";
 import CartItem from "./components/CartItem";
 import OrderSummary from "./components/OrderSummary";
@@ -27,24 +33,33 @@ type UIAddress = {
 
 export default function CartPage() {
   const [currentStep, setCurrentStep] = useState(1); // 1: Bag, 2: Address, 3: Payment
-  const { cart, isLoading, updateCartItem, removeFromCart, refreshCart } = useCart();
+  const { cart, isLoading, updateCartItem, removeFromCart, refreshCart, addToCart } =
+    useCart();
   const { customer } = useAuth();
 
-  const uiAddresses: UIAddress[] = (customer?.addresses || []).map((a: any) => ({
-    id: a._id || '',
-    name: (customer as any)?.fullName || `${customer?.firstName || ''} ${customer?.lastName || ''}`.trim(),
-    phone: customer?.phone || "",
-    address: a.street || "",
-    city: a.city || "",
-    state: a.state || "",
-    pincode: a.zipCode || "",
-    isDefault: !!a.isDefault,
-  }));
+  const uiAddresses: UIAddress[] = (customer?.addresses || []).map(
+    (a: any) => ({
+      id: a._id || "",
+      name:
+        (customer as any)?.fullName ||
+        `${customer?.firstName || ""} ${customer?.lastName || ""}`.trim(),
+      phone: customer?.phone || "",
+      address: a.street || "",
+      city: a.city || "",
+      state: a.state || "",
+      pincode: a.zipCode || "",
+      isDefault: !!a.isDefault,
+    })
+  );
 
-  const initialSelected = uiAddresses.find(a => a.isDefault) || uiAddresses[0] || (null as any);
-  const [selectedAddress, setSelectedAddress] = useState<UIAddress | null>(initialSelected);
-  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const initialSelected =
+    uiAddresses.find((a) => a.isDefault) || uiAddresses[0] || (null as any);
+  const [selectedAddress, setSelectedAddress] = useState<UIAddress | null>(
+    initialSelected
+  );
+  const [appliedCoupons, setAppliedCoupons] = useState<any[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [updatingSize, setUpdatingSize] = useState<string | null>(null);
 
   useEffect(() => {
     refreshCart();
@@ -54,8 +69,10 @@ export default function CartPage() {
   // Update selected address when customer addresses change
   useEffect(() => {
     const updated = (customer?.addresses || []).map((a: any) => ({
-      id: a._id || '',
-      name: (customer as any)?.fullName || `${customer?.firstName || ''} ${customer?.lastName || ''}`.trim(),
+      id: a._id || "",
+      name:
+        (customer as any)?.fullName ||
+        `${customer?.firstName || ""} ${customer?.lastName || ""}`.trim(),
       phone: customer?.phone || "",
       address: a.street || "",
       city: a.city || "",
@@ -63,14 +80,14 @@ export default function CartPage() {
       pincode: a.zipCode || "",
       isDefault: !!a.isDefault,
     }));
-    const preferred = updated.find(a => a.isDefault) || updated[0] || null;
+    const preferred = updated.find((a) => a.isDefault) || updated[0] || null;
     setSelectedAddress(preferred as any);
   }, [customer]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
     }).format(amount);
   };
 
@@ -79,7 +96,61 @@ export default function CartPage() {
     try {
       await updateCartItem(itemId, newQuantity);
     } catch (error) {
-      console.error('Error updating cart item:', error);
+      console.error("Error updating cart item:", error);
+    }
+  };
+
+  const updateSize = async (itemId: string, newSize: string) => {
+    try {
+      // Find the cart item to get current info
+      const cartItem = cartItems.find((item: any) => item._id === itemId);
+      if (!cartItem || cartItem.size === newSize) return;
+
+      setUpdatingSize(itemId);
+      console.log(`Changing size for item ${itemId} from ${cartItem.size} to ${newSize}`);
+      
+      // Since backend doesn't support size update yet, we'll:
+      // 1. Remove the current item
+      // 2. Add the same item with new size
+      
+      const addToCartData = {
+        productId: cartItem.product._id,
+        quantity: cartItem.quantity,
+        color: cartItem.color,
+        size: newSize,
+        price: cartItem.price
+      };
+      
+      // Remove current item
+      await removeFromCart(itemId);
+      
+      // Add with new size
+      await addToCart(addToCartData);
+      
+      console.log(`Successfully changed size to ${newSize}`);
+      
+    } catch (error) {
+      console.error("Error updating cart item size:", error);
+      // Show user-friendly error
+      alert("Could not update size. Please try again.");
+      // Refresh cart to restore original state
+      await refreshCart();
+    } finally {
+      setUpdatingSize(null);
+    }
+  };
+
+  const moveToWishlist = async (itemId: string) => {
+    try {
+      // Implement move to wishlist functionality
+      console.log(`Moving item ${itemId} to wishlist`);
+      // await addToWishlist(itemId);
+      // await removeFromCart(itemId);
+      
+      // Temporary implementation
+      alert("Move to wishlist functionality will be implemented soon");
+    } catch (error) {
+      console.error("Error moving item to wishlist:", error);
     }
   };
 
@@ -87,46 +158,55 @@ export default function CartPage() {
     try {
       await removeFromCart(itemId);
     } catch (error) {
-      console.error('Error removing cart item:', error);
+      console.error("Error removing cart item:", error);
     }
   };
 
-  const applyCoupon = (code: string) => {
-    if (code.toUpperCase() === "SAVE10") {
-      setAppliedCoupon({
-        code: "SAVE10",
-        discount: 10,
-        type: "percentage",
-      });
-    } else {
-      alert("Invalid coupon code");
-    }
+  const handleApplyCoupons = (coupons: any[]) => {
+    setAppliedCoupons(coupons);
   };
 
   const cartItems = cart?.items || [];
   const calculateTotals = () => {
+    // Calculate MRP (original price) and current subtotal
+    const mrp = cartItems.reduce((sum: number, item: any) => {
+      const originalPrice = item.product.compareAtPrice || item.price;
+      return sum + originalPrice * item.quantity;
+    }, 0);
+    
     const subtotal = cartItems.reduce(
       (sum: number, item: any) => sum + item.price * item.quantity,
       0
     );
-    const savings = cartItems.reduce((sum: number, item: any) => {
-      const itemSavings = item.product.compareAtPrice
-        ? (item.product.compareAtPrice - item.price) * item.quantity
-        : 0;
-      return sum + itemSavings;
+    
+    const savings = mrp - subtotal; // Savings from MRP to current price
+
+    // Calculate total coupon discount from all applied coupons
+    const couponDiscount = appliedCoupons.reduce((total, coupon) => {
+      if (subtotal < coupon.minAmount) return total;
+      
+      if (coupon.type === "percentage") {
+        const discount = (subtotal * coupon.value) / 100;
+        return total + (coupon.maxDiscount ? Math.min(discount, coupon.maxDiscount) : discount);
+      } else {
+        return total + coupon.value;
+      }
     }, 0);
 
-    const couponDiscount = appliedCoupon
-      ? appliedCoupon.type === "percentage"
-        ? subtotal * (appliedCoupon.discount / 100)
-        : appliedCoupon.discount
-      : 0;
-
-    const shipping = subtotal > 50 ? 0 : 9.99;
+    const delivery = subtotal > 500 ? 0 : 50; // Free delivery above ₹500
     const tax = (subtotal - couponDiscount) * 0.08;
-    const total = subtotal - couponDiscount + shipping + tax;
+    const total = subtotal - couponDiscount + delivery + tax;
 
-    return { subtotal, savings, couponDiscount, shipping, tax, total };
+    return { 
+      subtotal, 
+      savings, 
+      couponDiscount, 
+      shipping: delivery, // for backward compatibility
+      delivery, // for OrderSummary
+      tax, 
+      total,
+      mrp // for OrderSummary
+    };
   };
 
   const totals = calculateTotals();
@@ -136,13 +216,13 @@ export default function CartPage() {
     <Row>
       <Col lg={8}>
         <div>
-          <Card className="border-0 shadow-sm mb-4">
-            <Card.Header className="bg-light border-0">
+          <div className="border-0  mb-4">
+            {/* <Card.Header className="bg-light border-0">
               <h5 className="mb-0">
                 <FiShoppingBag className="me-2" />
                 Shopping Bag ({cartItems.length} items)
               </h5>
-            </Card.Header>
+            </Card.Header> */}
             <Card.Body className="p-0">
               {isLoading ? (
                 <div className="text-center py-5">
@@ -154,7 +234,9 @@ export default function CartPage() {
                   <div>
                     <FiShoppingBag size={60} className="text-muted mb-3" />
                     <h5 className="text-muted">Your bag is empty</h5>
-                    <p className="text-muted mb-4">Add some items to get started</p>
+                    <p className="text-muted mb-4">
+                      Add some items to get started
+                    </p>
                     <Button variant="dark" as="a" href="/website/products">
                       Continue Shopping
                     </Button>
@@ -166,34 +248,37 @@ export default function CartPage() {
                     key={item._id}
                     item={item}
                     onUpdateQuantity={updateQuantity}
+                    onUpdateSize={updateSize}
                     onRemoveItem={removeItem}
-                    formatCurrency={formatCurrency}
+                    onMoveToWishlist={moveToWishlist}
                   />
                 ))
               )}
             </Card.Body>
-          </Card>
-          {/* Coupon Section */}
-          {cartItems.length > 0 && (
-            <CouponSection
-              appliedCoupon={appliedCoupon}
-              onApplyCoupon={applyCoupon}
-              formatCurrency={formatCurrency}
-              couponDiscount={totals.couponDiscount}
-            />
-          )}
+          </div>
         </div>
       </Col>
       <Col lg={4}>
         <div>
           {cartItems.length > 0 && (
-            <OrderSummary
-              totals={totals}
-              itemCount={cartItems.length}
-              appliedCoupon={appliedCoupon}
-              onContinue={() => setCurrentStep(2)}
-              formatCurrency={formatCurrency}
-            />
+            <>
+              <CouponSection
+                appliedCoupons={appliedCoupons}
+                onApplyCoupons={handleApplyCoupons}
+                formatCurrency={formatCurrency}
+                cartSubtotal={totals.subtotal}
+              />
+              <OrderSummary
+                totals={totals}
+                itemCount={cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0)}
+                appliedCoupon={appliedCoupons.length > 0 ? { 
+                  code: appliedCoupons.map(c => c.code).join(', '), 
+                  discount: totals.couponDiscount 
+                } : null}
+                onContinue={() => setCurrentStep(2)}
+                formatCurrency={formatCurrency}
+              />
+            </>
           )}
         </div>
       </Col>
@@ -235,8 +320,11 @@ export default function CartPage() {
         <div>
           <OrderSummary
             totals={totals}
-            itemCount={cartItems.length}
-            appliedCoupon={appliedCoupon}
+            itemCount={cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0)}
+            appliedCoupon={appliedCoupons.length > 0 ? { 
+              code: appliedCoupons.map(c => c.code).join(', '), 
+              discount: totals.couponDiscount 
+            } : null}
             onContinue={() => setCurrentStep(3)}
             formatCurrency={formatCurrency}
           />
@@ -269,16 +357,28 @@ export default function CartPage() {
               {/* Order Items */}
               <div className="mb-3">
                 {cartItems.map((item: any) => (
-                  <div key={item._id} className="d-flex align-items-center mb-2">
+                  <div
+                    key={item._id}
+                    className="d-flex align-items-center mb-2"
+                  >
                     <img
-                      src={item.product.images?.[0] || "https://via.placeholder.com/200x200"}
+                      src={
+                        item.product.images?.[0] ||
+                        "https://via.placeholder.com/200x200"
+                      }
                       alt={item.product.name}
                       className="rounded me-2"
-                      style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        objectFit: "cover",
+                      }}
                     />
                     <div className="flex-grow-1">
                       <div className="small fw-bold">{item.product.name}</div>
-                      <div className="small text-muted">Qty: {item.quantity}</div>
+                      <div className="small text-muted">
+                        Qty: {item.quantity}
+                      </div>
                     </div>
                     <div className="small fw-bold">
                       {formatCurrency(item.price * item.quantity)}
@@ -290,9 +390,13 @@ export default function CartPage() {
               {/* Delivery Address */}
               <div className="mb-3">
                 <small className="text-muted">Delivering to:</small>
-                <div className="small fw-bold">{selectedAddress?.name || '—'}</div>
+                <div className="small fw-bold">
+                  {selectedAddress?.name || "—"}
+                </div>
                 <div className="small text-muted">
-                  {selectedAddress?.city || '—'}, {selectedAddress?.state || '—'} - {selectedAddress?.pincode || '—'}
+                  {selectedAddress?.city || "—"},{" "}
+                  {selectedAddress?.state || "—"} -{" "}
+                  {selectedAddress?.pincode || "—"}
                 </div>
               </div>
               <hr />
@@ -301,16 +405,18 @@ export default function CartPage() {
                 <span>Subtotal:</span>
                 <span>{formatCurrency(totals.subtotal)}</span>
               </div>
-              {appliedCoupon && (
+              {appliedCoupons.length > 0 && totals.couponDiscount > 0 && (
                 <div className="d-flex justify-content-between mb-2 text-success">
-                  <span>Coupon Discount:</span>
+                  <span>Coupon Discount ({appliedCoupons.map(c => c.code).join(', ')}):</span>
                   <span>-{formatCurrency(totals.couponDiscount)}</span>
                 </div>
               )}
               <div className="d-flex justify-content-between mb-2">
                 <span>Shipping:</span>
                 <span>
-                  {totals.shipping === 0 ? "FREE" : formatCurrency(totals.shipping)}
+                  {totals.shipping === 0
+                    ? "FREE"
+                    : formatCurrency(totals.shipping)}
                 </span>
               </div>
               <div className="d-flex justify-content-between mb-2">

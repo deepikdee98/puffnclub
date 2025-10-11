@@ -1,78 +1,36 @@
-# Node dependencies
-node_modules/
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Next.js build output
-.next/
-out/
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
 
-# Build artifacts
-build/
-dist/
+# testing
+/coverage
 
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
+# next.js
+/.next/
+/out/
 
-# Logs
-logs
-*.log
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-# Caches
-.cache/
-.parcel-cache/
-.npm/
-.eslintcache
-.stylelintcache
-.turbo/
-.pnp
-.pnp.js
-.pnp.cjs
+# local env files
+.env
+.env*.local
 
-# Environment files (keep example committed)
-
-.env.local
-.env.*.local
-.env.development
-.env.development.local
-.env.test
-.env.test.local
-
-.env.production.local
-!.env.example
-
-# Uploads and user-generated content
-uploads/
-server/uploads/
-
-# Coverage / test outputs
-coverage/
-.nyc_output/
-playwright-report/
-test-results/
-
-# IDE / Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS-generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-.fseventsd
-.Trash-*
-
-# Vercel
+# vercel
 .vercel
 
-# Misc
-*.pem
+# typescript
+*.tsbuildinfo
+next-env.d.ts

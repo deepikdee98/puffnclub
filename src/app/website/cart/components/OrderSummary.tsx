@@ -1,7 +1,6 @@
 "use client";
 
 import { Card, Button } from "react-bootstrap";
-import { FiArrowRight, FiShield } from "react-icons/fi";
 
 interface OrderSummaryProps {
   totals: {
@@ -11,6 +10,8 @@ interface OrderSummaryProps {
     shipping: number;
     tax: number;
     total: number;
+    mrp: number;
+    delivery: number;
   };
   itemCount: number;
   appliedCoupon: any;
@@ -26,55 +27,53 @@ export default function OrderSummary({
   formatCurrency,
 }: OrderSummaryProps) {
   return (
-    <Card className="border-0 shadow-sm sticky-top" style={{ top: "100px" }}>
-      <Card.Header className="bg-light border-0">
-        <h6 className="mb-0">Order Summary</h6>
-      </Card.Header>
+    <Card className="border-0 shadow-sm rounded">
       <Card.Body>
-        <div className="d-flex justify-content-between mb-2">
-          <span>Subtotal ({itemCount} items):</span>
-          <span>Rs. {totals.subtotal}</span>
+        <div className="mb-3">
+          <div className="fw-semibold mb-2">Price Summary</div>
+        </div>
+        <div className="d-flex justify-content-between mb-1">
+          <span className="text-muted">Total Items</span>
+          <span>{itemCount} items</span>
+        </div>
+        <div className="d-flex justify-content-between mb-1">
+          <span className="text-muted">Total MRP</span>
+          <span>{formatCurrency(totals.mrp)}</span>
         </div>
         {totals.savings > 0 && (
-          <div className="d-flex justify-content-between mb-2 text-success">
-            <span>You Save:</span>
-            <span>-{totals.savings}</span>
+          <div className="d-flex justify-content-between mb-1">
+            <span className="text-muted">Discount on MRP</span>
+            <span className="text-success">-{formatCurrency(totals.savings)}</span>
           </div>
         )}
-        {appliedCoupon && (
-          <div className="d-flex justify-content-between mb-2 text-success">
-            <span>Coupon Discount:</span>
-            <span>-{totals.couponDiscount}</span>
+        {appliedCoupon && totals.couponDiscount > 0 && (
+          <div className="d-flex justify-content-between mb-1">
+            <span className="text-success" style={{ fontWeight: 500 }}>
+              Coupon Discount ({appliedCoupon.code})
+            </span>
+            <span className="text-success">-{formatCurrency(totals.couponDiscount)}</span>
           </div>
         )}
-        <div className="d-flex justify-content-between mb-2">
-          <span>Shipping:</span>
-          <span>{totals.shipping === 0 ? "FREE" : totals.shipping}</span>
+        <div className="d-flex justify-content-between mb-1">
+          <span className="text-muted">Delivery Charges</span>
+          <span className={totals.delivery === 0 ? "text-success fw-bold" : ""}>
+            {totals.delivery === 0 ? "FREE" : formatCurrency(totals.delivery)}
+          </span>
         </div>
-        <div className="d-flex justify-content-between mb-2">
-          <span>Tax:</span>
-          <span>Rs. {totals.tax}</span>
+        {totals.tax > 0 && (
+          <div className="d-flex justify-content-between mb-1">
+            <span className="text-muted">Tax</span>
+            <span>{formatCurrency(totals.tax)}</span>
+          </div>
+        )}
+        <hr className="my-3" />
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <span className="fw-bold">Total Amount</span>
+          <span className="fw-bold fs-5">{formatCurrency(totals.total)}</span>
         </div>
-        <hr />
-        <div className="d-flex justify-content-between fw-bold h5">
-          <span>Total:</span>
-          <span>Rs. {totals.total}</span>
-        </div>
-        <Button
-          variant="dark"
-          size="lg"
-          className="w-100 mt-3"
-          onClick={onContinue}
-        >
-          Place Order
-          <FiArrowRight className="ms-2" />
+        <Button variant="dark" className="w-100 py-2 fs-6" onClick={onContinue}>
+          Proceed to buy
         </Button>
-        <div className="text-center mt-3">
-          <small className="text-muted">
-            <FiShield className="me-1" />
-            Safe and Secure Payments
-          </small>
-        </div>
       </Card.Body>
     </Card>
   );

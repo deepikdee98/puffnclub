@@ -65,6 +65,12 @@ export const API_ENDPOINTS = {
       GET_BY_ID: (orderId: string) => `${API_BASE_URL}/website/orders/${orderId}`,
       CANCEL: (orderId: string) => `${API_BASE_URL}/website/orders/${orderId}/cancel`,
     },
+    
+    // Coupon endpoints
+    COUPONS: {
+      GET_ACTIVE: `${API_BASE_URL}/coupons/active`,
+      VALIDATE: `${API_BASE_URL}/coupons/validate`,
+    },
   },
 };
 
@@ -109,13 +115,18 @@ export const apiRequest = async <T>(
   url: string,
   options: RequestInit = {}
 ): Promise<T> => {
+  // If URL starts with /api/, prepend the base URL
+  const fullUrl = url.startsWith('/api/') 
+    ? `${API_BASE_URL.replace('/api', '')}${url}`
+    : url;
+
   const defaultOptions: RequestInit = {
     headers: createAuthHeaders(),
     ...options,
   };
 
   try {
-    const response = await fetch(url, defaultOptions);
+    const response = await fetch(fullUrl, defaultOptions);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));

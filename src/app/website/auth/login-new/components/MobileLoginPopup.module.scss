@@ -1,0 +1,35 @@
+// MobileLoginPopup styles
+.modal {
+  .modal-dialog {
+    max-width: 400px;
+  }
+  
+  .modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: #6c757d;
+  padding: 5px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  z-index: 10;
+  
+  &:hover {
+    color: #000;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+}

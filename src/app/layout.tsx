@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Bebas_Neue, Instrument_Sans } from "next/font/google";
 import "@/styles/globals.scss";
 // import '@/styles/components.scss';
 // import '@/app/website/styles/website.scss';
@@ -7,7 +7,20 @@ import { ToastContainer } from "react-toastify";
 import NextTopLoader from "nextjs-toploader";
 import LayoutWrapper from "./LayoutWrapper";
 
-const inter = Inter({ subsets: ["latin"] });
+// Font for headings
+const bebasNeue = Bebas_Neue({ 
+  weight: '400',
+  subsets: ["latin"],
+  variable: '--font-bebas-neue',
+  display: 'swap',
+});
+
+// Font for body text and paragraphs
+const instrumentSans = Instrument_Sans({ 
+  subsets: ["latin"],
+  variable: '--font-instrument-sans',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "PuffnClub - Fashion E-commerce Store",
@@ -32,8 +45,15 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/npm/react-toastify@9.1.3/dist/ReactToastify.css"
           rel="stylesheet"
         />
+        {/* Fallback Google Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" 
+          rel="stylesheet" 
+        />
       </head>
-      <body className={inter.className}>
+      <body className={`${instrumentSans.variable} ${bebasNeue.variable} ${instrumentSans.className}`}>
         <NextTopLoader
           color="#007bff"
           initialPosition={0.08}

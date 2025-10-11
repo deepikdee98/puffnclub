@@ -1,0 +1,179 @@
+.addCouponPage {
+  padding: 2rem 0;
+
+  .pageHeader {
+    margin-bottom: 1.5rem;
+
+    .backButton {
+      padding: 0;
+      text-decoration: none;
+      color: #666;
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      transition: color 0.2s;
+
+      &:hover {
+        color: #0d6efd;
+      }
+    }
+
+    .pageTitle {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 0;
+    }
+
+    .pageSubtitle {
+      color: #666;
+      margin: 0.5rem 0 0 0;
+      font-size: 1rem;
+    }
+  }
+
+  .card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+
+    .card-header {
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+      padding: 1rem 1.5rem;
+
+      h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1a1a1a;
+      }
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+
+  .couponPreview {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    color: white;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+    .couponCode {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      border: 2px dashed rgba(255, 255, 255, 0.5);
+    }
+
+    .couponDiscount {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .couponCondition {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-bottom: 0.5rem;
+    }
+
+    .couponDescription {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 0.625rem 0.875rem;
+
+    &:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    }
+  }
+
+  .form-check {
+    padding-left: 2.5rem;
+
+    .form-check-input {
+      width: 3rem;
+      height: 1.5rem;
+      margin-left: -2.5rem;
+      cursor: pointer;
+
+      &:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+      }
+    }
+
+    .form-check-label {
+      font-weight: 500;
+      color: #495057;
+      cursor: pointer;
+    }
+  }
+
+  .form-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+  }
+
+  .btn {
+    border-radius: 8px;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+@media (max-width: 992px) {
+  .addCouponPage {
+    padding: 1rem 0;
+
+    .pageHeader {
+      .pageTitle {
+        font-size: 1.5rem;
+      }
+    }
+
+    .couponPreview {
+      padding: 1.5rem;
+
+      .couponCode {
+        font-size: 1.2rem;
+      }
+
+      .couponDiscount {
+        font-size: 1.5rem;
+      }
+    }
+  }
+}

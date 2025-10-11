@@ -61,11 +61,29 @@ export default function AddProductPage() {
     clearErrors();
 
     try {
-      console.log("Starting product creation...");
-      console.log("Form data:", JSON.parse(JSON.stringify(data))); // Log the form data
+      console.log("=".repeat(80));
+      console.log("🚀 STARTING PRODUCT CREATION - ADD PRODUCT PAGE");
+      console.log("=".repeat(80));
+      
+      console.log("📋 COMPLETE FORM DATA STRUCTURE:");
+      console.log(JSON.stringify(data, null, 2));
+      
+      console.log("\n📊 VARIANTS BREAKDOWN:");
+      data.variants.forEach((variant, index) => {
+        console.log(`\n--- VARIANT ${index + 1} ---`);
+        console.log(`Color: ${variant.color}`);
+        console.log(`Total Stock: ${variant.totalStock}`);
+        console.log("Size Stocks:");
+        variant.sizeStocks.forEach(sizeStock => {
+          console.log(`  ${sizeStock.size}: ${sizeStock.stock} units (${sizeStock.available ? 'Available' : 'Out of Stock'})`);
+        });
+        console.log(`Images: ${variant.images.length} files`);
+      });
 
       // Create FormData object
       const formData = new FormData();
+
+      console.log("\n🔄 CREATING FORMDATA FOR API CALL...");
 
       // Add all basic product fields to FormData
       console.log("Processing basic fields:", {
@@ -133,28 +151,38 @@ export default function AddProductPage() {
         throw error;
       }
 
-      // Add variants data
+      // Add variants data with new size-stock structure
       console.log("Processing variants for FormData:", data.variants);
       data.variants.forEach((variant, index) => {
         console.log(`Processing variant ${index}:`, variant);
         console.log(`Variant ${index} detailed:`, {
           color: { type: typeof variant.color, value: variant.color },
-          stock: { type: typeof variant.stock, value: variant.stock },
-          sizes: { type: typeof variant.sizes, value: variant.sizes, isArray: Array.isArray(variant.sizes) },
+          sizeStocks: { type: typeof variant.sizeStocks, value: variant.sizeStocks, isArray: Array.isArray(variant.sizeStocks) },
+          totalStock: { type: typeof variant.totalStock, value: variant.totalStock },
           images: { type: typeof variant.images, value: variant.images, isArray: Array.isArray(variant.images), length: variant.images?.length }
         });
 
         try {
           // Ensure all values are properly converted to strings
           const color = String(variant.color || '');
-          const stock = String(variant.stock || 0);
-          const sizes = Array.isArray(variant.sizes) ? variant.sizes.join(",") : String(variant.sizes || '');
-
-          console.log(`Appending variant ${index} data:`, { color, stock, sizes });
+          const totalStock = String(variant.totalStock || 0);
+          
+          console.log(`Appending variant ${index} data:`, { color, totalStock });
 
           formData.append(`variants[${index}][color]`, color);
-          formData.append(`variants[${index}][stock]`, stock);
-          formData.append(`variants[${index}][sizes]`, sizes);
+          formData.append(`variants[${index}][totalStock]`, totalStock);
+
+          // Add size stocks
+          if (variant.sizeStocks && Array.isArray(variant.sizeStocks)) {
+            variant.sizeStocks.forEach((sizeStock, sizeIndex) => {
+              formData.append(`variants[${index}][sizeStocks][${sizeIndex}][size]`, String(sizeStock.size));
+              formData.append(`variants[${index}][sizeStocks][${sizeIndex}][stock]`, String(sizeStock.stock || 0));
+              formData.append(`variants[${index}][sizeStocks][${sizeIndex}][available]`, String(sizeStock.available || false));
+            });
+            
+            // Also send as JSON string for easier backend parsing
+            formData.append(`variants[${index}][sizeStocksJson]`, JSON.stringify(variant.sizeStocks));
+          }
 
           // Add variant images
           if (variant.images && Array.isArray(variant.images)) {
@@ -177,6 +205,34 @@ export default function AddProductPage() {
       });
       // DO NOT append the entire variants array or object to FormData!
 
+      console.log("\n📤 FORMDATA CONTENTS SUMMARY:");
+      console.log("📋 Basic Fields:");
+      console.log(`- name: ${formData.get('name')}`);
+      console.log(`- sku: ${formData.get('sku')}`);
+      console.log(`- category: ${formData.get('category')}`);
+      console.log(`- price: ${formData.get('price')}`);
+      console.log(`- status: ${formData.get('status')}`);
+      console.log(`- tags: ${formData.get('tags')}`);
+      
+      console.log("\n📊 Variants in FormData:");
+      data.variants.forEach((variant, index) => {
+        console.log(`\n--- VARIANT ${index} FORMDATA ---`);
+        console.log(`variants[${index}][color]: ${formData.get(`variants[${index}][color]`)}`);
+        console.log(`variants[${index}][totalStock]: ${formData.get(`variants[${index}][totalStock]`)}`);
+        console.log(`variants[${index}][sizeStocksJson]: ${formData.get(`variants[${index}][sizeStocksJson]`)}`);
+        
+        console.log("Individual Size Stocks:");
+        variant.sizeStocks.forEach((sizeStock, sizeIndex) => {
+          console.log(`  variants[${index}][sizeStocks][${sizeIndex}][size]: ${formData.get(`variants[${index}][sizeStocks][${sizeIndex}][size]`)}`);
+          console.log(`  variants[${index}][sizeStocks][${sizeIndex}][stock]: ${formData.get(`variants[${index}][sizeStocks][${sizeIndex}][stock]`)}`);
+          console.log(`  variants[${index}][sizeStocks][${sizeIndex}][available]: ${formData.get(`variants[${index}][sizeStocks][${sizeIndex}][available]`)}`);
+        });
+      });
+
+      console.log("\n🌐 CALLING API: productsAPI.createProduct()");
+      console.log("API Endpoint: POST /api/products (or similar)");
+      console.log("Content-Type: multipart/form-data");
+
       // Call API with progress tracking
       const response = await productsAPI.createProduct(
         formData,
@@ -184,6 +240,9 @@ export default function AddProductPage() {
           setUploadProgress(progress);
         }
       );
+
+      console.log("\n✅ API RESPONSE RECEIVED:");
+      console.log("Response:", response);
 
       console.log("Product created:", response);
       toast.success("Product created successfully!");
@@ -193,12 +252,19 @@ export default function AddProductPage() {
       setUploadProgress(0);
       router.push("/admin/dashboard/products");
     } catch (error: any) {
-      console.error("Product creation error:", error);
+      console.log("\n❌ API ERROR OCCURRED:");
+      console.error("Full error object:", error);
+      console.error("Error response:", error.response);
+      console.error("Error data:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      console.error("Error headers:", error.response?.headers);
 
       // Handle specific error messages from backend
       const errorMessage =
         error.response?.data?.message ||
         "Failed to create product. Please try again.";
+
+      console.log(`Final error message shown to user: "${errorMessage}"`);
 
       setError("root", {
         type: "manual",
@@ -208,6 +274,9 @@ export default function AddProductPage() {
     } finally {
       setIsLoading(false);
       setUploadProgress(0);
+      console.log("=".repeat(80));
+      console.log("🏁 ADD PRODUCT API CALL COMPLETED");
+      console.log("=".repeat(80));
     }
   };
 

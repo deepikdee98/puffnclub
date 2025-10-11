@@ -35,8 +35,6 @@ export default function ProductImageGallery({
   const [modalImageIndex, setModalImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-
-  // Zoom states
   const [zoomLevel, setZoomLevel] = useState(1);
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
@@ -44,18 +42,30 @@ export default function ProductImageGallery({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [lastTap, setLastTap] = useState(0);
 
-  // Get images for selected color with placeholders
+  // const getColorImages = (color: string): string[] => {
+  //   const variant = variants.find((v) => v.color === color);
+  //   if (variant?.images && variant.images.length > 0) {
+  //     const realImage = variant.images[0];
+  //     return [
+  //       realImage,
+  //       "/default-image.png",
+  //       "/default-image.png",
+  //       "/default-image.png",
+  //     ];
+  //   }
+  //   return [
+  //     "/default-image.png",
+  //     "/default-image.png",
+  //     "/default-image.png",
+  //     "/default-image.png",
+  //   ];
+  // };
   const getColorImages = (color: string): string[] => {
     const variant = variants.find((v) => v.color === color);
     if (variant?.images && variant.images.length > 0) {
-      const realImage = variant.images[0];
-      return [
-        realImage,
-        "/default-image.png",
-        "/default-image.png",
-        "/default-image.png",
-      ];
+      return variant.images; // Return complete array of images
     }
+    // If no images, then fallback to placeholder (4 placeholders to mimic existing length)
     return [
       "/default-image.png",
       "/default-image.png",
@@ -66,12 +76,10 @@ export default function ProductImageGallery({
 
   const currentImages = getColorImages(selectedColor);
 
-  // Reset selected image when color changes
   useEffect(() => {
     setSelectedImage(0);
   }, [selectedColor]);
 
-  // Modal functions
   const openModal = (imageIndex: number) => {
     setModalImageIndex(imageIndex);
     setIsModalOpen(true);
@@ -82,7 +90,6 @@ export default function ProductImageGallery({
     resetZoom();
   };
 
-  // Zoom functions
   const resetZoom = () => {
     setZoomLevel(1);
     setPanX(0);
@@ -111,10 +118,9 @@ export default function ProductImageGallery({
     } else {
       setModalImageIndex(modalImageIndex < maxIndex ? modalImageIndex + 1 : 0);
     }
-    resetZoom(); // Reset zoom when changing images
+    resetZoom();
   };
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (!isModalOpen) return;
@@ -138,7 +144,6 @@ export default function ProductImageGallery({
     return () => document.removeEventListener("keydown", handleKeyPress);
   }, [isModalOpen, modalImageIndex]);
 
-  // Prevent body scroll when modal is open
   useEffect(() => {
     if (isModalOpen) {
       document.body.style.overflow = "hidden";
@@ -151,7 +156,6 @@ export default function ProductImageGallery({
     };
   }, [isModalOpen]);
 
-  // Touch/swipe gesture handlers
   const minSwipeDistance = 50;
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -177,7 +181,6 @@ export default function ProductImageGallery({
     }
   };
 
-  // Mouse zoom handlers
   const handleWheel = (e: React.WheelEvent) => {
     if (!isModalOpen) return;
     e.preventDefault();
@@ -189,7 +192,6 @@ export default function ProductImageGallery({
     }
   };
 
-  // Double-click zoom
   const handleDoubleClick = () => {
     if (zoomLevel === 1) {
       setZoomLevel(2);
@@ -198,13 +200,11 @@ export default function ProductImageGallery({
     }
   };
 
-  // Double-tap zoom for mobile
   const handleImageTouch = (e: React.TouchEvent) => {
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;
 
     if (tapLength < 500 && tapLength > 0) {
-      // Double tap detected
       e.preventDefault();
       if (zoomLevel === 1) {
         setZoomLevel(2);
@@ -215,7 +215,6 @@ export default function ProductImageGallery({
     setLastTap(currentTime);
   };
 
-  // Pan/drag handlers
   const handleMouseDown = (e: React.MouseEvent) => {
     if (zoomLevel > 1) {
       setIsDragging(true);
@@ -229,7 +228,6 @@ export default function ProductImageGallery({
       const newPanX = e.clientX - dragStart.x;
       const newPanY = e.clientY - dragStart.y;
 
-      // Limit panning to keep image within bounds
       const maxPanX = (zoomLevel - 1) * 150;
       const maxPanY = (zoomLevel - 1) * 150;
 
@@ -242,7 +240,6 @@ export default function ProductImageGallery({
     setIsDragging(false);
   };
 
-  // Pinch-to-zoom for mobile
   const [initialPinchDistance, setInitialPinchDistance] = useState<
     number | null
   >(null);
@@ -286,15 +283,17 @@ export default function ProductImageGallery({
         styles.productImageGallery
       )}
     >
-      {/* Main Image */}
-      <div className="position-relative mb-3">
+      {/* Image gallery container */}
+      <div className="position-relative w-100 image-gallery-container">
+        {/* Main Image */}
         <img
           src={currentImages[selectedImage]}
           alt={productName}
-          className={`img-fluid  mx-auto d-block rounded-top ${styles.mainProductImage}`}
+          className="img-fluid rounded-4 w-100 main-product-image-style"
           onClick={() => openModal(selectedImage)}
         />
-        {badge && (
+        {/* Badge */}
+        {/* {badge && (
           <Badge
             bg={
               badge === "Sale" ? "danger" : badge === "New" ? "success" : "dark"
@@ -303,7 +302,8 @@ export default function ProductImageGallery({
           >
             {badge}
           </Badge>
-        )}
+        )} */}
+        {/* Wishlist button */}
         <Button
           variant={isWishlisted ? "danger" : "light"}
           className="position-absolute top-0 end-0 m-3 rounded-circle"
@@ -311,34 +311,32 @@ export default function ProductImageGallery({
         >
           <FiHeart fill={isWishlisted ? "currentColor" : "none"} />
         </Button>
-      </div>
 
-      {/* Thumbnail Images - Desktop: Side by side, Mobile: Swipe scrollable */}
-      <div className={styles.imageThumbnails}>
-        <div
-          className={`${styles.thumbnailContainer} d-flex flex-md-column gap-2`}
-        >
+        {/* Thumbnails */}
+        <div className="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-2 p-2 thumbnail-container-style">
           {currentImages.map((image: string, index: number) => (
             <img
               key={index}
               src={image}
-              alt={`${productName} ${index + 1}`}
-              className={`img-thumbnail ${styles.thumbnailImage} ${
+              alt={`${productName} thumbnail ${index + 1}`}
+              className={`thumbnail-image-style ${
                 selectedImage === index
                   ? "border-dark border-2"
                   : "border-light"
               }`}
-              style={{ width: "80px", height: "80px", objectFit: "cover" }}
-              onClick={() => {
-                setSelectedImage(index);
-                openModal(index);
+              style={{
+                width: "80px",
+                height: "80px",
+                objectFit: "cover",
+                cursor: "pointer",
               }}
+              onClick={() => setSelectedImage(index)}
             />
           ))}
         </div>
       </div>
 
-      {/* Full-screen Image Modal */}
+      {/* Modal */}
       {isModalOpen && (
         <div
           className={`${styles.imageModal} d-flex align-items-center justify-content-center`}
@@ -363,7 +361,7 @@ export default function ProductImageGallery({
             {modalImageIndex + 1} of {currentImages.length}
           </div>
 
-          {/* Previous Button */}
+          {/* Prev Button */}
           <button
             className={`${styles.modalNavBtn} ${styles.prevBtn} d-flex align-items-center justify-content-center`}
             onClick={(e) => {
@@ -410,8 +408,7 @@ export default function ProductImageGallery({
             }}
             onTouchMove={handlePinchMove}
           />
-
-          {/* Zoom Controls */}
+          {/* Zoom controls */}
           <div className={`${styles.zoomControls} d-flex align-items-center`}>
             <button
               className={styles.zoomBtn}
@@ -423,11 +420,9 @@ export default function ProductImageGallery({
             >
               <FiMinus />
             </button>
-
             <div className={styles.zoomLevel}>
               {Math.round(zoomLevel * 100)}%
             </div>
-
             <button
               className={styles.zoomBtn}
               onClick={(e) => {

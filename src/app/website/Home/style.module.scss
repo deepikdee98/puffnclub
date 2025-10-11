@@ -1,0 +1,187 @@
+.cardImg {
+  // height: 250px;
+  width: 100%;
+  border-radius: 0.5rem;
+  position: relative;
+  background: #222;
+  overflow: hidden;
+
+  span{
+    font-size: 20px;
+
+    @media screen and (min-width:769px) and (max-width:1024px){
+      font-size: 18px;
+    }
+
+    @media screen and (max-width:768px){
+      font-size: 16px;
+    }
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: #0000004D; // 30% opacity black overlay
+    z-index: 1;
+    border-radius: 0.5rem;
+  }
+}
+
+.cardLabel {
+  position: absolute;
+  z-index: 2; // Above overlay
+  font-size: 1.25rem;
+  letter-spacing: 0.01em;
+  color: white;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 600;
+}
+
+.featuredProductsContainer {
+  // Optional container styles, spacing, etc.
+}
+
+.productImage {
+  width: 100%;
+  object-fit: cover;
+  // background: #fafafb;
+  display: block;
+  transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
+
+  &:hover {
+    transform: translateY(-8px);
+    z-index: 1;
+  }
+}
+
+
+.wishlistBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(60, 60, 60, 0.08);
+  background: #fff;
+  border: none;
+  padding: 0;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  transition: background 0.2s;
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #ffe066;
+  }
+}
+.cardWrapper {
+  min-width: 260px;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-10px);
+  }
+}
+
+
+
+.cardsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.storyCard {
+  background: #F6F6F6;
+  border-radius: 12px;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  margin-bottom: 0;
+  box-shadow: none;
+}
+.clubBanner {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('/images/homepageBanner.png') center/cover no-repeat; // Dummy path, replace as needed
+   &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.52); // Black overlay at 52% opacity or adjust as needed
+    z-index: 0;
+  }
+}
+
+.overlay {
+  position: relative;
+  z-index: 1; // keep content above the overlay
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content {
+  text-align: center;
+  color: #fff;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.content {
+  text-align: center;
+  color: #fff;
+  margin: 0 auto;
+}
+
+.statement {
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.logo {
+  margin: 0 auto;
+  margin-top: 6px;
+}
+
+.joinClubBanner {
+  height: 500px;
+  background: url('/images/joinclub-banner.png') center/cover no-repeat;
+  overflow: hidden;
+}
+
+.overlay {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.36);
+  z-index: 1;
+}
+
+
+
+
+

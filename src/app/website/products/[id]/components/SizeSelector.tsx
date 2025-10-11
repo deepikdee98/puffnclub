@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "react-bootstrap";
+import styles from "../styles.module.scss";
 
 interface Size {
   size: string;
@@ -20,25 +20,22 @@ export default function SizeSelector({
 }: SizeSelectorProps) {
   return (
     <div className="mb-4">
-      <h6 className="fw-bold mb-3">
-        Size: <span className="fw-normal text-muted">{selectedSize}</span>
-      </h6>
-      <div className="d-flex gap-2 flex-wrap">
+      <h6 className="fw-bold mb-3">Select size</h6>
+      <div className="d-flex gap-3">
         {Array.isArray(sizes) &&
           sizes.map((sizeObj) => (
-            <Button
+            <button
               key={sizeObj.size}
-              variant={
-                selectedSize === sizeObj.size ? "dark" : "outline-secondary"
-              }
-              size="sm"
+              type="button"
+              className={`btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center p-0 ${
+                styles.sizeOption
+              } ${selectedSize === sizeObj.size ? styles.selected : ""}`}
+              style={{ width: "40px", height: "40px" }}
               onClick={() => sizeObj.available && onSizeSelect(sizeObj.size)}
               disabled={!sizeObj.available}
-              className="px-3 py-2"
-              style={{ minWidth: "50px" }}
             >
               {sizeObj.size}
-            </Button>
+            </button>
           ))}
       </div>
     </div>

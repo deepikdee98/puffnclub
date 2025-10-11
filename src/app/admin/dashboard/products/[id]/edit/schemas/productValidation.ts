@@ -45,15 +45,28 @@ export const productSchema = yup.object().shape({
     .of(
       yup.object().shape({
         color: yup.string().required("Color is required"),
-        stock: yup
-          .number()
-          .required("Stock quantity is required")
-          .integer("Stock must be a whole number")
-          .min(0, "Stock cannot be negative"),
-        sizes: yup
+        sizeStocks: yup
           .array()
-          .of(yup.string().defined())
-          .min(1, "At least one size must be selected"),
+          .of(
+            yup.object().shape({
+              size: yup.string().required("Size is required"),
+              stock: yup
+                .number()
+                .required("Stock quantity is required")
+                .integer("Stock must be a whole number")
+                .min(0, "Stock cannot be negative"),
+              available: yup.boolean().default(false),
+            })
+          )
+          .test(
+            "has-available-sizes",
+            "At least one size must have stock > 0",
+            function (value) {
+              if (!value || value.length === 0) return false;
+              return value.some((sizeStock) => sizeStock.stock > 0);
+            }
+          ),
+        totalStock: yup.number().min(0, "Total stock cannot be negative"),
         images: yup.array(),
         existingImages: yup.array(),
       })
@@ -92,11 +105,17 @@ export const productSchema = yup.object().shape({
     .max(160, "Meta description must not exceed 160 characters"),
 });
 
+export interface SizeStock {
+  size: string;
+  stock: number;
+  available: boolean;
+}
+
 export interface Variant {
   id?: string;
   color: string;
-  stock: number;
-  sizes: string[];
+  sizeStocks: SizeStock[];
+  totalStock: number;
   images: File[];
   imagePreviews: string[];
   existingImages?: string[]; // For edit mode - existing images from API

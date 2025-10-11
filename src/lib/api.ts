@@ -318,4 +318,51 @@ export const homepageAPI = {
     apiClient.post('/homepage/sections/reorder', { sections }),
 };
 
+// Coupons API
+export const couponsAPI = {
+  // Get all coupons with filtering and pagination
+  getCoupons: (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: 'all' | 'active' | 'inactive' | 'expired' | 'scheduled';
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) =>
+    apiClient.get('/coupons', { params }),
+    
+  // Get single coupon by ID
+  getCoupon: (id: string) =>
+    apiClient.get(`/coupons/${id}`),
+    
+  // Create new coupon
+  createCoupon: (data: any) =>
+    apiClient.post('/coupons', data),
+    
+  // Update coupon
+  updateCoupon: (id: string, data: any) =>
+    apiClient.put(`/coupons/${id}`, data),
+    
+  // Delete coupon
+  deleteCoupon: (id: string) =>
+    apiClient.delete(`/coupons/${id}`),
+    
+  // Toggle coupon status
+  toggleCouponStatus: (id: string) =>
+    apiClient.patch(`/coupons/${id}/toggle`),
+    
+  // Validate coupon code
+  validateCoupon: (data: {
+    code: string;
+    orderAmount: number;
+    customerId?: string;
+    productIds?: string[];
+  }) =>
+    apiClient.post('/coupons/validate', data),
+    
+  // Get coupon statistics
+  getCouponStats: () =>
+    apiClient.get('/coupons/stats'),
+};
+
 export default api;

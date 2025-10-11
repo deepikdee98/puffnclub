@@ -1,10 +1,10 @@
 "use client";
 
 import { ChangeEvent } from "react";
-import { Row, Col, Card, Button, Form } from "react-bootstrap";
+import { Row, Col, Card, Button, Form, Table, Badge } from "react-bootstrap";
 import { Controller, Control, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form";
 import { FiUpload, FiX } from "react-icons/fi";
-import { ProductFormData } from "../schemas/productValidation";
+import { ProductFormData, SizeStock } from "../schemas/productValidation";
 
 interface VariantCardProps {
   control: Control<ProductFormData>;
@@ -30,6 +30,27 @@ export default function VariantCard({
   setValue,
 }: VariantCardProps) {
   const variantImages = watch(`variants.${index}.imagePreviews`);
+  const sizeStocks = watch(`variants.${index}.sizeStocks`) || [];
+
+  // Initialize size stocks if empty
+  const initializeSizeStocks = () => {
+    if (sizeStocks.length === 0) {
+      const initialSizeStocks = availableSizes.map((size) => ({
+        size,
+        stock: 0,
+        available: false,
+      }));
+      setValue(`variants.${index}.sizeStocks`, initialSizeStocks, {
+        shouldValidate: true,
+      });
+    }
+  };
+
+  // Calculate total stock
+  const updateTotalStock = () => {
+    const total = sizeStocks.reduce((sum, sizeStock) => sum + (sizeStock.stock || 0), 0);
+    setValue(`variants.${index}.totalStock`, total, { shouldValidate: true });
+  };
 
   const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -76,20 +97,31 @@ export default function VariantCard({
     setValue(`variants.${index}.images`, newImages, { shouldValidate: true });
   };
 
-  const toggleSize = (size: string) => {
-    const currentSizes = watch(`variants.${index}.sizes`) || [];
-    if (currentSizes.includes(size)) {
-      setValue(
-        `variants.${index}.sizes`,
-        currentSizes.filter((s) => s !== size),
-        { shouldValidate: true }
-      );
-    } else {
-      setValue(`variants.${index}.sizes`, [...currentSizes, size], {
-        shouldValidate: true,
-      });
-    }
+  const updateSizeStock = (size: string, stock: number) => {
+    const currentSizeStocks = watch(`variants.${index}.sizeStocks`) || [];
+    const updatedSizeStocks = currentSizeStocks.map((sizeStock) =>
+      sizeStock.size === size
+        ? { ...sizeStock, stock, available: stock > 0 }
+        : sizeStock
+    );
+    setValue(`variants.${index}.sizeStocks`, updatedSizeStocks, {
+      shouldValidate: true,
+    });
+    
+    // Update total stock
+    const total = updatedSizeStocks.reduce((sum, sizeStock) => sum + (sizeStock.stock || 0), 0);
+    setValue(`variants.${index}.totalStock`, total, { shouldValidate: true });
   };
+
+  const getSizeStock = (size: string): number => {
+    const sizeStock = sizeStocks.find((ss) => ss.size === size);
+    return sizeStock ? sizeStock.stock : 0;
+  };
+
+  // Initialize size stocks on first render
+  if (sizeStocks.length === 0) {
+    initializeSizeStocks();
+  }
 
   return (
     <Card className="mb-4 border">
@@ -136,60 +168,69 @@ export default function VariantCard({
           </Col>
           <Col md={6}>
             <Form.Group className="mb-3">
-              <Form.Label>Stock Quantity *</Form.Label>
+              <Form.Label>Total Stock</Form.Label>
               <Controller
-                name={`variants.${index}.stock`}
+                name={`variants.${index}.totalStock`}
                 control={control}
                 render={({ field }) => (
                   <Form.Control
                     {...field}
                     type="number"
-                    min="0"
-                    placeholder="0"
-                    isInvalid={!!errors.variants?.[index]?.stock}
-                    disabled={isLoading}
-                    value={field.value || ""}
-                    onChange={(e) =>
-                      field.onChange(parseInt(e.target.value) || 0)
-                    }
+                    disabled
+                    value={field.value || 0}
+                    className="bg-light"
                   />
                 )}
               />
-              {errors.variants?.[index]?.stock && (
-                <Form.Control.Feedback type="invalid">
-                  {errors.variants[index]?.stock?.message}
-                </Form.Control.Feedback>
-              )}
+              <Form.Text className="text-muted">
+                Auto-calculated from size stocks below
+              </Form.Text>
             </Form.Group>
           </Col>
         </Row>
 
         <Form.Group className="mb-3">
-          <Form.Label>Available Sizes *</Form.Label>
-          <Controller
-            name={`variants.${index}.sizes`}
-            control={control}
-            render={({ field: { value } }) => (
-              <div className="d-flex flex-wrap gap-2">
-                {availableSizes.map((size) => (
-                  <Button
-                    key={size}
-                    variant={
-                      value?.includes(size) ? "primary" : "outline-secondary"
-                    }
-                    size="sm"
-                    onClick={() => toggleSize(size)}
-                    type="button"
-                  >
-                    {size}
-                  </Button>
-                ))}
-              </div>
-            )}
-          />
-          {errors.variants?.[index]?.sizes && (
+          <Form.Label>Stock by Size *</Form.Label>
+          <Table size="sm" bordered>
+            <thead className="bg-light">
+              <tr>
+                <th>Size</th>
+                <th>Stock Quantity</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {availableSizes.map((size) => (
+                <tr key={size}>
+                  <td className="fw-bold">{size}</td>
+                  <td>
+                    <Form.Control
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={getSizeStock(size)}
+                      onChange={(e) =>
+                        updateSizeStock(size, parseInt(e.target.value) || 0)
+                      }
+                      disabled={isLoading}
+                      size="sm"
+                    />
+                  </td>
+                  <td>
+                    <Badge
+                      bg={getSizeStock(size) > 0 ? "success" : "secondary"}
+                      className="text-capitalize"
+                    >
+                      {getSizeStock(size) > 0 ? "Available" : "Out of Stock"}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          {errors.variants?.[index]?.sizeStocks && (
             <div className="text-danger mt-2 small">
-              {errors.variants[index]?.sizes?.message}
+              {errors.variants[index]?.sizeStocks?.message}
             </div>
           )}
         </Form.Group>

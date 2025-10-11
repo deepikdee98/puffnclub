@@ -1,24 +1,7 @@
 import { Button, ProgressBar, Alert } from "react-bootstrap";
 import { FiArrowLeft, FiSave } from "react-icons/fi";
 import { FieldErrors } from "react-hook-form";
-
-interface ProductFormData {
-  name: string;
-  description: string;
-  sku: string;
-  category: string;
-  brand: string;
-  color: string;
-  price: number;
-  comparePrice?: number | null;
-  stock: number;
-  sizes: string[];
-  tags: string[];
-  status: "active" | "inactive" | "draft";
-  featured: boolean;
-  metaTitle?: string;
-  metaDescription?: string;
-}
+import { ProductFormData } from "../../schemas/productValidation";
 
 interface EditProductHeaderProps {
   productId: string;

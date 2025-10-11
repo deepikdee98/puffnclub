@@ -114,7 +114,7 @@ const mockProducts = [
   },
 ];
 
-// Helper function to transform API response to support variants
+// Helper function to transform API response to support variants with size-specific stock
 const transformProduct = (product: any) => {
   console.log("Transforming product for edit:", product);
   
@@ -131,7 +131,7 @@ const transformProduct = (product: any) => {
     return `http://localhost:8080/uploads/${filename}`;
   };
 
-  // Convert old single-product format to variants format
+  // Convert to new size-stock format
   let variants = [];
   
   if (product.variants && product.variants.length > 0) {
@@ -149,21 +149,58 @@ const transformProduct = (product: any) => {
       
       console.log(`Variant ${index} processed existingImages:`, existingImages);
       
+      // Transform to new size-stock format
+      let sizeStocks = [];
+      let totalStock = 0;
+      
+      if (variant.sizeStocks && Array.isArray(variant.sizeStocks)) {
+        // Already in new format
+        sizeStocks = variant.sizeStocks.map((sizeStock: any) => ({
+          size: sizeStock.size,
+          stock: sizeStock.stock || 0,
+          available: (sizeStock.stock || 0) > 0,
+        }));
+        totalStock = sizeStocks.reduce((sum: number, ss: any) => sum + ss.stock, 0);
+      } else {
+        // Convert from old format (stock + sizes)
+        const availableSizes = ["XS", "S", "M", "L", "XL", "XXL"];
+        const variantSizes = variant.sizes || variant.availableSizes || [];
+        const stockPerSize = Math.floor((variant.stock || 0) / Math.max(variantSizes.length, 1));
+        
+        sizeStocks = availableSizes.map((size) => ({
+          size,
+          stock: variantSizes.includes(size) ? stockPerSize : 0,
+          available: variantSizes.includes(size) && stockPerSize > 0,
+        }));
+        totalStock = variant.stock || variant.stockQuantity || 0;
+      }
+      
       return {
         color: variant.color || "Not specified",
-        stock: variant.stock || variant.stockQuantity || 0,
-        sizes: variant.sizes || variant.availableSizes || [],
+        sizeStocks,
+        totalStock,
         images: [], // New images will be added here
         imagePreviews: [], // New image previews will be added here
         existingImages: existingImages,
       };
     });
   } else {
-    // Convert legacy single-product format to variants
+    // Convert legacy single-product format to variants with size-stock
+    const availableSizes = ["XS", "S", "M", "L", "XL", "XXL"];
+    const productSizes = product.availableSizes || product.sizes || [];
+    const totalStock = product.stockQuantity || product.stock || 0;
+    const stockPerSize = Math.floor(totalStock / Math.max(productSizes.length, 1));
+    
+    const sizeStocks = availableSizes.map((size) => ({
+      size,
+      stock: productSizes.includes(size) ? stockPerSize : 0,
+      available: productSizes.includes(size) && stockPerSize > 0,
+    }));
+    
     variants = [{
       color: product.color || "Not specified",
-      stock: product.stockQuantity || product.stock || 0,
-      sizes: product.availableSizes || product.sizes || [],
+      sizeStocks,
+      totalStock,
       images: [],
       imagePreviews: [],
       existingImages: product.images && product.images.length > 0

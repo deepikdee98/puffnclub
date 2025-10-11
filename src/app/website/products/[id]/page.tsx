@@ -24,6 +24,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useWishlist } from "../../contexts/WishlistContext";
 import { toast } from "react-toastify";
 import { normalizeProductData } from "../../utils/productUtils";
+import { reviewService } from "../../services/reviewService";
 import ProductImageGallery from "./components/ProductImageGallery";
 import ProductInfo from "./components/ProductInfo";
 import ColorSelector from "./components/ColorSelector";
@@ -34,6 +35,8 @@ import DeliveryInfo from "./components/DeliveryInfo";
 import RelatedProducts from "./components/RelatedProducts";
 import styles from "./styles.module.scss";
 import classNames from "classnames";
+import ProductDescriptionAndReviews from "./components/ProductDescriptionAndReviews";
+import ProductAdditionalDetails from "./components/ProductAdditionalDetails";
 
 // Category mapping for display names and API values
 const categoryMapping = {
@@ -79,7 +82,29 @@ export default function ProductDetailPage() {
         const normalizedProduct = normalizeProductData(response.product);
 
         setProduct(normalizedProduct);
-        setRelatedProducts(response.relatedProducts || []);
+        
+        // Fetch review stats for related products
+        const relatedProductsWithReviews = await Promise.all(
+          (response.relatedProducts || []).map(async (product: Product) => {
+            try {
+              const reviewStats = await reviewService.getProductReviewStats(product._id);
+              return {
+                ...product,
+                rating: reviewStats.averageRating || 0,
+                reviewCount: reviewStats.totalReviews || 0,
+              };
+            } catch (error) {
+              console.error(`Error loading reviews for product ${product._id}:`, error);
+              return {
+                ...product,
+                rating: 0,
+                reviewCount: 0,
+              };
+            }
+          })
+        );
+        
+        setRelatedProducts(relatedProductsWithReviews);
 
         // Check if product is in wishlist
         setIsWishlisted(isInWishlist(normalizedProduct._id));
@@ -135,32 +160,6 @@ export default function ProductDetailPage() {
 
     return stars;
   };
-
-  // const handleAddToCart = async () => {
-  //     console.log("Add to Cart clicked", { product, selectedSize, selectedColor, quantity });
-  //   if (!product) return;
-
-  //   if (!selectedSize && product.availableSizes && product.availableSizes.length > 0) {
-  //     toast.error("Please select a size");
-  //     return;
-  //   }
-
-  //   if (!isAuthenticated) {
-  //     toast.error("Please login to add items to cart");
-  //     return;
-  //   }
-
-  //   try {
-  //     await addToCart({
-  //       productId: product._id,
-  //       quantity,
-  //       size: selectedSize,
-  //       color: selectedColor,
-  //     });
-  //   } catch (error) {
-  //     console.error("Error adding to cart:", error);
-  //   }
-  // };
   const handleAddToCart = async () => {
     console.log("Add to Cart clicked", {
       product,
@@ -238,22 +237,13 @@ export default function ProductDetailPage() {
 
   // Helper function to get display name for category
   const getCategoryDisplayName = (category: string) => {
-    const mapping = categoryMapping as Record<string, { display: string; value: string }>;
+    const mapping = categoryMapping as Record<
+      string,
+      { display: string; value: string }
+    >;
     return mapping[category]?.display || category;
   };
 
-  // Get available sizes for selected color
-  // const getAvailableSizesForColor = (color: string) => {
-  //   if (!product?.variants) return [];
-
-  //   const variant = product.variants.find((v) => v.color === color);
-  //   if (!variant?.sizes) return [];
-
-  //   return variant.sizes.map((size) => ({
-  //     size,
-  //     available: true, // You can enhance this based on stock per size if needed
-  //   }));
-  // };
   const getAvailableSizesForColor = (color: string) => {
     if (!product?.variants) return [];
     const variant = product.variants.find((v) => v.color === color);
@@ -290,237 +280,89 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="product-detail-page bg-light">
-      <Container className="py-4">
+    <div className="product-detail-page bg-white">
+      <Container className="pt-4 pb-0">
         {/* Breadcrumb */}
-        <Breadcrumb
-          className={classNames(
-            "mb-4 bg-white p-3 rounded",
-            styles.breadCrumbDetails
-          )}
-        >
-          <Breadcrumb.Item href="/website" className="text-dark">
-            Home
-          </Breadcrumb.Item>
-          <Breadcrumb.Item href="/website/products" className="text-dark">
-            Products
-          </Breadcrumb.Item>
-          <Breadcrumb.Item
-            href={
-              product?.category
-                ? `/website/products?category=${product.category}`
-                : "/website/products"
-            }
-            className="text-dark"
-          >
-            {product?.category
-              ? getCategoryDisplayName(product.category)
-              : "Category"}
-          </Breadcrumb.Item>
-          <Breadcrumb.Item active className="text-muted">
-            {product?.name || "Product"}
-          </Breadcrumb.Item>
-        </Breadcrumb>
 
         <Row>
           {/* Product Images */}
           <Col lg={6} className="mb-4">
-            <Card className="border-0 shadow-sm">
-              <Card.Body className="p-0">
-                <ProductImageGallery
-                  variants={product.variants || []}
-                  selectedColor={selectedColor}
-                  productName={product.name}
-                  badge={
-                    product.tags?.includes("New")
-                      ? "New"
-                      : product.tags?.includes("Best Seller")
-                      ? "Best Seller"
-                      : undefined
-                  }
-                  isWishlisted={isWishlisted}
-                  onWishlistToggle={handleWishlist}
-                />
-              </Card.Body>
-            </Card>
+            <div className="p-0">
+              <ProductImageGallery
+                variants={product.variants || []}
+                selectedColor={selectedColor}
+                productName={product.name}
+                badge={
+                  product.tags?.includes("New")
+                    ? "New"
+                    : product.tags?.includes("Best Seller")
+                    ? "Best Seller"
+                    : undefined
+                }
+                isWishlisted={isWishlisted}
+                onWishlistToggle={handleWishlist}
+              />
+            </div>
           </Col>
-
           {/* Product Details */}
           <Col lg={6}>
-            <Card className="border-0 shadow-sm h-100">
-              <Card.Body className="p-4">
-                <ProductInfo
-                  product={product}
-                  formatCurrency={formatCurrency}
-                  renderStars={renderStars}
-                  getDiscountPercentage={getDiscountPercentage}
-                />
+            {/* <Card className="border-0 shadow-sm h-100"> */}
+            <div className="p-4">
+              <ProductInfo
+                product={product}
+                getDiscountPercentage={getDiscountPercentage}
+              />
 
-                <ColorSelector
-                  variants={product.variants || []}
-                  selectedColor={selectedColor}
-                  onColorSelect={setSelectedColor}
-                />
+              <ColorSelector
+                variants={product.variants || []}
+                selectedColor={selectedColor}
+                onColorSelect={setSelectedColor}
+              />
 
-                <SizeSelector
-                  // sizes={
-                  //   Array.isArray(product.availableSizes)
-                  //     ? product.availableSizes
-                  //     : []
-                  // }
-                  sizes={getAvailableSizesForColor(selectedColor)}
-                  selectedSize={selectedSize}
-                  onSizeSelect={setSelectedSize}
-                />
+              <SizeSelector
+                sizes={getAvailableSizesForColor(selectedColor)}
+                selectedSize={selectedSize}
+                onSizeSelect={setSelectedSize}
+              />
 
-                <QuantitySelector
-                  quantity={quantity}
-                  onQuantityChange={handleQuantityChange}
-                />
+              <QuantitySelector
+                quantity={quantity}
+                onQuantityChange={handleQuantityChange}
+              />
 
-                <ProductActions
-                  selectedSize={selectedSize}
-                  isWishlisted={isWishlisted}
-                  onAddToCart={handleAddToCart}
-                  onWishlistToggle={handleWishlist}
-                />
+              <ProductActions
+                selectedSize={selectedSize}
+                isWishlisted={isWishlisted}
+                onGoToCart={handleAddToCart}
+                onWishlistToggle={handleWishlist}
+              />
 
-                <DeliveryInfo
-                  deliveryInfo={{
-                    freeDelivery: true,
-                    deliveryTime: "2-3 days",
-                    returnPolicy: "30 days easy return",
-                  }}
-                />
+              <DeliveryInfo />
 
-                {/* Stock Status */}
-                <div className="mt-3">
-                  <Badge
-                    bg={product.totalStock > 0 ? "success" : "danger"}
-                    className="px-3 py-2"
-                  >
-                    {product.totalStock > 0
-                      ? `${product.totalStock} items in stock`
-                      : "Out of stock"}
-                  </Badge>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Product Information Tabs */}
-        <Row className="mt-5">
-          <Col>
-            <Card className="border-0 shadow-sm">
-              <Card.Body>
-                <Tabs
-                  activeKey={activeTab}
-                  onSelect={(k) => setActiveTab(k || "description")}
-                  className={classNames(
-                    "mb-4 border-bottom",
-                    styles.productTabs
-                  )}
+              {/* Stock Status */}
+              <div className="mt-3">
+                <Badge
+                  bg={product.totalStock > 0 ? "success" : "danger"}
+                  className="px-3 py-2"
                 >
-                  <Tab eventKey="description" title="Product Details">
-                    <div className="py-3">
-                      <h5 className="fw-bold mb-3">Description</h5>
-                      <p className="text-muted mb-4">{product.description}</p>
-
-                      {/* Key Features - Show tags if no features */}
-                      {product.tags && product.tags.length > 0 && (
-                        <>
-                          <h6 className="fw-bold mb-3">Tags:</h6>
-                          <Row>
-                            {product.tags.map((tag: string, index: number) => (
-                              <Col md={6} key={index} className="mb-2">
-                                <div className="d-flex align-items-center">
-                                  <span className="text-success me-2">✓</span>
-                                  <span>{tag}</span>
-                                </div>
-                              </Col>
-                            ))}
-                          </Row>
-                        </>
-                      )}
-                    </div>
-                  </Tab>
-
-                  <Tab eventKey="specifications" title="Specifications">
-                    <div className="py-3">
-                      <h5 className="fw-bold mb-4">Product Specifications</h5>
-                      <Row>
-                        <Col md={6} className="mb-3">
-                          <div className="d-flex border-bottom pb-2">
-                            <strong
-                              className="me-3 text-dark"
-                              style={{ minWidth: "140px" }}
-                            >
-                              SKU:
-                            </strong>
-                            <span className="text-muted">{product.sku}</span>
-                          </div>
-                        </Col>
-                        <Col md={6} className="mb-3">
-                          <div className="d-flex border-bottom pb-2">
-                            <strong
-                              className="me-3 text-dark"
-                              style={{ minWidth: "140px" }}
-                            >
-                              Brand:
-                            </strong>
-                            <span className="text-muted">{product.brand}</span>
-                          </div>
-                        </Col>
-                        <Col md={6} className="mb-3">
-                          <div className="d-flex border-bottom pb-2">
-                            <strong
-                              className="me-3 text-dark"
-                              style={{ minWidth: "140px" }}
-                            >
-                              Category:
-                            </strong>
-                            <span className="text-muted">
-                              {product.category}
-                            </span>
-                          </div>
-                        </Col>
-                        <Col md={6} className="mb-3">
-                          <div className="d-flex border-bottom pb-2">
-                            <strong
-                              className="me-3 text-dark"
-                              style={{ minWidth: "140px" }}
-                            >
-                              Available Colors:
-                            </strong>
-                            <span className="text-muted">
-                              {product.availableColors?.join(", ")}
-                            </span>
-                          </div>
-                        </Col>
-                        <Col md={6} className="mb-3">
-                          <div className="d-flex border-bottom pb-2">
-                            <strong
-                              className="me-3 text-dark"
-                              style={{ minWidth: "140px" }}
-                            >
-                              Available Sizes:
-                            </strong>
-                            <span className="text-muted">
-                              {product.availableSizes?.join(", ")}
-                            </span>
-                          </div>
-                        </Col>
-                      </Row>
-                    </div>
-                  </Tab>
-
-                  {/* Reviews tab hidden - can be enabled later */}
-                </Tabs>
-              </Card.Body>
-            </Card>
+                  {product.totalStock > 0
+                    ? `${product.totalStock} items in stock`
+                    : "Out of stock"}
+                </Badge>
+              </div>
+              <ProductAdditionalDetails
+                product={product}
+                selectedColor={selectedColor}
+              />
+            </div>
+            {/* </Card> */}
           </Col>
         </Row>
+
+        <ProductDescriptionAndReviews 
+          description={product.description} 
+          productId={product._id}
+        />
 
         {/* Related Products */}
         <RelatedProducts
@@ -528,12 +370,9 @@ export default function ProductDetailPage() {
             id: p.id || p._id || "",
             name: p.name || "",
             price: p.price ?? 0,
-            image:
-              Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : "",
+            image: p.primaryImage || "",
             rating: p.rating ?? 0,
-            reviews: Array.isArray(p.reviews)
-              ? p.reviews.length
-              : p.reviews ?? 0,
+            reviews: p.reviewCount ?? 0,
           }))}
           formatCurrency={formatCurrency}
           renderStars={renderStars}

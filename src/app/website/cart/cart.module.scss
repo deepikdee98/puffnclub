@@ -1,0 +1,167 @@
+// Cart Page SCSS Module
+// Using Bootstrap classes where possible, custom styles only when needed
+
+/* Coupon Section Styles */
+.couponCard {
+  transition: all 0.2s ease-in-out;
+  border-radius: 8px;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.selected {
+    border: 2px solid #28a745 !important;
+    background-color: #f8fff8 !important;
+  }
+  
+  &.applicable {
+    border: 2px solid #e0e0e0;
+    background-color: #ffffff;
+  }
+  
+  &.notApplicable {
+    border: 2px solid #f0f0f0;
+    background-color: #f9f9f9;
+    opacity: 0.6;
+  }
+}
+
+.selectionIndicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 0 6px 0 8px;
+}
+
+.couponCode {
+  border: 1px dashed #ff6b35;
+  border-radius: 4px;
+  background-color: #fff5f2;
+  color: #ff6b35;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.couponTitle {
+  font-size: 14px;
+}
+
+.couponDescription {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.couponExpiry {
+  font-size: 11px;
+}
+
+.couponTerms {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.savingsAmount {
+  font-size: 14px;
+}
+
+.savingsLabel {
+  font-size: 13px;
+}
+
+.minimumAmount {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.minimumLabel {
+  font-size: 11px;
+}
+
+.couponContentWidth {
+  min-width: 0;
+  max-width: 70%;
+}
+
+.couponSavingsWidth {
+  min-width: 80px;
+  max-width: 30%;
+}
+
+.selectedPadding {
+  padding-right: 35px;
+}
+
+.normalPadding {
+  padding-right: 16px;
+}
+
+/* Modal Styles */
+.couponModal {
+  .modal-dialog {
+    max-width: 600px;
+  }
+}
+
+/* Scrollbar Styles */
+.couponScrollbar {
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 8px;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #999;
+    }
+  }
+}
+
+/* Manual entry styles */
+.manualEntry {
+  font-size: 14px;
+}
+
+/* Text sizes */
+.text11 {
+  font-size: 11px;
+}
+
+.text12 {
+  font-size: 12px;
+}
+
+.text13 {
+  font-size: 13px;
+}
+
+.text14 {
+  font-size: 14px;
+}
+
+/* Line heights */
+.lineHeight13 {
+  line-height: 1.3;
+}
+
+.lineHeight14 {
+  line-height: 1.4;
+}
+
+/* Letter spacing */
+.letterSpacing05 {
+  letter-spacing: 0.5px;
+}

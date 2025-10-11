@@ -2,29 +2,7 @@ import { Row, Col, Form } from "react-bootstrap";
 import { Controller, Control, FieldErrors } from "react-hook-form";
 import { FiDollarSign } from "react-icons/fi";
 import { FormCard } from "../ui/FormCard";
-
-interface ProductFormData {
-  name: string;
-  description: string;
-  sku: string;
-  category: string;
-  brand: string;
-  price: number;
-  comparePrice?: number | null;
-  variants: Array<{
-    color: string;
-    stock: number;
-    sizes: string[];
-    images: File[];
-    imagePreviews: string[];
-    existingImages?: string[];
-  }>;
-  tags: string[];
-  status: "active" | "inactive" | "draft";
-  featured: boolean;
-  metaTitle?: string;
-  metaDescription?: string;
-}
+import { ProductFormData } from "../../schemas/productValidation";
 
 interface PricingInventoryFormProps {
   control: Control<ProductFormData>;

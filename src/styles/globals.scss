@@ -14,6 +14,8 @@
   --border-radius: 8px;
   --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
+  
+  /* Font families - direct reference to CSS variables */
 }
 
 /* Global styles */
@@ -27,13 +29,41 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background-color: #f8f9fa;
 }
 
 body {
   color: var(--dark-color);
   line-height: 1.6;
+}
+
+/* Headings use Bebas Neue */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--font-bebas-neue), 'Bebas Neue', sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Body text, paragraphs, and descriptions use Instrument Sans */
+p, span, div, label, input, textarea, button,
+.text-body, .description, .para {
+  font-family: var(--font-instrument-sans), 'Instrument Sans', sans-serif !important;
+}
+
+/* Bootstrap heading overrides */
+.modal-title,
+.card-title,
+.form-label,
+.btn {
+  font-family: var(--font-instrument-sans), 'Instrument Sans', sans-serif !important;
+}
+
+/* Ensure headings in modals also use Bebas Neue */
+.modal h1, .modal h2, .modal h3, .modal h4, .modal h5, .modal h6 {
+  font-family: var(--font-bebas-neue), 'Bebas Neue', sans-serif !important;
 }
 
 a {

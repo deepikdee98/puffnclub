@@ -1,7 +1,6 @@
-
 "use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import { useState, useEffect, Suspense } from "react";
 import {
@@ -38,6 +37,7 @@ import { useWishlist } from "../contexts/WishlistContext";
 import { toast } from "react-toastify";
 import { normalizeProductsData } from "../utils/productUtils";
 import { FadeUpOnScroll, FlipYOnScroll } from "../constants/FadeUpOnScroll";
+import { reviewService } from "../services/reviewService";
 
 // Category mapping for display names and API values
 // Values must match backend category names in your DB
@@ -89,8 +89,12 @@ function ProductsPageContent() {
     const categoryParam = searchParams.get("category");
     if (categoryParam) {
       // 1) First, try to match backend names directly (e.g., T-Shirt, Over_Size)
-      const direct = (Object.entries(categoryMapping) as [CategoryKey, { display: string; value: string }][])
-        .find(([_, m]) => m.value.toLowerCase() === categoryParam.toLowerCase());
+      const direct = (
+        Object.entries(categoryMapping) as [
+          CategoryKey,
+          { display: string; value: string }
+        ][]
+      ).find(([_, m]) => m.value.toLowerCase() === categoryParam.toLowerCase());
 
       if (direct) {
         setSelectedCategory(direct[0]);
@@ -158,21 +162,29 @@ function ProductsPageContent() {
       const rawCategoryParam = searchParams.get("category");
 
       if (rawCategoryParam) {
-        console.log("Using category endpoint with raw param:", rawCategoryParam);
-        if(rawCategoryParam.toLowerCase() === "all") {
+        console.log(
+          "Using category endpoint with raw param:",
+          rawCategoryParam
+        );
+        if (rawCategoryParam.toLowerCase() === "all") {
           const { category: _omit, ...rest } = filters as any;
           response = await productService.getProducts(rest);
-        }
-        else {
+        } else {
           const { category: _omit, ...rest } = filters as any;
-          response = await productService.getProductsByCategory(rawCategoryParam, rest);
+          response = await productService.getProductsByCategory(
+            rawCategoryParam,
+            rest
+          );
         }
-       
       } else if (selectedCategory !== "All") {
-        const apiCategory = categoryMapping[selectedCategory]?.value || selectedCategory;
+        const apiCategory =
+          categoryMapping[selectedCategory]?.value || selectedCategory;
         console.log("Using category endpoint with mapped value:", apiCategory);
         const { category: _omit2, ...rest2 } = filters as any;
-        response = await productService.getProductsByCategory(apiCategory, rest2);
+        response = await productService.getProductsByCategory(
+          apiCategory,
+          rest2
+        );
       } else {
         console.log("Using generic products endpoint");
         response = await productService.getProducts(filters);
@@ -183,7 +195,28 @@ function ProductsPageContent() {
       // Normalize products data to ensure arrays are always defined
       const normalizedProducts = normalizeProductsData(response.products || []);
 
-      setProducts(normalizedProducts);
+      // Fetch review stats for each product
+      const productsWithReviews = await Promise.all(
+        normalizedProducts.map(async (product) => {
+          try {
+            const reviewStats = await reviewService.getProductReviewStats(product._id);
+            return {
+              ...product,
+              rating: reviewStats.averageRating || 0,
+              reviewCount: reviewStats.totalReviews || 0,
+            };
+          } catch (error) {
+            console.error(`Error loading reviews for product ${product._id}:`, error);
+            return {
+              ...product,
+              rating: 0,
+              reviewCount: 0,
+            };
+          }
+        })
+      );
+
+      setProducts(productsWithReviews);
       setPagination(response.pagination);
     } catch (error) {
       console.error("Error loading products:", error);
@@ -297,7 +330,7 @@ function ProductsPageContent() {
             <Card.Body>
               {/* Category Filter */}
               <div className="mb-4">
-                <h6 className="fw-bold mb-3">Category</h6>
+                <h6 className=" mb-3">Category</h6>
                 {(categories as CategoryKey[]).map((category) => (
                   <Form.Check
                     key={category}
@@ -314,7 +347,7 @@ function ProductsPageContent() {
 
               {/* Brand Filter */}
               <div className="mb-4">
-                <h6 className="fw-bold mb-3">Brand</h6>
+                <h6 className=" mb-3">Brand</h6>
                 {brands.map((brand) => (
                   <Form.Check
                     key={brand}
@@ -331,7 +364,7 @@ function ProductsPageContent() {
 
               {/* Price Filter */}
               <div className="mb-4">
-                <h6 className="fw-bold mb-3">Price Range</h6>
+                <h6 className=" mb-3">Price Range</h6>
                 {priceRanges.map((range, index) => (
                   <Form.Check
                     key={index}
@@ -366,16 +399,16 @@ function ProductsPageContent() {
                   Sort by
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => setSortBy("name")}> 
+                  <Dropdown.Item onClick={() => setSortBy("name")}>
                     Name
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setSortBy("price-low")}> 
+                  <Dropdown.Item onClick={() => setSortBy("price-low")}>
                     Price: Low to High
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setSortBy("price-high")}> 
+                  <Dropdown.Item onClick={() => setSortBy("price-high")}>
                     Price: High to Low
                   </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setSortBy("rating")}> 
+                  <Dropdown.Item onClick={() => setSortBy("rating")}>
                     Rating
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -490,8 +523,21 @@ function ProductsPageContent() {
                                 </Link>
                               </Card.Title>
                               <div className="d-flex align-items-center mb-2">
-                                <div className="me-2">{renderStars(4.5)}</div>
-                                <small className="text-muted">(4.5)</small>
+                                {product.rating && product.rating > 0 ? (
+                                  <>
+                                    <div className="me-2">{renderStars(product.rating)}</div>
+                                    <small className="text-muted">
+                                      ({product.rating.toFixed(1)})
+                                      {product.reviewCount && product.reviewCount > 0 && (
+                                        <span className="ms-1">
+                                          {product.reviewCount} {product.reviewCount === 1 ? 'review' : 'reviews'}
+                                        </span>
+                                      )}
+                                    </small>
+                                  </>
+                                ) : (
+                                  <small className="text-muted">No reviews yet</small>
+                                )}
                               </div>
                               <p className="text-muted small mb-2">
                                 {product.brand}
@@ -558,7 +604,13 @@ function ProductsPageContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div className="text-center py-5"><LoadingSpinner /></div>}>
+    <Suspense
+      fallback={
+        <div className="text-center py-5">
+          <LoadingSpinner />
+        </div>
+      }
+    >
       <ProductsPageContent />
     </Suspense>
   );
