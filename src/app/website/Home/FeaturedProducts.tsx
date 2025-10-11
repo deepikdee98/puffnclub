@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Row, Col, Button } from "react-bootstrap";
 import { FiHeart, FiStar, FiShoppingBag } from "react-icons/fi";
 import { LoadingSpinner } from "@/app/components";
@@ -28,12 +28,22 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   products,
   handleAddToWishlist,
 }) => {
+  useEffect(() => {
+    console.log("Featured Products received:", products);
+    console.log("Number of products:", products.length);
+    if (products.length > 0) {
+      console.log("First product:", products[0]);
+      console.log("Product images:", products.map(p => ({ name: p.name, image: p.images?.[0] })));
+    }
+  }, [products]);
   return (
     <div className={styles.featuredProductsContainer}>
-      <Row className="mb-4">
+      <Row className="mb-5">
         <Col>
-          <h2 className="text-center">OUR BEST PICKS FOR YOU</h2>
-          <p className="text-center text-muted">
+          <h2 className="text-center fw-bold mb-3" style={{ fontSize: '2.5rem', letterSpacing: '-0.5px' }}>
+            OUR BEST PICKS FOR YOU
+          </h2>
+          <p className="text-center text-muted" style={{ fontSize: '1.1rem', maxWidth: '700px', margin: '0 auto' }}>
             Discover versatile staples and bold statement pieces designed
             <br />
             to elevate your style, season after season.
@@ -60,29 +70,31 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
           </Col>
         </Row>
       ) : (
-        <Row className="justify-content-center">
-          {/* {products.slice(0, 3).map((product) => (
+        <Row className="justify-content-center g-4">
+          {products.slice(0, 3).map((product) => (
             <Col
               lg={4}
               md={6}
               xs={12}
               key={product._id}
-              className="mb-4 d-flex flex-column align-items-center"
+              className={`d-flex flex-column ${styles.productCard}`}
             >
-              <div
-                style={{
-                  width: "100%",
-                  position: "relative",
-                  marginBottom: 12,
-                }}
-              >
-                <img
-                  src={
-                    product.images?.[0] || "https://via.placeholder.com/300x300"
-                  }
-                  alt={product.name}
-                  className={styles.productImage}
-                />
+              <div className={styles.imageWrapper}>
+                <Link
+                  className="text-dark text-decoration-none"
+                  href={`/website/products/${product._id}`}
+                  passHref
+                >
+                  
+                  <img
+                    src={
+                      product.primaryImage || product.images?.[0] || "https://via.placeholder.com/300x300"
+                    }
+                    alt={product.name}
+                    className={styles.productImage}
+                  />
+                </Link>
+
                 <button
                   type="button"
                   className={styles.wishlistBtn}
@@ -92,70 +104,18 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                   <FiHeart size={20} />
                 </button>
               </div>
-              <div className="w-100 px-1">
-                <div
-                  className="d-flex align-items-center mb-1"
-                  style={{ minHeight: "28px" }}
-                >
-                  <strong className="flex-grow-1">{product.name}</strong>
-                  <span style={{ fontSize: 15, marginLeft: 8 }}>
-                    {product.rating || 4.5}
-                  </span>
-                  <FiStar className="text-warning ms-1" size={15} />
-                </div>
-                <div>
-                  <span className="fw-bold text-dark">₹ {product.price}</span>
-                  {product.comparePrice && (
-                    <span className="text-muted text-decoration-line-through ms-2">
-                      ₹ {product.comparePrice}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </Col>
-          ))} */}
-          {products.slice(0, 3).map((product) => (
-            <Col
-              lg={4}
-              md={6}
-              xs={12}
-              key={product._id}
-              className="mb-4 d-flex flex-column align-items-center"
-            >
-              <Link
-                className="text-dark text-decoration-none"
-                href={`/website/products/${product._id}`}
-                passHref
-              >
-                <img
-                  src={
-                    product.images?.[0] || "https://via.placeholder.com/300x300"
-                  }
-                  alt={product.name}
-                  className={styles.productImage}
-                />
-              </Link>
 
-              <button
-                type="button"
-                className={styles.wishlistBtn}
-                onClick={() => handleAddToWishlist(product._id)}
-                aria-label="Add to wishlist"
-              >
-                <FiHeart size={20} />
-              </button>
-
-              <div className="w-100 px-1 mt-2">
+              <div className="w-100 mt-3">
                 <Link
                   className="text-dark text-decoration-none"
                   href={`/website/products/${product._id}`}
                   passHref
                 >
                   <div
-                    className="d-flex align-items-center mb-1"
+                    className="d-flex align-items-center mb-2"
                     style={{ minHeight: "28px" }}
                   >
-                    <strong className="flex-grow-1">{product.name}</strong>
+                    <strong className="flex-grow-1" style={{ fontSize: '1.1rem' }}>{product.name}</strong>
                     {product.rating && product.rating > 0 ? (
                       <>
                         <span style={{ fontSize: 15, marginLeft: 8 }}>
@@ -182,10 +142,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                   </div>
                 </Link>
 
-                <div>
-                  <span className="fw-bold text-dark">₹ {product.price}</span>
+                <div className="mt-1">
+                  <span className="fw-bold text-dark" style={{ fontSize: '1.2rem' }}>₹ {product.price}</span>
                   {product.comparePrice && (
-                    <span className="text-muted text-decoration-line-through ms-2">
+                    <span className="text-muted text-decoration-line-through ms-2" style={{ fontSize: '1rem' }}>
                       ₹ {product.comparePrice}
                     </span>
                   )}
@@ -195,13 +155,14 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
           ))}
         </Row>
       )}
-      <Row>
+      <Row className="mt-5">
         <Col className="text-center">
           <Button
             as="a"
             href="/website/products"
             variant="dark"
-            className="mt-2 px-4"
+            className="px-5 py-3"
+            style={{ fontSize: '1.1rem', fontWeight: '500', borderRadius: '8px' }}
           >
             View more →
           </Button>

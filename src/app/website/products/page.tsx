@@ -472,7 +472,7 @@ function ProductsPageContent() {
                             <Card.Img
                               variant="top"
                               src={
-                                product.images?.[0] ||
+                                product.primaryImage||
                                 "https://via.placeholder.com/300x300"
                               }
                               style={{
