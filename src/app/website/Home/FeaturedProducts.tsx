@@ -10,6 +10,7 @@ import Link from "next/link";
 interface Product {
   _id: string;
   name: string;
+  primaryImage?: string;
   images?: string[];
   rating?: number;
   reviewCount?: number;
