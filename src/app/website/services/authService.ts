@@ -1,4 +1,5 @@
 import { apiRequest, API_ENDPOINTS, setAuthToken, removeAuthToken } from './api';
+import { BackendAddress } from './addressService';
 
 export interface Customer {
   _id: string;
@@ -8,7 +9,7 @@ export interface Customer {
   phone: string;
   dateOfBirth?: string;
   gender?: string;
-  addresses: Address[];
+  addresses: BackendAddress[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

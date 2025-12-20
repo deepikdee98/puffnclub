@@ -10,7 +10,6 @@ import Link from "next/link";
 interface Product {
   _id: string;
   name: string;
-  primaryImage?: string;
   images?: string[];
   rating?: number;
   reviewCount?: number;
@@ -72,11 +71,11 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
         </Row>
       ) : (
         <Row className="justify-content-center g-4">
-          {products.slice(0, 3).map((product) => (
+          {products.slice(0, 4).map((product) => (
             <Col
               lg={4}
               md={6}
-              xs={12}
+              xs={6}
               key={product._id}
               className={`d-flex flex-column ${styles.productCard}`}
             >
@@ -86,10 +85,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                   href={`/website/products/${product._id}`}
                   passHref
                 >
-                  
+
                   <img
                     src={
-                      product.primaryImage || product.images?.[0] || "https://via.placeholder.com/300x300"
+                      product.images?.[0] || "https://via.placeholder.com/300x300"
                     }
                     alt={product.name}
                     className={styles.productImage}
@@ -106,47 +105,30 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                 </button>
               </div>
 
-              <div className="w-100 mt-3">
+              <div className={`w-100 ${styles.productInfo}`}>
                 <Link
                   className="text-dark text-decoration-none"
                   href={`/website/products/${product._id}`}
                   passHref
                 >
-                  <div
-                    className="d-flex align-items-center mb-2"
-                    style={{ minHeight: "28px" }}
-                  >
-                    <strong className="flex-grow-1" style={{ fontSize: '1.1rem' }}>{product.name}</strong>
-                    {product.rating && product.rating > 0 ? (
-                      <>
-                        <span style={{ fontSize: 15, marginLeft: 8 }}>
+                  <div className={`mb-2 ${styles.productNameRatingContainer}`}>
+                    <strong className={styles.productName}>{product.name}</strong>
+                    
+                    {product.rating && product.rating > 0 && product.reviewCount && product.reviewCount > 0 && (
+                      <div className={styles.ratingBadge}>
+                        <span className={styles.ratingText}>
                           {product.rating.toFixed(1)}
                         </span>
-                        <FiStar className="text-warning ms-1" size={15} />
-                        {product.reviewCount && product.reviewCount > 0 && (
-                          <span
-                            className="text-muted ms-1"
-                            style={{ fontSize: 13 }}
-                          >
-                            ({product.reviewCount})
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      <span
-                        className="text-muted"
-                        style={{ fontSize: 13, marginLeft: 8 }}
-                      >
-                        No reviews yet
-                      </span>
+                        <FiStar className={styles.ratingIcon} size={12} />
+                      </div>
                     )}
                   </div>
                 </Link>
 
-                <div className="mt-1">
-                  <span className="fw-bold text-dark" style={{ fontSize: '1.2rem' }}>₹ {product.price}</span>
+                <div className={styles.priceContainer}>
+                  <span className={styles.currentPrice}>₹ {product.price}</span>
                   {product.comparePrice && (
-                    <span className="text-muted text-decoration-line-through ms-2" style={{ fontSize: '1rem' }}>
+                    <span className={styles.comparePrice}>
                       ₹ {product.comparePrice}
                     </span>
                   )}
@@ -161,11 +143,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
           <Button
             as="a"
             href="/website/products"
-            variant="dark"
-            className="px-5 py-3"
-            style={{ fontSize: '1.1rem', fontWeight: '500', borderRadius: '8px' }}
+            variant="outline-dark"
+            className={`${styles.viewMoreBtn}`}
           >
-            View more →
+            View more ≫
           </Button>
         </Col>
       </Row>

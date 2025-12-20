@@ -194,45 +194,47 @@ export default function CouponSection({
     <>
       <Card className="border-0 shadow-sm rounded mb-3">
         <Card.Body>
-          <div className="d-block d-md-flex justify-content-between align-items-center">
-            <div>
-              <div className="fw-semibold mb-1">
-                <FiTag className="me-2" />
-                Apply Coupons
-              </div>
-              {appliedCoupons.length > 0 ? (
-                <div>
-                  <small className="text-success">
-                    {appliedCoupons.length} coupon
-                    {appliedCoupons.length > 1 ? "s" : ""} applied • You saved{" "}
-                    {formatCurrency(totalSavings)}
-                  </small>
-                  <div className="mt-2">
-                    {appliedCoupons.map((coupon) => (
-                      <Badge key={coupon.id} bg="success" className="me-1 mb-1">
-                        {coupon.code}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <small className="text-muted">
-                  Select or enter coupon code
-                </small>
-              )}
-            </div>
-            <Button
-              variant="outline-dark"
-              size="sm"
-              onClick={() => {
-                setSelectedCoupons(appliedCoupons);
-                setShowModal(true);
-              }}
-              className="mt-3"
-            >
-              SELECT COUPON
-            </Button>
+          <div className="fw-semibold mb-3">
+            Apply coupon
           </div>
+
+          {appliedCoupons.length > 0 && (
+            <div
+              className="mb-3 p-3 rounded d-flex justify-content-between align-items-center"
+              style={{ backgroundColor: "#d4edda", border: "1px solid #c3e6cb" }}
+            >
+              <div>
+                <div className="fw-bold text-success mb-1">
+                  {appliedCoupons.map((c) => c.code).join(", ")}
+                </div>
+                <small className="text-success">
+                  Coupon applied on the Festive season
+                </small>
+              </div>
+              <Button
+                variant="link"
+                className="text-danger p-0"
+                onClick={() => {
+                  setSelectedCoupons([]);
+                  onApplyCoupons([]);
+                }}
+              >
+                <FiX size={20} />
+              </Button>
+            </div>
+          )}
+
+          <Button
+            variant={appliedCoupons.length > 0 ? "outline-success" : "outline-dark"}
+            size="sm"
+            onClick={() => {
+              setSelectedCoupons(appliedCoupons);
+              setShowModal(true);
+            }}
+            className="w-100"
+          >
+            {appliedCoupons.length > 0 ? "CHANGE COUPON" : "SELECT COUPON"}
+          </Button>
         </Card.Body>
       </Card>
 

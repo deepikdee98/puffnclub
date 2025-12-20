@@ -1,0 +1,587 @@
+================================================================================
+                    PROFILE PAGE DOCUMENTATION
+================================================================================
+
+Project: E-commerce Admin - Customer Profile
+Last Updated: 2025-12-04
+Location: frontend/src/app/website/profile/
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. Overview
+2. Current Implementation (What Exists)
+3. File Structure
+4. Components Breakdown
+5. Styling Approach
+6. Pending Implementation
+7. API Integration Requirements
+8. Testing Notes
+
+================================================================================
+1. OVERVIEW
+================================================================================
+
+The Profile Page is a customer-facing interface that displays user information,
+navigation to various account sections, and account management options.
+
+Purpose:
+- Display user profile information (name, phone)
+- Provide quick access to Orders, Saved Addresses, and other sections
+- Allow users to edit profile or logout
+
+Current Status:
+✅ UI/Design: COMPLETE
+⏳ Functionality: PENDING (Railway API subscription expired)
+
+================================================================================
+2. CURRENT IMPLEMENTATION (What Exists)
+================================================================================
+
+2.1 PROFILE PAGE LAYOUT
+------------------------
+✅ Responsive layout (mobile & desktop)
+✅ Centered content wrapper with max-width
+✅ Clean, modern design with rounded corners
+✅ Light background (#f8f9fa) for content area
+
+2.2 PROFILE HEADER COMPONENT
+-----------------------------
+✅ User avatar with gradient background (purple gradient)
+✅ Display user name (currently mock: "Vittesh Pagallu")
+✅ Display user phone (currently mock: "+91 9123456789")
+✅ Edit Profile button (outline style, dark theme)
+✅ Logout button (filled style, dark theme)
+✅ Responsive design (column on mobile, row on desktop)
+✅ Hover effects on buttons (lift animation)
+
+2.3 MENU LIST COMPONENT
+------------------------
+✅ Navigation menu with 5 items:
+   1. Orders → /website/orders
+   2. Saved Address → /website/profile/addresses
+   3. Contact Us → /website/contactus
+   4. Terms & Conditions → /website/terms-of-services
+   5. Privacy Policy → /website/privacy
+
+✅ Each menu item includes:
+   - Custom SVG icon
+   - Label text
+   - Right-pointing chevron
+   - Hover animation (slides right slightly)
+   - Border between items
+
+✅ Icons used:
+   - orders-icon.svg
+   - saved-address-icon.svg
+   - contact-us-icon.svg
+   - t&c-icon.svg
+   - privacy-policy-icon.svg
+
+2.4 STYLING OPTIMIZATION
+-------------------------
+✅ Migrated from custom SCSS to Bootstrap utility classes
+✅ Reduced SCSS code by ~40%
+✅ Using Bootstrap classes:
+   - Layout: d-flex, flex-column, flex-row, gap-*
+   - Spacing: p-*, m-*, py-*, px-*
+   - Colors: bg-white, bg-light, text-dark
+   - Utilities: rounded-3, overflow-hidden, text-decoration-none
+
+✅ Retained custom SCSS only for:
+   - Avatar gradient background
+   - Custom typography (font sizes, weights)
+   - Hover effects and transitions
+   - Button animations
+
+2.5 AUTHENTICATION BYPASS
+--------------------------
+✅ Temporary bypass flag for UI testing:
+   - BYPASS_AUTH_FOR_UI_TESTING = true
+   - Allows viewing UI without active authentication
+   - Mock data used when bypass is active
+
+2.6 NAVIGATION HANDLERS
+-----------------------
+✅ handleEditProfile() - Routes to /website/profile/edit
+✅ handleLogout() - Shows confirmation, clears auth, routes to /website
+
+================================================================================
+3. FILE STRUCTURE
+================================================================================
+
+/frontend/src/app/website/profile/
+│
+├── page.tsx                           # Main profile page component
+├── PROFILE_PAGE_DOCUMENTATION.txt     # This file
+│
+└── components/
+    ├── ProfileHeader.tsx              # Header with avatar, name, actions
+    ├── ProfileHeader.module.scss      # Custom styles for header (90 lines)
+    ├── MenuList.tsx                   # Navigation menu list
+    ├── MenuList.module.scss           # Custom styles for menu (51 lines)
+    ├── UserInfo.tsx                   # Simple user info card (legacy)
+    └── UserAddresses.tsx              # Address management component (legacy)
+
+DELETED FILES:
+├── profile.module.scss                # Removed - replaced with Bootstrap
+
+================================================================================
+4. COMPONENTS BREAKDOWN
+================================================================================
+
+4.1 PAGE.TSX (Main Component)
+------------------------------
+File: frontend/src/app/website/profile/page.tsx
+
+Key Features:
+- Uses AuthContext for authentication state
+- Router navigation for redirects
+- Temporary auth bypass for UI testing
+- Mock customer data for testing
+
+Structure:
+<div className="bg-white py-4 py-md-5">
+  <Container>
+    <div className="row justify-content-center">
+      <div className="col-md-12 col-lg-10">
+        <div className="bg-light p-3 p-md-4 rounded-3">
+          <ProfileHeader />
+          <MenuList />
+        </div>
+      </div>
+    </div>
+  </Container>
+</div>
+
+Dependencies:
+- react-bootstrap: Container
+- next/navigation: useRouter
+- ../contexts/AuthContext: useAuth
+- ./components/ProfileHeader
+- ./components/MenuList
+
+4.2 PROFILEHEADER.TSX
+---------------------
+File: frontend/src/app/website/profile/components/ProfileHeader.tsx
+
+Props:
+- name: string          # User's full name
+- phone: string         # User's phone number
+- onEditProfile: fn     # Edit profile callback
+- onLogout: fn          # Logout callback
+
+Layout:
+- Left section: Avatar + User Info
+- Right section: Edit & Logout buttons
+- Mobile: Stacked vertically
+- Desktop: Horizontal layout
+
+Icons Used:
+- FiUser (avatar icon)
+- FiEdit2 (edit button)
+- FiLogOut (logout button)
+
+4.3 MENULIST.TSX
+----------------
+File: frontend/src/app/website/profile/components/MenuList.tsx
+
+Data Structure:
+interface MenuItem {
+  icon: string;    # Path to SVG icon
+  label: string;   # Display text
+  href: string;    # Navigation URL
+}
+
+Menu Items Array:
+const menuItems: MenuItem[] = [
+  { icon: "/images/orders-icon.svg", label: "Orders", href: "/website/orders" },
+  { icon: "/images/saved-address-icon.svg", label: "Saved Address", href: "/website/profile/addresses" },
+  { icon: "/images/contact-us-icon.svg", label: "Contact Us", href: "/website/contactus" },
+  { icon: "/images/t&c-icon.svg", label: "Terms & Conditions", href: "/website/terms-of-services" },
+  { icon: "/images/privacy-policy-icon.svg", label: "Privacy policy", href: "/website/privacy" }
+];
+
+4.4 USERINFO.TSX (Legacy)
+-------------------------
+File: frontend/src/app/website/profile/components/UserInfo.tsx
+
+Status: Not currently used in main profile page
+Purpose: Simple user info card with icon
+May be used in other sections or deprecated
+
+4.5 USERADDRESSES.TSX (Legacy)
+------------------------------
+File: frontend/src/app/website/profile/components/UserAddresses.tsx
+
+Status: Not currently used in main profile page
+Purpose: Display and manage user addresses
+May be used in /website/profile/addresses page
+
+================================================================================
+5. STYLING APPROACH
+================================================================================
+
+5.1 BOOTSTRAP UTILITY CLASSES USED
+-----------------------------------
+
+Layout & Flexbox:
+- d-flex, d-block
+- flex-column, flex-md-row
+- align-items-center, align-items-stretch
+- justify-content-between, justify-content-end
+- flex-1, flex-shrink-0, flex-fill
+
+Spacing:
+- p-3, p-md-4 (padding)
+- py-4, py-md-5 (vertical padding)
+- mb-1, mb-3, mb-md-4 (margin bottom)
+- gap-2, gap-3, gap-md-4
+
+Colors:
+- bg-white (white background)
+- bg-light (#f8f9fa background)
+- text-dark (#212529 text)
+- text-decoration-none
+
+Sizing:
+- w-100, w-md-auto
+
+Borders & Corners:
+- rounded-3 (border-radius: 12px)
+- overflow-hidden
+
+Responsive:
+- col-md-12, col-lg-10
+- *-md-* modifiers for medium+ screens
+
+5.2 CUSTOM SCSS (What Remains)
+-------------------------------
+
+ProfileHeader.module.scss (90 lines):
+- .avatar: Gradient background, circular shape, responsive sizing
+- .userName: Custom font size (1.5rem → 1.25rem on mobile)
+- .userPhone: Custom font size, muted color
+- .editButton/.logoutButton: Hover effects, transitions, animations
+
+MenuList.module.scss (51 lines):
+- .menuItem: Custom padding, border-bottom, hover slide animation
+- .menuLabel: Custom font size (1rem → 0.95rem on mobile)
+- .chevron: Custom color (#adb5bd), transition effects
+
+5.3 DESIGN TOKENS
+-----------------
+
+Colors:
+- Primary Dark: #212529
+- Dark Hover: #000000
+- Light Gray: #f8f9fa
+- Border Gray: #f0f0f0
+- Text Muted: #6c757d
+- Chevron Gray: #adb5bd
+- Avatar Gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%)
+
+Border Radius:
+- Small: 8px (mobile)
+- Medium: 12px (desktop)
+- Circle: 50% (avatar)
+
+Spacing:
+- Small gap: 0.5rem (8px)
+- Medium gap: 1rem (16px)
+- Large gap: 2rem (32px)
+
+Typography:
+- Heading: 1.5rem / 600 weight
+- Body: 1rem / 500 weight
+- Small: 0.95rem / 0.875rem
+
+================================================================================
+6. PENDING IMPLEMENTATION
+================================================================================
+
+6.1 AUTHENTICATION INTEGRATION
+-------------------------------
+❌ Connect to real authentication API
+❌ Fetch user data from backend
+❌ Display actual user name (not mock data)
+❌ Display actual phone number (not mock data)
+❌ Remove BYPASS_AUTH_FOR_UI_TESTING flag
+❌ Implement proper auth redirect logic
+❌ Handle authentication errors
+
+6.2 PROFILE DATA MANAGEMENT
+----------------------------
+❌ Fetch user profile from API
+❌ Display profile picture/avatar (if available)
+❌ Show additional user info (email, address count, etc.)
+❌ Implement profile update functionality
+❌ Handle profile fetch errors
+❌ Add loading states while fetching data
+
+6.3 EDIT PROFILE FUNCTIONALITY
+-------------------------------
+❌ Create Edit Profile page (/website/profile/edit)
+❌ Build edit form with fields:
+   - Full Name
+   - Email
+   - Phone Number
+   - Profile Picture upload
+❌ Form validation
+❌ API integration for profile update
+❌ Success/error notifications
+❌ Redirect back to profile after save
+
+6.4 LOGOUT FUNCTIONALITY
+-------------------------
+❌ Integrate with backend logout API
+❌ Clear authentication tokens
+❌ Clear user session data
+❌ Clear local storage/cookies
+❌ Update AuthContext state
+❌ Redirect to home or login page
+
+6.5 MENU NAVIGATION
+--------------------
+❌ Verify all menu links work correctly
+❌ Implement Orders page (/website/orders)
+❌ Implement Saved Addresses page (/website/profile/addresses)
+❌ Add active state indicator for current page
+❌ Add badge/count for unread items (e.g., "3 orders")
+
+6.6 SAVED ADDRESSES FEATURE
+----------------------------
+❌ Fetch user addresses from API
+❌ Display list of saved addresses
+❌ Add new address functionality
+❌ Edit existing address
+❌ Delete address with confirmation
+❌ Set default address
+❌ Address form validation
+
+6.7 ERROR HANDLING
+-------------------
+❌ API error handling
+❌ Network error handling
+❌ Show error messages to user
+❌ Fallback UI for failed data fetch
+❌ Retry mechanisms
+
+6.8 LOADING STATES
+-------------------
+❌ Add loading spinner while fetching profile
+❌ Skeleton screens for menu items
+❌ Disable buttons during actions
+❌ Show progress indicators
+
+6.9 NOTIFICATIONS/TOASTS
+-------------------------
+❌ Success message on profile update
+❌ Success message on logout
+❌ Error messages for failed operations
+❌ Confirmation dialogs for destructive actions
+
+6.10 ACCESSIBILITY IMPROVEMENTS
+--------------------------------
+❌ Add ARIA labels
+❌ Keyboard navigation support
+❌ Focus management
+❌ Screen reader optimization
+
+6.11 PERFORMANCE OPTIMIZATION
+------------------------------
+❌ Lazy load profile data
+❌ Cache user profile data
+❌ Optimize image loading
+❌ Implement code splitting
+
+6.12 ANALYTICS & TRACKING
+--------------------------
+❌ Track profile views
+❌ Track edit profile clicks
+❌ Track logout events
+❌ Track menu navigation
+
+================================================================================
+7. API INTEGRATION REQUIREMENTS
+================================================================================
+
+7.1 REQUIRED API ENDPOINTS
+---------------------------
+
+GET /api/website/user/profile
+Purpose: Fetch current user profile
+Response: {
+  success: boolean,
+  data: {
+    _id: string,
+    fullName: string,
+    phone: string,
+    email?: string,
+    avatar?: string,
+    createdAt: string
+  }
+}
+
+PUT /api/website/user/profile
+Purpose: Update user profile
+Request: {
+  fullName: string,
+  email?: string,
+  avatar?: File
+}
+Response: {
+  success: boolean,
+  message: string,
+  data: { updated profile }
+}
+
+POST /api/website/auth/logout
+Purpose: Logout user
+Response: {
+  success: boolean,
+  message: string
+}
+
+GET /api/website/user/addresses
+Purpose: Fetch user addresses
+Response: {
+  success: boolean,
+  data: Address[]
+}
+
+7.2 AUTHENTICATION CONTEXT
+---------------------------
+
+Required methods from AuthContext:
+- customer: Customer object or null
+- isAuthenticated: boolean
+- logout(): void
+- updateProfile(data): Promise<void>
+- fetchProfile(): Promise<void>
+
+7.3 ERROR HANDLING
+-------------------
+
+Expected error responses:
+{
+  success: false,
+  message: "Error description",
+  error?: "Error code"
+}
+
+HTTP Status Codes:
+- 200: Success
+- 401: Unauthorized (redirect to login)
+- 403: Forbidden
+- 404: Not found
+- 500: Server error
+
+================================================================================
+8. TESTING NOTES
+================================================================================
+
+8.1 CURRENT TESTING SETUP
+--------------------------
+✅ Mock data enabled via BYPASS_AUTH_FOR_UI_TESTING
+✅ Mock customer: "Vittesh Pagallu", "+91 9123456789"
+✅ UI can be tested without backend
+
+8.2 UI TESTING CHECKLIST
+-------------------------
+✅ Profile page renders correctly
+✅ Responsive design works (mobile/tablet/desktop)
+✅ Avatar displays with gradient
+✅ Buttons have hover effects
+✅ Menu items are clickable
+✅ Chevron animation on hover
+✅ Edit profile button triggers navigation
+✅ Logout button shows confirmation
+
+8.3 PENDING TESTING
+--------------------
+❌ API integration testing
+❌ Authentication flow testing
+❌ Profile update testing
+❌ Logout flow testing
+❌ Error state testing
+❌ Loading state testing
+❌ Cross-browser testing
+❌ Accessibility testing
+
+8.4 TEST SCENARIOS TO IMPLEMENT
+--------------------------------
+1. User logs in → Profile displays correct data
+2. User clicks Edit Profile → Navigate to edit page
+3. User updates profile → Changes saved and reflected
+4. User clicks Logout → Confirmation shown → Logged out
+5. Unauthenticated user → Redirect to login
+6. API fails → Error message displayed
+7. Network offline → Offline message shown
+8. Menu items → Navigate to correct pages
+
+================================================================================
+9. DEPLOYMENT NOTES
+================================================================================
+
+9.1 ENVIRONMENT SETUP
+----------------------
+⏳ Railway API subscription renewal required
+⏳ Backend server must be running
+⏳ Database connection must be active
+⏳ Authentication service must be operational
+
+9.2 CONFIGURATION
+------------------
+- Remove BYPASS_AUTH_FOR_UI_TESTING before production
+- Configure API base URL in environment variables
+- Set up proper CORS settings
+- Configure authentication token handling
+
+9.3 DEPENDENCIES
+-----------------
+✅ react-bootstrap: ^2.x
+✅ next: ^14.x
+✅ react-icons: ^5.x
+✅ bootstrap: ^5.x
+
+================================================================================
+10. MIGRATION GUIDE (SCSS to Bootstrap)
+================================================================================
+
+Before (Custom SCSS):
+- profile.module.scss: 22 lines → DELETED
+- ProfileHeader.module.scss: 141 lines → 90 lines (36% reduction)
+- MenuList.module.scss: 83 lines → 51 lines (39% reduction)
+
+After (Bootstrap + Minimal SCSS):
+- Total SCSS reduction: ~40%
+- Improved maintainability
+- Consistent with Bootstrap design system
+- Smaller bundle size
+- Faster development
+
+Key Changes:
+1. Layout → Bootstrap flexbox utilities
+2. Spacing → Bootstrap spacing scale
+3. Colors → Bootstrap color utilities
+4. Borders/Radius → Bootstrap utilities
+5. Responsive → Bootstrap breakpoint modifiers
+
+Retained Custom SCSS:
+- Unique gradients
+- Custom animations
+- Hover effects
+- Typography fine-tuning
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================
+
+For questions or updates, refer to:
+- Main README: /frontend/README.md
+- Website Master Docs: /frontend/src/app/website/WEBSITE_MASTER_DOCUMENTATION.txt
+- Backend API Docs: /server/WEBSITE_API_DOCUMENTATION.md
+
+Last Updated: 2025-12-04
+Maintained by: Development Team

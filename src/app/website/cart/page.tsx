@@ -1,88 +1,26 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
-import {
-  FiShoppingBag,
-  FiArrowLeft,
-  FiArrowRight,
-  FiCheck,
-  FiShield,
-} from "react-icons/fi";
+import { Container, Row, Col, Button } from "react-bootstrap";
+import { FiShoppingBag } from "react-icons/fi";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import { LoadingSpinner } from "@/app/components";
 import { useCart } from "../contexts/CartContext";
-import StepIndicator from "./components/StepIndicator";
 import CartItem from "./components/CartItem";
 import OrderSummary from "./components/OrderSummary";
 import CouponSection from "./components/CouponSection";
-import AddressSelection from "./components/AddressSelection";
-import PaymentOptions from "./components/PaymentOptions";
-import { useAuth } from "../contexts/AuthContext";
-
-// Addresses will be derived from authenticated customer profile
-
-type UIAddress = {
-  id: string;
-  name: string;
-  phone: string;
-  address: string;
-  city: string;
-  state: string;
-  pincode: string;
-  isDefault: boolean;
-};
 
 export default function CartPage() {
-  const [currentStep, setCurrentStep] = useState(1); // 1: Bag, 2: Address, 3: Payment
+  const router = useRouter();
   const { cart, isLoading, updateCartItem, removeFromCart, refreshCart, addToCart } =
     useCart();
-  const { customer } = useAuth();
 
-  const uiAddresses: UIAddress[] = (customer?.addresses || []).map(
-    (a: any) => ({
-      id: a._id || "",
-      name:
-        (customer as any)?.fullName ||
-        `${customer?.firstName || ""} ${customer?.lastName || ""}`.trim(),
-      phone: customer?.phone || "",
-      address: a.street || "",
-      city: a.city || "",
-      state: a.state || "",
-      pincode: a.zipCode || "",
-      isDefault: !!a.isDefault,
-    })
-  );
-
-  const initialSelected =
-    uiAddresses.find((a) => a.isDefault) || uiAddresses[0] || (null as any);
-  const [selectedAddress, setSelectedAddress] = useState<UIAddress | null>(
-    initialSelected
-  );
   const [appliedCoupons, setAppliedCoupons] = useState<any[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [updatingSize, setUpdatingSize] = useState<string | null>(null);
 
   useEffect(() => {
     refreshCart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Update selected address when customer addresses change
-  useEffect(() => {
-    const updated = (customer?.addresses || []).map((a: any) => ({
-      id: a._id || "",
-      name:
-        (customer as any)?.fullName ||
-        `${customer?.firstName || ""} ${customer?.lastName || ""}`.trim(),
-      phone: customer?.phone || "",
-      address: a.street || "",
-      city: a.city || "",
-      state: a.state || "",
-      pincode: a.zipCode || "",
-      isDefault: !!a.isDefault,
-    }));
-    const preferred = updated.find((a) => a.isDefault) || updated[0] || null;
-    setSelectedAddress(preferred as any);
-  }, [customer]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -102,17 +40,9 @@ export default function CartPage() {
 
   const updateSize = async (itemId: string, newSize: string) => {
     try {
-      // Find the cart item to get current info
       const cartItem = cartItems.find((item: any) => item._id === itemId);
       if (!cartItem || cartItem.size === newSize) return;
 
-      setUpdatingSize(itemId);
-      console.log(`Changing size for item ${itemId} from ${cartItem.size} to ${newSize}`);
-      
-      // Since backend doesn't support size update yet, we'll:
-      // 1. Remove the current item
-      // 2. Add the same item with new size
-      
       const addToCartData = {
         productId: cartItem.product._id,
         quantity: cartItem.quantity,
@@ -120,45 +50,48 @@ export default function CartPage() {
         size: newSize,
         price: cartItem.price
       };
-      
-      // Remove current item
+
       await removeFromCart(itemId);
-      
-      // Add with new size
       await addToCart(addToCartData);
-      
-      console.log(`Successfully changed size to ${newSize}`);
-      
     } catch (error) {
       console.error("Error updating cart item size:", error);
-      // Show user-friendly error
       alert("Could not update size. Please try again.");
-      // Refresh cart to restore original state
       await refreshCart();
-    } finally {
-      setUpdatingSize(null);
     }
   };
 
   const moveToWishlist = async (itemId: string) => {
     try {
-      // Implement move to wishlist functionality
-      console.log(`Moving item ${itemId} to wishlist`);
+      // Get item details for toast message
+      const item = cartItems.find((item: any) => item._id === itemId);
+      const productName = item?.product?.name || "Product";
+
+      // TODO: Implement actual wishlist functionality when API is ready
       // await addToWishlist(itemId);
       // await removeFromCart(itemId);
-      
-      // Temporary implementation
-      alert("Move to wishlist functionality will be implemented soon");
+
+      // For now, just remove from cart
+      await removeFromCart(itemId);
+
+      toast.success(`Product moved to wishlist from your bag`);
     } catch (error) {
       console.error("Error moving item to wishlist:", error);
+      toast.error("Failed to move item to wishlist. Please try again.");
     }
   };
 
   const removeItem = async (itemId: string) => {
     try {
+      // Get item details for toast message
+      const item = cartItems.find((item: any) => item._id === itemId);
+      const productName = item?.product?.name || "Product";
+
       await removeFromCart(itemId);
+
+      toast.success(`Product deleted from your bag`);
     } catch (error) {
       console.error("Error removing cart item:", error);
+      toast.error("Failed to remove item. Please try again.");
     }
   };
 
@@ -167,24 +100,23 @@ export default function CartPage() {
   };
 
   const cartItems = cart?.items || [];
+
   const calculateTotals = () => {
-    // Calculate MRP (original price) and current subtotal
     const mrp = cartItems.reduce((sum: number, item: any) => {
       const originalPrice = item.product.compareAtPrice || item.price;
       return sum + originalPrice * item.quantity;
     }, 0);
-    
+
     const subtotal = cartItems.reduce(
       (sum: number, item: any) => sum + item.price * item.quantity,
       0
     );
-    
-    const savings = mrp - subtotal; // Savings from MRP to current price
 
-    // Calculate total coupon discount from all applied coupons
+    const savings = mrp - subtotal;
+
     const couponDiscount = appliedCoupons.reduce((total, coupon) => {
       if (subtotal < coupon.minAmount) return total;
-      
+
       if (coupon.type === "percentage") {
         const discount = (subtotal * coupon.value) / 100;
         return total + (coupon.maxDiscount ? Math.min(discount, coupon.maxDiscount) : discount);
@@ -193,73 +125,68 @@ export default function CartPage() {
       }
     }, 0);
 
-    const delivery = subtotal > 500 ? 0 : 50; // Free delivery above ₹500
-    const tax = (subtotal - couponDiscount) * 0.08;
-    const total = subtotal - couponDiscount + delivery + tax;
+    const delivery = subtotal > 500 ? 0 : 60;
+    const total = subtotal - couponDiscount + delivery;
 
-    return { 
-      subtotal, 
-      savings, 
-      couponDiscount, 
-      shipping: delivery, // for backward compatibility
-      delivery, // for OrderSummary
-      tax, 
+    return {
+      subtotal,
+      savings,
+      couponDiscount,
+      shipping: delivery,
+      delivery,
+      tax: 0,
       total,
-      mrp // for OrderSummary
+      mrp
     };
   };
 
   const totals = calculateTotals();
 
-  // Step 1: Shopping Bag
-  const renderBagStep = () => (
-    <Row>
-      <Col lg={8}>
-        <div>
-          <div className="border-0  mb-4">
-            {/* <Card.Header className="bg-light border-0">
-              <h5 className="mb-0">
-                <FiShoppingBag className="me-2" />
-                Shopping Bag ({cartItems.length} items)
-              </h5>
-            </Card.Header> */}
-            <Card.Body className="p-0">
-              {isLoading ? (
-                <div className="text-center py-5">
-                  <LoadingSpinner />
-                  <p className="mt-3 text-muted">Loading your cart...</p>
-                </div>
-              ) : cartItems.length === 0 ? (
-                <div className="text-center py-5">
-                  <div>
-                    <FiShoppingBag size={60} className="text-muted mb-3" />
-                    <h5 className="text-muted">Your bag is empty</h5>
-                    <p className="text-muted mb-4">
-                      Add some items to get started
-                    </p>
-                    <Button variant="dark" as="a" href="/website/products">
-                      Continue Shopping
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                cartItems.map((item: any) => (
-                  <CartItem
-                    key={item._id}
-                    item={item}
-                    onUpdateQuantity={updateQuantity}
-                    onUpdateSize={updateSize}
-                    onRemoveItem={removeItem}
-                    onMoveToWishlist={moveToWishlist}
-                  />
-                ))
-              )}
-            </Card.Body>
-          </div>
-        </div>
-      </Col>
-      <Col lg={4}>
-        <div>
+  const handleProceedToBuy = () => {
+    if (cartItems.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+    // Navigate to address page (Step 2)
+    router.push("/website/checkout/address");
+  };
+
+  return (
+    <Container className="py-4">
+      <h5 className="mb-4">Items you added into the cart</h5>
+      <Row>
+        {/* Left Column - Cart Items */}
+        <Col lg={7}>
+          {isLoading ? (
+            <div className="text-center py-5">
+              <LoadingSpinner />
+              <p className="mt-3 text-muted">Loading your cart...</p>
+            </div>
+          ) : cartItems.length === 0 ? (
+            <div className="text-center py-5">
+              <FiShoppingBag size={60} className="text-muted mb-3" />
+              <h5 className="text-muted">Your bag is empty</h5>
+              <p className="text-muted mb-4">Add some items to get started</p>
+              <Button variant="dark" onClick={() => router.push("/website/products")}>
+                Continue Shopping
+              </Button>
+            </div>
+          ) : (
+            cartItems.map((item: any) => (
+              <CartItem
+                key={item._id}
+                item={item}
+                onUpdateQuantity={updateQuantity}
+                onUpdateSize={updateSize}
+                onRemoveItem={removeItem}
+                onMoveToWishlist={moveToWishlist}
+              />
+            ))
+          )}
+        </Col>
+
+        {/* Right Column - Coupon & Summary */}
+        <Col lg={5}>
           {cartItems.length > 0 && (
             <>
               <CouponSection
@@ -271,201 +198,21 @@ export default function CartPage() {
               <OrderSummary
                 totals={totals}
                 itemCount={cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0)}
-                appliedCoupon={appliedCoupons.length > 0 ? { 
-                  code: appliedCoupons.map(c => c.code).join(', '), 
-                  discount: totals.couponDiscount 
-                } : null}
-                onContinue={() => setCurrentStep(2)}
+                appliedCoupon={
+                  appliedCoupons.length > 0
+                    ? {
+                        code: appliedCoupons.map((c) => c.code).join(", "),
+                        discount: totals.couponDiscount,
+                      }
+                    : null
+                }
+                onContinue={handleProceedToBuy}
                 formatCurrency={formatCurrency}
               />
             </>
           )}
-        </div>
-      </Col>
-    </Row>
-  );
-
-  // Step 2: Address Selection
-  const renderAddressStep = () => (
-    <Row>
-      <Col lg={8}>
-        <div>
-          <AddressSelection
-            addresses={uiAddresses as any}
-            selectedAddress={selectedAddress as any}
-            onSelectAddress={setSelectedAddress as any}
-          />
-          <div className="d-flex gap-2 mt-4">
-            <Button
-              variant="outline-dark"
-              onClick={() => setCurrentStep(1)}
-              className="flex-fill"
-            >
-              <FiArrowLeft className="me-2" />
-              Back
-            </Button>
-            <Button
-              variant="dark"
-              className="flex-fill"
-              onClick={() => setCurrentStep(3)}
-              disabled={!selectedAddress}
-            >
-              Continue
-              <FiArrowRight className="ms-2" />
-            </Button>
-          </div>
-        </div>
-      </Col>
-      <Col lg={4}>
-        <div>
-          <OrderSummary
-            totals={totals}
-            itemCount={cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0)}
-            appliedCoupon={appliedCoupons.length > 0 ? { 
-              code: appliedCoupons.map(c => c.code).join(', '), 
-              discount: totals.couponDiscount 
-            } : null}
-            onContinue={() => setCurrentStep(3)}
-            formatCurrency={formatCurrency}
-          />
-        </div>
-      </Col>
-    </Row>
-  );
-
-  // Step 3: Payment
-  const renderPaymentStep = () => (
-    <Row>
-      <Col lg={8}>
-        <div>
-          <PaymentOptions
-            paymentMethod={paymentMethod}
-            onPaymentMethodChange={setPaymentMethod}
-          />
-        </div>
-      </Col>
-      <Col lg={4}>
-        <div>
-          <Card
-            className="border-0 shadow-sm sticky-top"
-            style={{ top: "100px" }}
-          >
-            <Card.Header className="bg-light border-0">
-              <h6 className="mb-0">Order Summary</h6>
-            </Card.Header>
-            <Card.Body>
-              {/* Order Items */}
-              <div className="mb-3">
-                {cartItems.map((item: any) => (
-                  <div
-                    key={item._id}
-                    className="d-flex align-items-center mb-2"
-                  >
-                    <img
-                      src={
-                        item.product.images?.[0] ||
-                        "https://via.placeholder.com/200x200"
-                      }
-                      alt={item.product.name}
-                      className="rounded me-2"
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        objectFit: "cover",
-                      }}
-                    />
-                    <div className="flex-grow-1">
-                      <div className="small fw-bold">{item.product.name}</div>
-                      <div className="small text-muted">
-                        Qty: {item.quantity}
-                      </div>
-                    </div>
-                    <div className="small fw-bold">
-                      {formatCurrency(item.price * item.quantity)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <hr />
-              {/* Delivery Address */}
-              <div className="mb-3">
-                <small className="text-muted">Delivering to:</small>
-                <div className="small fw-bold">
-                  {selectedAddress?.name || "—"}
-                </div>
-                <div className="small text-muted">
-                  {selectedAddress?.city || "—"},{" "}
-                  {selectedAddress?.state || "—"} -{" "}
-                  {selectedAddress?.pincode || "—"}
-                </div>
-              </div>
-              <hr />
-              {/* Price Breakdown */}
-              <div className="d-flex justify-content-between mb-2">
-                <span>Subtotal:</span>
-                <span>{formatCurrency(totals.subtotal)}</span>
-              </div>
-              {appliedCoupons.length > 0 && totals.couponDiscount > 0 && (
-                <div className="d-flex justify-content-between mb-2 text-success">
-                  <span>Coupon Discount ({appliedCoupons.map(c => c.code).join(', ')}):</span>
-                  <span>-{formatCurrency(totals.couponDiscount)}</span>
-                </div>
-              )}
-              <div className="d-flex justify-content-between mb-2">
-                <span>Shipping:</span>
-                <span>
-                  {totals.shipping === 0
-                    ? "FREE"
-                    : formatCurrency(totals.shipping)}
-                </span>
-              </div>
-              <div className="d-flex justify-content-between mb-2">
-                <span>Tax:</span>
-                <span>{formatCurrency(totals.tax)}</span>
-              </div>
-              <hr />
-              <div className="d-flex justify-content-between fw-bold h5">
-                <span>Total:</span>
-                <span>{formatCurrency(totals.total)}</span>
-              </div>
-              <div className="d-flex gap-2 mt-3">
-                <Button
-                  variant="outline-dark"
-                  onClick={() => setCurrentStep(2)}
-                  className="flex-fill"
-                >
-                  <FiArrowLeft className="me-2" />
-                  Back
-                </Button>
-                <Button
-                  variant="dark"
-                  className="flex-fill"
-                  disabled={!paymentMethod}
-                  onClick={() => alert("Order placed successfully!")}
-                >
-                  Place Order
-                  <FiCheck className="ms-2" />
-                </Button>
-              </div>
-              <div className="text-center mt-3">
-                <small className="text-muted">
-                  <FiShield className="me-1" />
-                  100% Safe & Secure Payments
-                </small>
-              </div>
-            </Card.Body>
-          </Card>
-        </div>
-      </Col>
-    </Row>
-  );
-
-  return (
-    <Container className="py-4">
-      <StepIndicator currentStep={currentStep} />
-      {currentStep === 1 && renderBagStep()}
-      {currentStep === 2 && renderAddressStep()}
-      {currentStep === 3 && renderPaymentStep()}
+        </Col>
+      </Row>
     </Container>
   );
 }

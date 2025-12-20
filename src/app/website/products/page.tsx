@@ -11,18 +11,11 @@ import {
   Button,
   Badge,
   Form,
-  Dropdown,
   Pagination,
 } from "react-bootstrap";
-import {
-  FiGrid,
-  FiList,
-  FiHeart,
-  FiShoppingBag,
-  FiStar,
-  FiFilter,
-} from "react-icons/fi";
+import { FiStar, FiFilter, FiSearch } from "react-icons/fi";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { LoadingSpinner } from "@/app/components";
 import {
@@ -38,47 +31,53 @@ import { toast } from "react-toastify";
 import { normalizeProductsData } from "../utils/productUtils";
 import { FadeUpOnScroll, FlipYOnScroll } from "../constants/FadeUpOnScroll";
 import { reviewService } from "../services/reviewService";
+import styles from "./page.module.scss";
 
 // Category mapping for display names and API values
 // Values must match backend category names in your DB
 const categoryMapping = {
-  All: { display: "All", value: "All" },
-  "T-Shirts": { display: "T-Shirts", value: "T-Shirt" },
-  "Oversize T-Shirts": {
-    display: "Oversize T-Shirts",
-    value: "Over_Size",
-  },
+  "T-shirts": { display: "T-shirts", value: "T-Shirt" },
+  Hoodies: { display: "Hoodies", value: "Hoodies" },
+  "Sweat shirts": { display: "Sweat shirts", value: "Sweat_Shirts" },
 } as const;
 
 type CategoryKey = keyof typeof categoryMapping;
 
 const categories = Object.keys(categoryMapping);
 
-const brands = [
-  "All",
-  "StyleCraft",
-  "UrbanStyle",
-  "Floral Fashion",
-  "ComfortWalk",
-  "TrendyWear",
+const sizes = [
+  { label: "Small", value: "S" },
+  { label: "Medium", value: "M" },
+  { label: "Large", value: "L" },
+  { label: "Extra Large", value: "XL" },
 ];
-const priceRanges = [
-  { label: "All", min: 0, max: Infinity },
-  { label: "Under $50", min: 0, max: 50 },
-  { label: "$50 - $100", min: 50, max: 100 },
-  { label: "$100 - $200", min: 100, max: 200 },
-  { label: "Above $200", min: 200, max: Infinity },
+
+const colors = [
+  { name: "Red", hex: "#FF0000" },
+  { name: "Blue", hex: "#0000FF" },
+  { name: "Green", hex: "#00FF00" },
+  { name: "Yellow", hex: "#FFFF00" },
+  { name: "Purple", hex: "#800080" },
+  { name: "Orange", hex: "#FFA500" },
+  { name: "Pink", hex: "#FFC0CB" },
+  { name: "Brown", hex: "#8B4513" },
+  { name: "Gray", hex: "#808080" },
+  { name: "Black", hex: "#000000" },
+  { name: "White", hex: "#FFFFFF" },
+  { name: "Cyan", hex: "#00FFFF" },
 ];
 
 function ProductsPageContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState("name");
-  const [selectedCategory, setSelectedCategory] = useState<CategoryKey>("All");
-  const [selectedBrand, setSelectedBrand] = useState("All");
-  const [selectedPriceRange, setSelectedPriceRange] = useState(priceRanges[0]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<CategoryKey | null>(
+    null
+  );
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState({ min: 200, max: 599 });
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(12);
   const [pagination, setPagination] = useState<any>(null);
@@ -88,7 +87,7 @@ function ProductsPageContent() {
   useEffect(() => {
     const categoryParam = searchParams.get("category");
     if (categoryParam) {
-      // 1) First, try to match backend names directly (e.g., T-Shirt, Over_Size)
+      // Try to match backend names directly
       const direct = (
         Object.entries(categoryMapping) as [
           CategoryKey,
@@ -98,20 +97,9 @@ function ProductsPageContent() {
 
       if (direct) {
         setSelectedCategory(direct[0]);
-      } else {
-        // 2) Accept slugs like "t-shirt" or "over-size" or variations
-        const normalized = categoryParam.toLowerCase().replace(/\s+|-|_/g, "");
-        if (normalized.includes("oversize")) {
-          setSelectedCategory("Oversize T-Shirts");
-        } else if (normalized.includes("tshirt")) {
-          setSelectedCategory("T-Shirts");
-        } else {
-          // 3) Fallback: if unknown, keep "All"
-          setSelectedCategory("All");
-        }
       }
     }
-    // mark initialized after first param parse (must always run)
+    // mark initialized after first param parse
     setInitialized(true);
   }, [searchParams]);
 
@@ -123,9 +111,10 @@ function ProductsPageContent() {
     initialized,
     currentPage,
     selectedCategory,
-    selectedBrand,
-    selectedPriceRange,
-    sortBy,
+    selectedSizes,
+    selectedColors,
+    priceRange,
+    searchQuery,
   ]);
 
   const loadProducts = async () => {
@@ -134,27 +123,32 @@ function ProductsPageContent() {
       const filters: ProductFilters = {
         page: currentPage,
         limit: productsPerPage,
-        sortBy:
-          sortBy === "name"
-            ? "name"
-            : sortBy === "price-low"
-            ? "price"
-            : sortBy === "price-high"
-            ? "price"
-            : "createdAt",
-        sortOrder: sortBy === "price-high" ? "desc" : "asc",
+        sortBy: "createdAt",
+        sortOrder: "desc",
       };
 
-      if (selectedCategory !== "All") {
+      if (selectedCategory) {
         filters.category =
           categoryMapping[selectedCategory]?.value || selectedCategory;
       }
 
-      if (selectedPriceRange.min > 0) {
-        filters.minPrice = selectedPriceRange.min;
+      if (priceRange.min > 0) {
+        filters.minPrice = priceRange.min;
       }
-      if (selectedPriceRange.max < Infinity) {
-        filters.maxPrice = selectedPriceRange.max;
+      if (priceRange.max < Infinity) {
+        filters.maxPrice = priceRange.max;
+      }
+
+      if (searchQuery) {
+        filters.search = searchQuery;
+      }
+
+      if (selectedSizes.length > 0) {
+        filters.sizes = selectedSizes;
+      }
+
+      if (selectedColors.length > 0) {
+        filters.colors = selectedColors;
       }
 
       console.log("Filters:", filters);
@@ -166,17 +160,12 @@ function ProductsPageContent() {
           "Using category endpoint with raw param:",
           rawCategoryParam
         );
-        if (rawCategoryParam.toLowerCase() === "all") {
-          const { category: _omit, ...rest } = filters as any;
-          response = await productService.getProducts(rest);
-        } else {
-          const { category: _omit, ...rest } = filters as any;
-          response = await productService.getProductsByCategory(
-            rawCategoryParam,
-            rest
-          );
-        }
-      } else if (selectedCategory !== "All") {
+        const { category: _omit, ...rest } = filters as any;
+        response = await productService.getProductsByCategory(
+          rawCategoryParam,
+          rest
+        );
+      } else if (selectedCategory) {
         const apiCategory =
           categoryMapping[selectedCategory]?.value || selectedCategory;
         console.log("Using category endpoint with mapped value:", apiCategory);
@@ -199,14 +188,19 @@ function ProductsPageContent() {
       const productsWithReviews = await Promise.all(
         normalizedProducts.map(async (product) => {
           try {
-            const reviewStats = await reviewService.getProductReviewStats(product._id);
+            const reviewStats = await reviewService.getProductReviewStats(
+              product._id
+            );
             return {
               ...product,
               rating: reviewStats.averageRating || 0,
               reviewCount: reviewStats.totalReviews || 0,
             };
           } catch (error) {
-            console.error(`Error loading reviews for product ${product._id}:`, error);
+            console.error(
+              `Error loading reviews for product ${product._id}:`,
+              error
+            );
             return {
               ...product,
               rating: 0,
@@ -228,13 +222,17 @@ function ProductsPageContent() {
 
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
-  const { addToWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
-  const handleAddToWishlist = async (productId: string) => {
+  const handleWishlistToggle = async (productId: string) => {
     try {
-      await addToWishlist({ productId });
+      if (isInWishlist(productId)) {
+        await removeFromWishlist(productId);
+      } else {
+        await addToWishlist({ productId });
+      }
     } catch (error) {
-      console.error("Error adding to wishlist:", error);
+      console.error("Error toggling wishlist:", error);
       // toast handled in context
     }
   };
@@ -317,120 +315,221 @@ function ProductsPageContent() {
 
   return (
     <Container className="py-4">
+      {/* Header Section */}
+      <div className="mb-5 text-center">
+        <h2 className="mb-2">Our Products</h2>
+        <p className="text-muted mb-0">
+          Discover versatile staples and bold statement pieces designed
+          <br />
+          to elevate your style, season after season.
+        </p>
+      </div>
+
       <Row>
         {/* Filters Sidebar */}
-        <Col lg={3} className="mb-4 d-none">
-          <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-white border-0">
-              <h5 className="mb-0 d-flex align-items-center">
-                <FiFilter className="me-2" />
-                Filters
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              {/* Category Filter */}
-              <div className="mb-4">
-                <h6 className=" mb-3">Category</h6>
-                {(categories as CategoryKey[]).map((category) => (
-                  <Form.Check
-                    key={category}
-                    type="radio"
-                    name="category"
-                    id={`category-${category}`}
-                    label={category}
-                    checked={selectedCategory === category}
-                    onChange={() => setSelectedCategory(category)}
-                    className="mb-2"
-                  />
-                ))}
-              </div>
+        <Col lg={3} className={`mb-4 pe-3 pe-lg-4 ${styles.filterSidebar}`}>
+          {/* Category Filter */}
+          <div
+            className="mb-4 pb-4"
+            style={{ borderBottom: "1px solid #dee2e6" }}
+          >
+            <h6 className="mb-3">Category</h6>
+            {(categories as CategoryKey[]).map((category) => (
+              <Form.Check
+                key={category}
+                type="checkbox"
+                name="category"
+                id={`category-${category}`}
+                label={category}
+                checked={selectedCategory === category}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedCategory(category);
+                  } else {
+                    setSelectedCategory(null);
+                  }
+                }}
+                className="mb-2"
+              />
+            ))}
+          </div>
 
-              {/* Brand Filter */}
-              <div className="mb-4">
-                <h6 className=" mb-3">Brand</h6>
-                {brands.map((brand) => (
-                  <Form.Check
-                    key={brand}
-                    type="radio"
-                    name="brand"
-                    id={`brand-${brand}`}
-                    label={brand}
-                    checked={selectedBrand === brand}
-                    onChange={() => setSelectedBrand(brand)}
-                    className="mb-2"
-                  />
-                ))}
-              </div>
+          {/* Size Filter */}
+          <div
+            className="mb-4 pb-4"
+            style={{ borderBottom: "1px solid #dee2e6" }}
+          >
+            <h6 className="mb-3">Size</h6>
+            <div className="d-flex flex-column gap-2">
+              {sizes.map((size) => (
+                <Form.Check
+                  key={size.value}
+                  type="checkbox"
+                  id={`size-${size.value}`}
+                  label={size.label}
+                  checked={selectedSizes.includes(size.value)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedSizes([...selectedSizes, size.value]);
+                    } else {
+                      setSelectedSizes(
+                        selectedSizes.filter((s) => s !== size.value)
+                      );
+                    }
+                  }}
+                  className="mb-0"
+                />
+              ))}
+            </div>
+          </div>
 
-              {/* Price Filter */}
-              <div className="mb-4">
-                <h6 className=" mb-3">Price Range</h6>
-                {priceRanges.map((range, index) => (
-                  <Form.Check
-                    key={index}
-                    type="radio"
-                    name="price"
-                    id={`price-${index}`}
-                    label={range.label}
-                    checked={selectedPriceRange === range}
-                    onChange={() => setSelectedPriceRange(range)}
-                    className="mb-2"
-                  />
-                ))}
-              </div>
-            </Card.Body>
-          </Card>
+          {/* Colour Filter */}
+          <div
+            className="mb-4 pb-4"
+            style={{ borderBottom: "1px solid #dee2e6" }}
+          >
+            <h6 className="mb-3">Colour</h6>
+            <div className="d-flex flex-wrap gap-2">
+              {colors.map((color) => (
+                <button
+                  key={color.name}
+                  onClick={() => {
+                    if (selectedColors.includes(color.name)) {
+                      setSelectedColors(
+                        selectedColors.filter((c) => c !== color.name)
+                      );
+                    } else {
+                      setSelectedColors([...selectedColors, color.name]);
+                    }
+                  }}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    backgroundColor: color.hex,
+                    border: selectedColors.includes(color.name)
+                      ? "3px solid #000"
+                      : color.hex === "#FFFFFF"
+                      ? "1px solid #ddd"
+                      : "1px solid transparent",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                  title={color.name}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Price Filter */}
+          <div className="mb-4">
+            <h6 className="mb-3">Price Range</h6>
+            <div className="mb-3">
+              <Form.Label className="small text-muted">Min Price: ₹ {priceRange.min}</Form.Label>
+              <Form.Range
+                min={0}
+                max={priceRange.max}
+                value={priceRange.min}
+                onChange={(e) => {
+                  const newMin = parseInt(e.target.value);
+                  setPriceRange({ ...priceRange, min: Math.min(newMin, priceRange.max) });
+                }}
+                className="mb-2"
+              />
+            </div>
+            <div className="mb-3">
+              <Form.Label className="small text-muted">Max Price: ₹ {priceRange.max}</Form.Label>
+              <Form.Range
+                min={priceRange.min}
+                max={2000}
+                value={priceRange.max}
+                onChange={(e) => {
+                  const newMax = parseInt(e.target.value);
+                  setPriceRange({ ...priceRange, max: Math.max(newMax, priceRange.min) });
+                }}
+                className="mb-2"
+              />
+            </div>
+            <div className="text-center">
+              <span className="fw-bold">
+                ₹ {priceRange.min} - ₹ {priceRange.max}
+              </span>
+            </div>
+          </div>
+
+          {/* Reset Filters Button */}
+          <div>
+            <Button
+              className="ms-auto d-block w-100"
+              variant="outline-dark"
+              onClick={() => {
+                setSelectedCategory(null);
+                setSelectedSizes([]);
+                setSelectedColors([]);
+                setPriceRange({ min: 0, max: 2000 });
+                setSearchQuery("");
+                setCurrentPage(1);
+              }}
+              style={{
+                padding: "10px 40px",
+                borderRadius: "8px",
+              }}
+            >
+              Reset Filters
+            </Button>
+          </div>
         </Col>
 
         {/* Products Section */}
-        <Col lg={12}>
-          {/* Header */}
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <div>
-              <h4 className="mb-1">Products</h4>
-              <p className="text-muted mb-0">
-                {pagination?.totalProducts || products.length} products found
-              </p>
-            </div>
-            <div className="d-flex align-items-center gap-3">
-              {/* Sort Dropdown */}
-              <Dropdown>
-                <Dropdown.Toggle variant="outline-secondary" size="sm">
-                  Sort by
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => setSortBy("name")}>
-                    Name
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setSortBy("price-low")}>
-                    Price: Low to High
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setSortBy("price-high")}>
-                    Price: High to Low
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={() => setSortBy("rating")}>
-                    Rating
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-
-              {/* View Mode Toggle */}
-              <div className="btn-group" role="group">
-                <Button
-                  variant={viewMode === "grid" ? "dark" : "outline-secondary"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                >
-                  <FiGrid />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "dark" : "outline-secondary"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                >
-                  <FiList />
-                </Button>
+        <Col className="ps-3 ps-lg-4" lg={9}>
+          {/* Search Bar */}
+          <div className="mb-4">
+            <div className="d-flex gap-2 align-items-center">
+              <div className="position-relative flex-grow-1">
+                <FiSearch
+                  style={{
+                    position: "absolute",
+                    left: "15px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#999",
+                  }}
+                  size={20}
+                />
+                <Form.Control
+                  type="search"
+                  placeholder="Search for your type"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    backgroundColor: "#f5f5f5",
+                    border: "none",
+                    padding: "12px 20px 12px 45px",
+                    borderRadius: "8px",
+                  }}
+                />
               </div>
+              <Button
+                variant="dark"
+                style={{
+                  backgroundColor: "#000",
+                  border: "none",
+                  padding: "12px 24px",
+                  whiteSpace: "nowrap",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <Image
+                  src="/images/sort-icon.svg"
+                  alt="Sort"
+                  width={16}
+                  height={16}
+                />
+                Sort by
+              </Button>
             </div>
           </div>
 
@@ -448,141 +547,134 @@ function ProductsPageContent() {
             <>
               <Row>
                 {currentProducts.map((product) => (
-                  <Col
-                    key={product._id}
-                    lg={viewMode === "grid" ? 3 : 12}
-                    md={viewMode === "grid" ? 6 : 12}
-                    className="mb-4"
-                  >
+                  <Col key={product._id} lg={6} md={6} sm={6} className="mb-4">
                     <FlipYOnScroll>
-                      <Link
-                        className="text-decoration-none"
-                        href={`/website/products/${product._id}`}
-                      >
-                        <Card
-                          className={`border-0 shadow-sm h-100 product-card ${
-                            viewMode === "list" ? "flex-row" : ""
-                          }`}
-                        >
-                          <div
-                            className={`position-relative ${
-                              viewMode === "list" ? "flex-shrink-0" : ""
-                            }`}
-                          >
-                            <Card.Img
-                              variant="top"
+                      <div className="product-item">
+                        {/* Product Image */}
+                        <div className="position-relative mb-3">
+                          <Link href={`/website/products/${product._id}`}>
+                            <img
                               src={
-                                product.primaryImage||
+                                product.primaryImage ||
+                                product.images?.[0] ||
                                 "https://via.placeholder.com/300x300"
                               }
+                              alt={product.name}
+                              className="w-100"
                               style={{
-                                // height: viewMode === "list" ? "200px" : "300px",
-                                width: viewMode === "list" ? "200px" : "100%",
                                 objectFit: "cover",
+                                aspectRatio: "1/1",
+                                borderRadius: "8px",
+                                cursor: "pointer",
                               }}
                             />
-                            {product.tags?.length > 0 && (
-                              <Badge
-                                bg={
-                                  product.tags.includes("Sale")
-                                    ? "danger"
-                                    : product.tags.includes("New Arrival")
-                                    ? "success"
-                                    : "primary"
-                                }
-                                className="position-absolute top-0 start-0 m-2"
-                              >
-                                {product.tags[0]}
-                              </Badge>
-                            )}
-                            <div className="product-actions position-absolute top-0 end-0 m-2">
-                              <Button
-                                variant="light"
-                                size="sm"
-                                className="rounded-circle"
-                                onClick={() => handleAddToWishlist(product._id)}
-                              >
-                                <FiHeart size={16} />
-                              </Button>
-                            </div>
-                          </div>
-                          <Card.Body
-                            className={
-                              viewMode === "list"
-                                ? "d-flex flex-column justify-content-between"
-                                : ""
+                          </Link>
+
+                          {/* Product Badge/Tag */}
+                          {product.tags?.length > 0 && (
+                            <Badge
+                              bg={
+                                product.tags.includes("Sale")
+                                  ? "danger"
+                                  : product.tags.includes("New Arrival")
+                                  ? "success"
+                                  : product.tags.includes("Trending")
+                                  ? "warning"
+                                  : "primary"
+                              }
+                              className="position-absolute top-0 start-0 m-2"
+                              style={{ fontSize: "11px" }}
+                            >
+                              {product.tags[0]}
+                            </Badge>
+                          )}
+
+                          {/* Wishlist Icon */}
+                          <button
+                            className="position-absolute top-0 end-0 m-3 border-0 bg-transparent"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleWishlistToggle(product._id);
+                            }}
+                            title={
+                              isInWishlist(product._id)
+                                ? "Remove from Wishlist"
+                                : "Add to Wishlist"
                             }
+                            style={{ cursor: "pointer" }}
                           >
-                            <div>
-                              <Card.Title className="h6 mb-2">
-                                <Link
-                                  href={`/website/products/${product._id}`}
-                                  className="text-decoration-none text-dark"
-                                >
-                                  {product.name}
-                                </Link>
-                              </Card.Title>
-                              <div className="d-flex align-items-center mb-2">
-                                {product.rating && product.rating > 0 ? (
-                                  <>
-                                    <div className="me-2">{renderStars(product.rating)}</div>
-                                    <small className="text-muted">
-                                      ({product.rating.toFixed(1)})
-                                      {product.reviewCount && product.reviewCount > 0 && (
-                                        <span className="ms-1">
-                                          {product.reviewCount} {product.reviewCount === 1 ? 'review' : 'reviews'}
-                                        </span>
-                                      )}
-                                    </small>
-                                  </>
-                                ) : (
-                                  <small className="text-muted">No reviews yet</small>
-                                )}
-                              </div>
-                              <p className="text-muted small mb-2">
-                                {product.brand}
-                              </p>
-                              {viewMode === "list" && (
-                                <div className="mb-2">
-                                  <small className="text-muted">
-                                    Available sizes:{" "}
-                                  </small>
-                                  {product.availableSizes.map((size, index) => (
-                                    <Badge
-                                      key={size}
-                                      bg="light"
-                                      text="dark"
-                                      className="me-1"
-                                    >
-                                      {size}
-                                    </Badge>
-                                  ))}
+                            <Image
+                              src={
+                                isInWishlist(product._id)
+                                  ? "/images/whishlist-icon.svg"
+                                  : "/images/add-whislisht.svg"
+                              }
+                              alt={
+                                isInWishlist(product._id)
+                                  ? "Remove from wishlist"
+                                  : "Add to wishlist"
+                              }
+                              width={32}
+                              height={32}
+                            />
+                          </button>
+                        </div>
+
+                        {/* Product Details */}
+                        <Link
+                          href={`/website/products/${product._id}`}
+                          className="text-decoration-none"
+                        >
+                          <div className="mb-2">
+                            {/* Product Name and Rating Side by Side */}
+                            <div className="d-flex justify-content-between align-items-center mb-2">
+                              <h6
+                                className="mb-0 text-dark"
+                                style={{ fontSize: "14px", fontWeight: "500" }}
+                              >
+                                {product.name}
+                              </h6>
+
+                              {/* Star Rating */}
+                              {product.rating && product.rating > 0 && product.reviewCount && product.reviewCount > 0 && (
+                                <div className="d-flex align-items-center gap-1">
+                                  <span
+                                    className="text-dark"
+                                    style={{
+                                      fontSize: "14px",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    {product.rating.toFixed(1)}
+                                  </span>
+                                  <FiStar
+                                    size={14}
+                                    style={{ fill: "#FFC107", color: "#FFC107" }}
+                                  />
                                 </div>
                               )}
                             </div>
-                            <div className="d-flex align-items-center justify-content-between">
-                              <div>
-                                <span className="fw-bold text-dark">
-                                  Rs. {product.price}
-                                </span>
-                                {product.comparePrice && (
-                                  <small className="text-muted text-decoration-line-through ms-2">
-                                    Rs. {product.comparePrice}
-                                  </small>
-                                )}
-                              </div>
-                              <Button
-                                as="a"
-                                href={`/website/products/${product._id}`}
-                                variant="dark"
-                                size="sm"
+
+                            {/* Price */}
+                            <div className="d-flex align-items-center gap-2">
+                              <span
+                                className="fw-bold text-dark"
+                                style={{ fontSize: "16px" }}
                               >
-                                <FiShoppingBag size={14} />
-                              </Button>
+                                ₹ {product.price}
+                              </span>
+                              {product.comparePrice && (
+                                <span
+                                  className="text-muted text-decoration-line-through"
+                                  style={{ fontSize: "14px" }}
+                                >
+                                  ₹ {product.comparePrice}
+                                </span>
+                              )}
                             </div>
-                          </Card.Body>
-                        </Card>
-                      </Link>
+                          </div>
+                        </Link>
+                      </div>
                     </FlipYOnScroll>
                   </Col>
                 ))}

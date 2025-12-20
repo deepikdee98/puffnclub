@@ -1,0 +1,357 @@
+================================================================================
+                    PUFFN E-COMMERCE WEBSITE - MASTER DOCUMENTATION
+================================================================================
+
+CREATED: December 2, 2025
+PURPOSE: Complete overview of the customer-facing e-commerce website
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. WEBSITE OVERVIEW
+2. ARCHITECTURE & TECHNOLOGY STACK
+3. DIRECTORY STRUCTURE
+4. PAGE-BY-PAGE BREAKDOWN
+5. CORE FEATURES & FUNCTIONALITY
+6. INTEGRATION POINTS
+7. PENDING TASKS & IMPROVEMENTS
+8. QUICK REFERENCE LINKS
+
+================================================================================
+1. WEBSITE OVERVIEW
+================================================================================
+
+The Puffn E-Commerce Website is a modern, customer-facing shopping platform
+built with Next.js 14 and React. It provides a complete shopping experience
+including product browsing, cart management, user authentication, order
+tracking, and wishlist functionality.
+
+KEY CHARACTERISTICS:
+- Fully responsive design (mobile, tablet, desktop)
+- Server-side rendering with Next.js 14
+- React Bootstrap UI components
+- SCSS styling for custom designs
+- Real-time cart and wishlist management
+- OTP-based authentication (Phone & Email)
+- Integrated payment and checkout system
+- Product reviews and ratings
+- Coupon/discount system
+- Category-based product filtering
+
+================================================================================
+2. ARCHITECTURE & TECHNOLOGY STACK
+================================================================================
+
+FRONTEND FRAMEWORK:
+- Next.js 14 (App Router)
+- React 18
+- TypeScript
+
+UI FRAMEWORK:
+- React Bootstrap
+- SCSS Modules
+- React Icons (Feather Icons)
+
+STATE MANAGEMENT:
+- React Context API (Auth, Cart, Wishlist)
+- Local component state with useState
+- Custom hooks for data fetching
+
+API INTEGRATION:
+- RESTful API calls using fetch
+- Centralized API endpoints configuration
+- JWT token-based authentication
+
+ANIMATIONS:
+- Custom scroll-based animations (FadeUp, FlipX, FlipY, ZoomIn)
+- React Bootstrap transitions
+
+UTILITIES:
+- React Toastify for notifications
+- Axios for some API calls
+- Custom utility functions for data normalization
+
+================================================================================
+3. DIRECTORY STRUCTURE
+================================================================================
+
+/frontend/src/app/website/
+│
+├── page.tsx                          # Homepage (Main landing page)
+├── layout.tsx                        # Website layout wrapper
+│
+├── Home/                             # Homepage components
+│   ├── HeroCarousel.tsx              # Main banner carousel
+│   ├── Categories.tsx                # Category grid display
+│   ├── FeaturedProducts.tsx          # Featured products section
+│   ├── BrandStory.tsx                # Brand story section
+│   ├── ClubStatementBanner.tsx       # Marketing banner
+│   └── JoinClubBanner.tsx            # Newsletter signup banner
+│
+├── auth/                             # Authentication pages
+│   ├── login/                        # Original login (deprecated)
+│   ├── login-new/                    # New OTP-based login
+│   │   ├── page.tsx                  # Main login page
+│   │   ├── components/
+│   │   │   ├── MobileLoginPopup.tsx  # Phone number login
+│   │   │   ├── EmailLoginPopup.tsx   # Email login
+│   │   │   └── OtpPopup.tsx          # OTP verification
+│   │   ├── schemas/
+│   │   │   └── validationSchemas.ts  # Form validation
+│   │   └── services/
+│   │       └── otpService.ts         # OTP API calls
+│   ├── register/                     # Registration page
+│   └── otp/                          # OTP verification page
+│
+├── products/                         # Product pages
+│   ├── page.tsx                      # Product listing page
+│   └── [id]/                         # Product detail page
+│       ├── page.tsx                  # Main product detail
+│       └── components/               # Product detail components
+│           ├── ProductImageGallery.tsx
+│           ├── ProductInfo.tsx
+│           ├── ColorSelector.tsx
+│           ├── SizeSelector.tsx
+│           ├── QuantitySelector.tsx
+│           ├── ProductActions.tsx
+│           ├── DeliveryInfo.tsx
+│           ├── ProductDescriptionAndReviews.tsx
+│           ├── ProductAdditionalDetails.tsx
+│           └── RelatedProducts.tsx
+│
+├── cart/                             # Shopping cart & checkout
+│   ├── page.tsx                      # Cart & checkout page
+│   └── components/
+│       ├── StepIndicator.tsx         # 3-step checkout indicator
+│       ├── CartItem.tsx              # Individual cart item
+│       ├── OrderSummary.tsx          # Order total summary
+│       ├── CouponSection.tsx         # Coupon application
+│       ├── AddressSelection.tsx      # Address selection & management
+│       ├── AddressForm.tsx           # Add/Edit address form
+│       └── PaymentOptions.tsx        # Payment method selection
+│
+├── profile/                          # User account management
+│   ├── page.tsx                      # Profile page
+│   └── components/
+│       ├── UserInfo.tsx              # User information display
+│       └── UserAddresses.tsx         # Address management
+│
+├── orders/                           # Order history & tracking
+│   └── page.tsx                      # Orders list page
+│
+├── wishlist/                         # Wishlist management
+│   └── page.tsx                      # Wishlist page
+│
+├── collections/                      # Shop by collection
+│   ├── page.tsx                      # Collections page
+│   └── ShopByCollection.tsx          # Collection component
+│
+├── components/                       # Shared website components
+│   ├── NewHeader.tsx                 # Main navigation header
+│   ├── NewFooter.tsx                 # Footer component
+│   ├── Header.tsx                    # (Old header)
+│   └── Footer.tsx                    # (Old footer)
+│
+├── contexts/                         # React Context providers
+│   ├── AuthContext.tsx               # Authentication state
+│   ├── CartContext.tsx               # Shopping cart state
+│   └── WishlistContext.tsx           # Wishlist state
+│
+├── services/                         # API service modules
+│   ├── api.ts                        # API configuration & helpers
+│   ├── authService.ts                # Auth API calls
+│   ├── productService.ts             # Product API calls
+│   ├── cartService.ts                # Cart API calls
+│   ├── wishlistService.ts            # Wishlist API calls
+│   ├── orderService.ts               # Order API calls
+│   ├── addressService.ts             # Address API calls
+│   ├── bannerService.ts              # Banner API calls
+│   ├── contactService.ts             # Contact form API
+│   ├── faqService.ts                 # FAQ API calls
+│   ├── reviewService.ts              # Product reviews API
+│   └── otpService.ts                 # OTP API calls
+│
+├── utils/                            # Utility functions
+│   ├── productUtils.ts               # Product data normalization
+│   └── otpUtils.ts                   # OTP utilities
+│
+├── constants/                        # Constants & animations
+│   └── FadeUpOnScroll.tsx            # Scroll animations
+│
+├── styles/                           # SCSS stylesheets
+│   └── website.scss                  # Global website styles
+│
+├── aboutus/                          # About Us page
+├── contactus/                        # Contact Us page
+├── contact/                          # Contact page (duplicate)
+├── faq/                              # FAQ page
+├── privacy/                          # Privacy Policy page
+└── terms-of-services/                # Terms of Service page
+
+================================================================================
+4. PAGE-BY-PAGE BREAKDOWN
+================================================================================
+
+For detailed documentation of each page, see the following files:
+- HOME_PAGE_DOCUMENTATION.txt
+- AUTHENTICATION_DOCUMENTATION.txt
+- PRODUCTS_DOCUMENTATION.txt
+- CART_CHECKOUT_DOCUMENTATION.txt
+- USER_ACCOUNT_DOCUMENTATION.txt
+- SHARED_COMPONENTS_DOCUMENTATION.txt
+- STATIC_PAGES_DOCUMENTATION.txt
+
+================================================================================
+5. CORE FEATURES & FUNCTIONALITY
+================================================================================
+
+AUTHENTICATION SYSTEM:
+- OTP-based login (Phone/Email)
+- Session management with JWT tokens
+- Profile management
+- Address book management
+- Password reset functionality
+
+PRODUCT BROWSING:
+- Homepage with featured products
+- Category-based filtering
+- Product search
+- Product detail view with:
+  - Image gallery
+  - Color/Size selection
+  - Quantity selector
+  - Reviews and ratings
+  - Related products
+
+SHOPPING CART:
+- Add/Remove items
+- Update quantity
+- Update size/color
+- Coupon application
+- Real-time total calculation
+- Move to wishlist
+
+CHECKOUT FLOW:
+- 3-step checkout process:
+  1. Review cart items
+  2. Select/Add delivery address
+  3. Choose payment method
+- Order summary
+- Delivery cost calculation
+- Tax calculation
+
+WISHLIST:
+- Add/Remove products
+- Move to cart
+- View wishlist items
+
+ORDER MANAGEMENT:
+- Order history
+- Order status tracking
+- Order cancellation
+- Invoice download (planned)
+
+ADDITIONAL FEATURES:
+- Product reviews and ratings
+- Newsletter subscription
+- Contact form
+- FAQ section
+- Static informational pages
+
+================================================================================
+6. INTEGRATION POINTS
+================================================================================
+
+BACKEND API:
+- Base URL: http://localhost:5000/api
+- All endpoints defined in: services/api.ts
+- Uses JWT Bearer token authentication
+- RESTful API architecture
+
+KEY API ENDPOINTS:
+- /website/auth/*          - Authentication
+- /website/products/*      - Product data
+- /website/cart/*          - Cart operations
+- /website/wishlist/*      - Wishlist operations
+- /website/orders/*        - Order management
+- /website/addresses/*     - Address management
+- /coupons/*               - Coupon validation
+
+DATA FLOW:
+1. User actions trigger service calls
+2. Services make API requests with auth tokens
+3. Context providers manage global state
+4. Components re-render with updated data
+5. Toast notifications inform users
+
+================================================================================
+7. PENDING TASKS & IMPROVEMENTS
+================================================================================
+
+CRITICAL ISSUES:
+☐ Move to wishlist functionality in cart (placeholder only)
+☐ Profile update API integration (currently shows alert)
+☐ Payment gateway integration (placeholder)
+☐ Order invoice download
+☐ Order tracking with shiprocket
+
+ENHANCEMENTS NEEDED:
+☐ Product quick view
+☐ Product comparison
+☐ Advanced filtering (price range, color, size)
+☐ Search functionality
+☐ Sort by multiple criteria
+☐ Pagination optimization
+☐ Image zoom functionality
+☐ Write product reviews
+☐ Social sharing buttons
+☐ Recently viewed products
+☐ Size guide/chart
+
+UI/UX IMPROVEMENTS:
+☐ Loading skeletons instead of spinners
+☐ Error boundary implementation
+☐ Offline support
+☐ Progressive Web App (PWA) features
+☐ Accessibility improvements
+☐ SEO optimization
+☐ Performance optimization (image lazy loading)
+
+TECHNICAL DEBT:
+☐ Remove duplicate pages (login vs login-new)
+☐ Consolidate contact pages
+☐ Type safety improvements
+☐ Error handling standardization
+☐ API response caching
+☐ Unit tests
+☐ E2E tests
+
+================================================================================
+8. QUICK REFERENCE LINKS
+================================================================================
+
+DETAILED DOCUMENTATION FILES:
+- Home Page:           HOME_PAGE_DOCUMENTATION.txt
+- Authentication:      AUTHENTICATION_DOCUMENTATION.txt
+- Products:            PRODUCTS_DOCUMENTATION.txt
+- Cart & Checkout:     CART_CHECKOUT_DOCUMENTATION.txt
+- User Account:        USER_ACCOUNT_DOCUMENTATION.txt
+- Shared Components:   SHARED_COMPONENTS_DOCUMENTATION.txt
+- Static Pages:        STATIC_PAGES_DOCUMENTATION.txt
+
+KEY FILES TO UNDERSTAND:
+- Layout & Providers:  layout.tsx
+- API Configuration:   services/api.ts
+- Auth Context:        contexts/AuthContext.tsx
+- Cart Context:        contexts/CartContext.tsx
+- Product Utils:       utils/productUtils.ts
+
+STYLING:
+- Global Styles:       styles/website.scss
+- Bootstrap Config:    imported in layout.tsx
+- Module Styles:       [component].module.scss files
+
+================================================================================
+END OF MASTER DOCUMENTATION
+================================================================================

@@ -1,0 +1,571 @@
+================================================================================
+                      CART & CHECKOUT DOCUMENTATION
+================================================================================
+
+FILE: cart/page.tsx
+ROUTE: /website/cart
+PURPOSE: Complete shopping cart and 3-step checkout process
+
+================================================================================
+OVERVIEW
+================================================================================
+
+The cart page provides a complete checkout experience with three steps:
+1. Shopping Bag - Review and modify cart items
+2. Address - Select or add delivery address
+3. Payment - Choose payment method and place order
+
+The page uses a step indicator to show progress and guides users through
+the checkout process.
+
+================================================================================
+CHECKOUT FLOW
+================================================================================
+
+STEP 1: SHOPPING BAG
+  - View cart items
+  - Update quantity
+  - Change size/color
+  - Remove items
+  - Move to wishlist (planned)
+  - Apply coupons
+  - View order summary
+
+STEP 2: ADDRESS SELECTION
+  - Select from saved addresses
+  - Add new address
+  - Edit existing address
+  - Set default address
+
+STEP 3: PAYMENT
+  - Choose payment method (COD, Online, UPI)
+  - Review order summary
+  - Review delivery address
+  - Place order
+
+================================================================================
+MAIN COMPONENTS
+================================================================================
+
+1. StepIndicator (components/StepIndicator.tsx)
+   PURPOSE: Show current step in checkout
+   DISPLAYS:
+   - Step 1: Bag
+   - Step 2: Address
+   - Step 3: Payment
+   FEATURES:
+   - Visual progress indicator
+   - Step numbers
+   - Step labels
+   - Current step highlighted
+
+2. CartItem (components/CartItem.tsx)
+   PURPOSE: Display individual cart item
+   DISPLAYS:
+   - Product image
+   - Product name, color, size
+   - Quantity selector
+   - Size selector dropdown
+   - Price (unit and total)
+   - Remove button
+   - Move to wishlist button
+   ACTIONS:
+   - Update quantity (+/-)
+   - Change size (dropdown)
+   - Remove item
+   - Move to wishlist (placeholder)
+
+3. OrderSummary (components/OrderSummary.tsx)
+   PURPOSE: Show order total breakdown
+   DISPLAYS:
+   - MRP (original price)
+   - Discount on MRP
+   - Coupon discount
+   - Subtotal
+   - Delivery charges
+   - Tax (8%)
+   - Total amount
+   FEATURES:
+   - Sticky on scroll
+   - "Continue" button
+   - Free delivery badge (>500)
+
+4. CouponSection (components/CouponSection.tsx)
+   PURPOSE: Apply discount coupons
+   FEATURES:
+   - List available coupons
+   - Coupon details (code, discount, conditions)
+   - Apply/Remove coupon
+   - Multiple coupons support
+   - Minimum amount validation
+   - Expiry date check
+   DISPLAYS:
+   - Coupon code
+   - Discount type (% or flat)
+   - Discount value
+   - Min order amount
+   - Max discount cap
+   - Expiry date
+
+5. AddressSelection (components/AddressSelection.tsx)
+   PURPOSE: Manage delivery addresses
+   FEATURES:
+   - List saved addresses
+   - Select address (radio buttons)
+   - Add new address button
+   - Edit address button
+   - Delete address button
+   - Set as default address
+   DISPLAYS:
+   - Full name
+   - Phone number
+   - Complete address
+   - City, State, PIN code
+   - Default badge
+
+6. AddressForm (components/AddressForm.tsx)
+   PURPOSE: Add or edit address
+   FIELDS:
+   - Full name
+   - Phone number
+   - Address line 1
+   - Address line 2 (optional)
+   - City
+   - State
+   - PIN code
+   - Address type (Home/Work)
+   - Set as default (checkbox)
+   VALIDATION:
+   - All required fields
+   - Phone format (10 digits)
+   - PIN code format (6 digits)
+
+7. PaymentOptions (components/PaymentOptions.tsx)
+   PURPOSE: Select payment method
+   OPTIONS:
+   - Cash on Delivery (COD)
+   - Online Payment (Cards, Net Banking)
+   - UPI Payment
+   DISPLAYS:
+   - Payment method icons
+   - Method descriptions
+   - Security badges
+   - Selected state
+
+================================================================================
+STATE MANAGEMENT
+================================================================================
+
+Main State:
+- currentStep: 1 | 2 | 3 - Current checkout step
+- selectedAddress: UIAddress - Selected delivery address
+- appliedCoupons: Coupon[] - Applied discount coupons
+- paymentMethod: String - Selected payment method
+- updatingSize: String | null - Item being updated
+
+Cart Context State:
+- cart: Cart object from backend
+- isLoading: Boolean
+- cartItems: CartItem[]
+
+Customer State:
+- customer: Customer from AuthContext
+- uiAddresses: Addresses mapped to UI format
+
+================================================================================
+KEY FUNCTIONS
+================================================================================
+
+updateQuantity(itemId, newQuantity):
+  PURPOSE: Update cart item quantity
+  API: PATCH /website/cart/item/{itemId}
+  BODY: { quantity: newQuantity }
+  UPDATES: Cart state via CartContext
+
+updateSize(itemId, newSize):
+  PURPOSE: Change cart item size
+  IMPLEMENTATION:
+    1. Remove item from cart
+    2. Add same item with new size
+  REASON: Backend doesn't support size update
+  NOTE: Uses updatingSize state for loading
+
+moveToWishlist(itemId):
+  PURPOSE: Move item from cart to wishlist
+  STATUS: Placeholder implementation
+  TODO: Implement actual functionality
+
+removeItem(itemId):
+  PURPOSE: Remove item from cart
+  API: DELETE /website/cart/item/{itemId}
+  UPDATES: Cart state via CartContext
+
+handleApplyCoupons(coupons):
+  PURPOSE: Apply discount coupons
+  UPDATES: appliedCoupons state
+  TRIGGERS: Total recalculation
+
+calculateTotals():
+  PURPOSE: Calculate order totals
+  RETURNS:
+  {
+    mrp: Original total price
+    subtotal: Discounted product price
+    savings: MRP - Subtotal
+    couponDiscount: Total coupon discounts
+    delivery: Shipping charges
+    tax: 8% tax on (subtotal - coupon)
+    total: Final amount to pay
+  }
+  LOGIC:
+  - MRP = Sum of (comparePrice * quantity)
+  - Subtotal = Sum of (price * quantity)
+  - Savings = MRP - Subtotal
+  - Coupon = Apply each coupon's discount
+  - Delivery = 50 if subtotal < 500, else 0
+  - Tax = (Subtotal - Coupon) * 0.08
+  - Total = Subtotal - Coupon + Delivery + Tax
+
+================================================================================
+CART DATA STRUCTURE
+================================================================================
+
+Cart Type:
+{
+  _id: string
+  customer: string  // Customer ID
+  items: CartItem[]
+  totalItems: number
+  totalAmount: number
+  createdAt: string
+  updatedAt: string
+}
+
+CartItem Type:
+{
+  _id: string
+  product: {
+    _id: string
+    name: string
+    images: string[]
+    brand: string
+    availableSizes: string[]
+    compareAtPrice?: number
+  }
+  quantity: number
+  size: string
+  color: string
+  price: number  // Unit price
+}
+
+UIAddress Type:
+{
+  id: string
+  name: string
+  phone: string
+  address: string
+  city: string
+  state: string
+  pincode: string
+  isDefault: boolean
+}
+
+================================================================================
+COUPON SYSTEM
+================================================================================
+
+Coupon Type:
+{
+  _id: string
+  code: string
+  type: "percentage" | "fixed"
+  value: number  // Percentage or fixed amount
+  minAmount: number  // Minimum order value
+  maxDiscount?: number  // Max discount cap (for percentage)
+  expiryDate: string
+  isActive: boolean
+  description: string
+}
+
+Validation Rules:
+- Cart subtotal >= coupon.minAmount
+- Coupon not expired
+- Coupon is active
+- Multiple coupons can be applied
+
+Discount Calculation:
+- Percentage: (subtotal * value / 100)
+  - Capped at maxDiscount if specified
+- Fixed: value (flat amount)
+
+Display:
+- Applied coupons shown in order summary
+- Discount amount in green
+- Coupon codes listed
+
+================================================================================
+ADDRESS MANAGEMENT
+================================================================================
+
+Address Flow:
+1. Fetch addresses from customer profile
+2. Map backend addresses to UI format
+3. Set default address as selected
+4. Allow user to:
+   - Select different address
+   - Add new address
+   - Edit existing address
+   - Delete address
+   - Set as default
+
+Address Mapping:
+Backend Address → UI Address
+{
+  _id / id → id
+  street → address
+  city → city
+  state → state
+  zipCode → pincode
+  isDefault → isDefault
+  customer.fullName → name
+  customer.phone → phone
+}
+
+Add/Edit Address:
+- Opens AddressForm modal
+- Validates input
+- Calls addressService API
+- Refreshes address list
+- Updates selected address
+
+================================================================================
+PAYMENT PROCESSING
+================================================================================
+
+Payment Methods Supported:
+1. Cash on Delivery (COD)
+   - No upfront payment
+   - Pay when order delivered
+
+2. Online Payment
+   - Credit/Debit cards
+   - Net banking
+   - Wallets
+   - Payment gateway integration (TODO)
+
+3. UPI Payment
+   - UPI ID
+   - QR code scan
+   - UPI apps
+
+Current Status:
+- Payment method selection implemented
+- Actual payment integration pending
+- Place order shows alert (placeholder)
+
+TODO:
+- Integrate payment gateway (Razorpay/Stripe)
+- Handle payment success/failure
+- Create order after payment
+- Redirect to order confirmation
+
+================================================================================
+ORDER CREATION FLOW
+================================================================================
+
+When "Place Order" clicked:
+1. Validate all selections:
+   - Cart not empty
+   - Address selected
+   - Payment method selected
+
+2. Create order object:
+   {
+     items: cartItems
+     shippingAddress: selectedAddress
+     paymentMethod: paymentMethod
+     subtotal: totals.subtotal
+     tax: totals.tax
+     shipping: totals.delivery
+     discount: totals.couponDiscount
+     total: totals.total
+     appliedCoupons: appliedCoupons
+   }
+
+3. If COD:
+   - Create order directly
+   - Clear cart
+   - Redirect to order confirmation
+
+4. If Online/UPI:
+   - Initiate payment
+   - Wait for payment confirmation
+   - Create order on success
+   - Clear cart
+   - Redirect to order confirmation
+
+5. On failure:
+   - Show error message
+   - Keep cart intact
+   - Allow retry
+
+================================================================================
+RESPONSIVE DESIGN
+================================================================================
+
+Mobile:
+- Single column layout
+- Stacked cart items
+- Full-width order summary
+- Sticky order summary button
+
+Tablet:
+- 2-column layout (cart + summary)
+- Compact cart items
+
+Desktop:
+- 2-column layout (main + sidebar)
+- Sticky order summary
+- Spacious layout
+
+================================================================================
+API ENDPOINTS USED
+================================================================================
+
+1. GET /website/cart
+   Returns: Cart with items
+
+2. POST /website/cart/add
+   Body: { productId, quantity, size, color, price }
+   Returns: Updated cart
+
+3. PATCH /website/cart/item/{itemId}
+   Body: { quantity }
+   Returns: Updated cart
+
+4. DELETE /website/cart/item/{itemId}
+   Returns: Updated cart
+
+5. DELETE /website/cart/clear
+   Returns: Empty cart
+
+6. GET /website/addresses
+   Returns: List of addresses
+
+7. POST /website/addresses
+   Body: Address object
+   Returns: Created address
+
+8. PATCH /website/addresses/{addressId}
+   Body: Updated address fields
+   Returns: Updated address
+
+9. DELETE /website/addresses/{addressId}
+   Returns: Success message
+
+10. PATCH /website/addresses/{addressId}/default
+    Returns: Updated address list
+
+11. GET /coupons/active
+    Returns: List of active coupons
+
+12. POST /coupons/validate
+    Body: { code, cartTotal }
+    Returns: Coupon validity and discount
+
+================================================================================
+CONTEXT USAGE
+================================================================================
+
+useCart():
+  - cart - Current cart data
+  - isLoading - Loading state
+  - addToCart() - Add item
+  - updateCartItem() - Update quantity
+  - removeFromCart() - Remove item
+  - clearCart() - Clear all items
+  - refreshCart() - Reload cart
+  - getCartCount() - Total items
+  - getCartTotal() - Total amount
+
+useAuth():
+  - customer - Current customer
+  - isAuthenticated - Login status
+
+addressService:
+  - list() - Get addresses
+  - create() - Add address
+  - update() - Edit address
+  - delete() - Remove address
+  - setDefault() - Set default
+
+================================================================================
+ERROR HANDLING
+================================================================================
+
+Common Errors:
+- Empty cart → Show "Cart is empty" message
+- Not logged in → Redirect to login
+- API errors → Toast notification
+- Size update failure → Revert to original state
+- Payment failure → Show error, keep cart
+
+Error Display:
+- Toast notifications (react-toastify)
+- Inline error messages
+- Alert dialogs for critical errors
+
+================================================================================
+LOADING STATES
+================================================================================
+
+- Cart loading: LoadingSpinner + "Loading your cart..."
+- Updating quantity: Disabled buttons
+- Changing size: Loading indicator on item
+- Placing order: Disabled "Place Order" button
+
+================================================================================
+PENDING FEATURES
+================================================================================
+
+☐ Move to wishlist functionality
+☐ Save for later
+☐ Gift wrapping option
+☐ Delivery slot selection
+☐ Order notes/instructions
+☐ Apply gift card
+☐ Loyalty points redemption
+☐ Estimated delivery date
+☐ COD charges display
+☐ Payment gateway integration
+☐ Order confirmation page
+☐ Email order confirmation
+☐ SMS notifications
+☐ Shiprocket integration
+
+================================================================================
+RELATED FILES
+================================================================================
+
+Main:
+- cart/page.tsx
+- cart/cart.module.scss
+
+Components:
+- cart/components/StepIndicator.tsx
+- cart/components/CartItem.tsx
+- cart/components/OrderSummary.tsx
+- cart/components/CouponSection.tsx
+- cart/components/AddressSelection.tsx
+- cart/components/AddressForm.tsx
+- cart/components/PaymentOptions.tsx
+
+Services:
+- services/cartService.ts
+- services/addressService.ts
+- contexts/CartContext.tsx
+- contexts/AuthContext.tsx
+
+================================================================================
+END OF CART & CHECKOUT DOCUMENTATION
+================================================================================

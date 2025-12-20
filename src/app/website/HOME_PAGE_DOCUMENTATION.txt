@@ -1,0 +1,346 @@
+================================================================================
+                           HOME PAGE DOCUMENTATION
+================================================================================
+
+FILE: frontend/src/app/website/page.tsx
+ROUTE: /website
+PURPOSE: Main landing page for the e-commerce website
+
+================================================================================
+OVERVIEW
+================================================================================
+
+The homepage is the primary entry point for customers. It showcases featured
+products, categories, banners, and brand information to engage visitors and
+guide them to shop.
+
+================================================================================
+MAIN COMPONENTS
+================================================================================
+
+1. HERO CAROUSEL (HeroCarousel.tsx)
+   Location: Home/HeroCarousel.tsx
+
+   FUNCTIONALITY:
+   - Displays promotional banners in a rotating carousel
+   - Fetches banner data from backend API
+   - Supports multiple banner images
+   - Auto-plays with manual navigation controls
+
+   DATA SOURCE:
+   - API: /website/banners
+   - Loaded via bannerService.getBanners()
+
+   FEATURES:
+   - Responsive images
+   - Loading state indicator
+   - Bootstrap Carousel component
+   - Smooth transitions
+
+2. CATEGORIES SECTION (Categories.tsx)
+   Location: Home/Categories.tsx
+
+   FUNCTIONALITY:
+   - Displays product categories in a grid
+   - Links to category-specific product pages
+   - Shows category images and names
+
+   DATA SOURCE:
+   - API: /categories/dropdown
+   - Returns: Array of {_id, name, slug, image}
+
+   FEATURES:
+   - Grid layout (responsive)
+   - Category images
+   - Click to navigate to category products
+   - Loading state
+
+3. FEATURED PRODUCTS (FeaturedProducts.tsx)
+   Location: Home/FeaturedProducts.tsx
+
+   FUNCTIONALITY:
+   - Displays 4 featured/trending products
+   - Shows product cards with images, prices, ratings
+   - Add to wishlist button
+
+   DATA SOURCE:
+   - API: /website/products/featured
+   - Fetches 4 featured products
+   - Includes review stats for each product
+
+   FEATURES:
+   - Product cards with hover effects
+   - Star ratings (from review service)
+   - Review count display
+   - Add to wishlist functionality
+   - Price display with compare price
+   - "View Details" link to product page
+
+4. CLUB STATEMENT BANNER (ClubStatementBanner.tsx)
+   Location: Home/ClubStatementBanner.tsx
+
+   FUNCTIONALITY:
+   - Marketing/promotional banner
+   - Highlights brand USPs or membership benefits
+
+   FEATURES:
+   - Full-width banner
+   - Custom styling
+   - Static content (can be made dynamic)
+
+5. BRAND STORY SECTION (BrandStory.tsx)
+   Location: Home/BrandStory.tsx
+
+   FUNCTIONALITY:
+   - Tells the brand's story
+   - Engages customers with brand values
+   - Shows brand mission/vision
+
+   FEATURES:
+   - Text and image layout
+   - Scroll animations (FadeUp/FlipX/ZoomIn)
+   - Responsive design
+
+6. JOIN CLUB BANNER (JoinClubBanner.tsx)
+   Location: Home/JoinClubBanner.tsx
+
+   FUNCTIONALITY:
+   - Newsletter subscription CTA
+   - Captures email for marketing
+
+   FEATURES:
+   - Email input form
+   - Subscribe button
+   - API integration to save email
+
+================================================================================
+DATA FLOW
+================================================================================
+
+1. PAGE LOAD:
+   - Component mounts
+   - useEffect triggers loadData()
+
+2. DATA FETCHING (Parallel):
+   - loadFeaturedProducts() → Fetch 4 featured products
+   - loadBanners() → Fetch active banners
+   - loadCategories() → Fetch category list
+
+3. PRODUCT ENHANCEMENT:
+   - For each featured product:
+     - Fetch review stats (average rating, count)
+     - Normalize product data (ensure arrays exist)
+     - Merge review data with product
+
+4. STATE UPDATES:
+   - setFeaturedProducts(productsWithReviews)
+   - setBanners(banners)
+   - setCategories(categories)
+   - setLoading(false)
+
+5. RENDERING:
+   - Show loading spinners while fetching
+   - Render components with fetched data
+   - Display errors with toast notifications
+
+================================================================================
+KEY FUNCTIONS
+================================================================================
+
+loadFeaturedProducts():
+  - Fetches featured products
+  - Normalizes product data
+  - Fetches and merges review statistics
+  - Handles errors with toast
+
+loadBanners():
+  - Fetches active banners from API
+  - Updates banner state
+  - Logs success/error
+
+loadCategories():
+  - Fetches category dropdown data
+  - Updates categories state
+  - Error handling with toast
+
+handleAddToWishlist(productId):
+  - Adds product to wishlist
+  - Uses WishlistContext
+  - Shows success/error toast
+
+handleSubscribeNewsletter(email):
+  - Submits email to newsletter API
+  - Shows success/error toast
+
+formatCurrency(amount):
+  - Formats number as USD currency
+  - Used for price display
+
+renderStars(rating):
+  - Renders star icons based on rating
+  - Full stars and half stars
+  - Used in product cards
+
+================================================================================
+CONTEXT USAGE
+================================================================================
+
+useWishlist():
+  - Access: addToWishlist function
+  - Purpose: Add products to wishlist from featured section
+
+================================================================================
+API ENDPOINTS USED
+================================================================================
+
+1. GET /website/products/featured?limit=4
+   - Fetches featured products
+   - Returns: { products: Product[], pagination: {...} }
+
+2. GET /website/banners
+   - Fetches active banners
+   - Returns: { success: true, banners: Banner[] }
+
+3. GET /categories/dropdown
+   - Fetches category list
+   - Returns: CategoryItem[]
+
+4. GET /reviews/product/{productId}/stats
+   - Fetches review statistics
+   - Returns: { averageRating: number, totalReviews: number }
+
+5. POST /website/newsletter/subscribe
+   - Subscribes email to newsletter
+   - Body: { email: string }
+
+================================================================================
+STYLING
+================================================================================
+
+Global Styles:
+  - styles/website.scss
+  - Bootstrap grid and utilities
+
+Component Styles:
+  - Home/style.module.scss (if exists)
+  - Individual component SCSS modules
+
+Animations:
+  - FadeUpOnScroll
+  - FlipXOnScroll
+  - FlipYOnScroll
+  - ZoomInOnScroll
+
+================================================================================
+USER INTERACTIONS
+================================================================================
+
+1. VIEW BANNERS:
+   - Auto-rotates through promotional banners
+   - Click arrows to navigate manually
+
+2. BROWSE CATEGORIES:
+   - Click category card → Navigate to category products page
+
+3. VIEW FEATURED PRODUCTS:
+   - See product details (name, price, rating)
+   - Click product card → Navigate to product detail
+   - Click heart icon → Add to wishlist
+
+4. SUBSCRIBE TO NEWSLETTER:
+   - Enter email in Join Club section
+   - Click subscribe → Email saved to database
+
+5. NAVIGATION:
+   - Use header to navigate to other pages
+   - Footer links to static pages
+
+================================================================================
+LOADING STATES
+================================================================================
+
+- Featured Products: LoadingSpinner + "Loading..."
+- Banners: Loading indicator in carousel
+- Categories: Loading state in component
+
+================================================================================
+ERROR HANDLING
+================================================================================
+
+- All API errors logged to console
+- User-friendly toast notifications
+- Fallback to empty arrays if data fails to load
+- Continues rendering other sections if one fails
+
+================================================================================
+RESPONSIVE DESIGN
+================================================================================
+
+Mobile:
+  - Single column layout
+  - Stacked sections
+  - Full-width carousel
+
+Tablet:
+  - 2-column grid for categories
+  - 2-column grid for products
+
+Desktop:
+  - Full grid layouts
+  - Side-by-side sections
+  - Optimal spacing
+
+================================================================================
+PERFORMANCE CONSIDERATIONS
+================================================================================
+
+✓ Parallel data fetching (Promise.all)
+✓ Normalized product data (prevents array errors)
+✓ Optimized re-renders (proper state management)
+
+⚠ IMPROVEMENTS NEEDED:
+  - Image lazy loading
+  - Component code splitting
+  - Memoization for expensive renders
+  - Caching for repeated API calls
+
+================================================================================
+DEPENDENCIES
+================================================================================
+
+React Hooks:
+  - useState, useEffect
+
+Services:
+  - productService
+  - bannerService
+  - contactService
+  - reviewService
+
+Contexts:
+  - useWishlist (WishlistContext)
+
+Components:
+  - LoadingSpinner
+  - React Bootstrap (Container, Row, Col, Card, etc.)
+  - React Icons (FiStar, FiHeart, FiShoppingBag, etc.)
+
+Utilities:
+  - normalizeProductData
+  - toast (react-toastify)
+
+================================================================================
+RELATED FILES
+================================================================================
+
+- layout.tsx - Wraps homepage with header/footer
+- Home/HeroCarousel.tsx - Banner carousel component
+- Home/Categories.tsx - Category grid component
+- Home/FeaturedProducts.tsx - Featured products section
+- Home/BrandStory.tsx - Brand story section
+- Home/ClubStatementBanner.tsx - Marketing banner
+- Home/JoinClubBanner.tsx - Newsletter signup
+
+================================================================================
+END OF HOME PAGE DOCUMENTATION
+================================================================================

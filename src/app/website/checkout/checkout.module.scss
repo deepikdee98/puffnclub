@@ -1,0 +1,42 @@
+// Minimal custom styles for checkout page
+// Most styling is done with inline classes and Bootstrap
+
+.accordionButton {
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.paymentForm {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Custom radio button styling
+.form-check-input:checked {
+  background-color: #000;
+  border-color: #000;
+}
+
+// Card and input focus states
+.form-control:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.1);
+  border-color: #000;
+}
+
+// Smooth transitions for accordions
+.accordion-collapse {
+  transition: height 0.3s ease;
+}

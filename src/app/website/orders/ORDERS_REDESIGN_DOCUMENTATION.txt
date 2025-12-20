@@ -1,0 +1,1518 @@
+================================================================================
+                    ORDERS PAGE REDESIGN DOCUMENTATION
+================================================================================
+
+Project: E-commerce Admin - Customer Orders Management
+Last Updated: 2025-12-09
+Location: frontend/src/app/website/orders/
+Status: FRONTEND COMPLETE - AWAITING BACKEND APIs
+
+================================================================================
+⭐ IMPLEMENTATION STATUS - QUICK SUMMARY
+================================================================================
+
+✅ FRONTEND COMPLETED (2025-12-09)
+----------------------------------
+All UI components and pages are 100% implemented and ready:
+
+1. Pages Built:
+   ✓ Orders List Page (/website/orders) - No tabs, scrollable list design
+   ✓ Track Order Page (/website/orders/{orderId}/track) - Timeline + Actions
+   ✓ Test UI Page (/website/orders/test-ui) - For testing without backend
+
+2. Components Built:
+   ✓ PageHeader - Logo, back button, help link
+   ✓ ActionButton - Reusable styled button
+   ✓ ProductCard - Product display card
+   ✓ OrderCard - Order list card (horizontal layout)
+   ✓ TrackingTimeline - 5-stage vertical timeline
+   ✓ EmptyOrdersState - Empty state component
+
+3. Modals Built (React Bootstrap + React Hook Form + Yup):
+   ✓ ReviewModal - 3-step flow (empty → filled → success)
+   ✓ ExchangeModal - Choice screen + size/color selection form
+   ✓ ReturnProductModal - Return request form
+   ✓ CancelOrderModal - Confirmation with error handling
+
+4. Features Implemented:
+   ✓ All forms with validation (Yup schemas)
+   ✓ Currency format: ₹ (Indian Rupees)
+   ✓ Mobile-responsive design (Bootstrap classes)
+   ✓ Loading states, error handling
+   ✓ Status-based action buttons
+
+❌ BACKEND PENDING
+------------------
+Need to implement these 6 APIs:
+
+1. POST /api/website/orders/:orderId/review - Submit product review
+2. POST /api/website/orders/:orderId/exchange - Submit exchange request
+3. POST /api/website/orders/:orderId/return - Submit return request
+4. PUT /api/website/exchanges/:exchangeId/cancel - Cancel exchange
+5. PUT /api/website/returns/:returnId/cancel - Cancel return
+6. GET /api/website/orders/:orderId/tracking - Enhanced tracking (optional)
+
+Database Models Needed:
+- Review Model (product, customer, order, rating, comment)
+- ExchangeRequest Model (order, product, status, newSize, newColor)
+- ReturnRequest Model (order, product, status, reason)
+- Order Model Updates (deliveredAt, reviewSubmitted, eligibility dates)
+
+📄 Full API Specifications: See ORDERS_API_SPECIFICATIONS.md
+
+🔄 USER FLOW (How It All Works Together)
+-----------------------------------------
+1. User visits /website/orders
+   → Frontend calls: GET /api/website/orders ✅ (Already exists)
+
+2. User clicks "Track Order"
+   → Navigate to: /website/orders/{orderId}/track
+   → Frontend calls: GET /api/website/orders/:orderId ✅ (Already exists)
+
+3. User clicks action buttons:
+   - "Review Product" → POST /api/website/orders/:orderId/review ❌ (Need to create)
+   - "Return/Exchange" → POST /api/website/orders/:orderId/exchange ❌ (Need to create)
+   - "Cancel Order" → PUT /api/website/orders/:orderId/cancel ✅ (Already exists)
+
+Once backend APIs are ready, frontend will work automatically - no code changes needed!
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. Overview
+2. Current Implementation (What Exists)
+3. New Figma Design Requirements
+4. Comparison: Current vs New Design
+5. Proposed Folder Structure
+6. Screens to Implement
+7. Component Breakdown
+8. Pending Clarifications (Designer Feedback Needed)
+9. API Dependencies
+10. Implementation Checklist
+11. Testing Requirements
+
+================================================================================
+1. OVERVIEW
+================================================================================
+
+The Orders section is being redesigned based on new Figma mockups to provide
+a cleaner, more user-friendly order management experience.
+
+Purpose:
+- Display customer orders in simplified format
+- Track order status with visual timeline
+- Enable order actions (Track, Cancel, Share, Exchange, Return, Review)
+- Provide seamless order management workflow
+
+Current Status:
+✅ Current Implementation: EXISTS (detailed, tab-based design)
+🎨 New Design: FIGMA MOCKUPS PROVIDED
+⏳ Implementation: PENDING (awaiting designer clarifications)
+
+Design Philosophy:
+- Minimalist and clean UI
+- Mobile-first approach
+- Action-oriented (focus on what user can do)
+- Indian market focused (₹ currency)
+- Brand-centric (Puffn Club branding)
+
+================================================================================
+2. CURRENT IMPLEMENTATION (What Exists)
+================================================================================
+
+2.1 EXISTING FILES
+------------------
+Location: frontend/src/app/website/orders/
+
+Files:
+├── page.tsx                           # Main orders page component
+
+Services:
+├── frontend/src/app/website/services/
+    ├── orderService.ts                # Order API service
+    └── api.ts                         # API configuration
+
+2.2 EXISTING FEATURES
+---------------------
+✅ Orders list with filtering tabs:
+   - All Orders
+   - Processing
+   - Shipped
+   - Delivered
+
+✅ Order card components showing:
+   - Order number and placement date
+   - Status badge with icon (colored)
+   - All order items with images
+   - Product details (name, size, color, quantity)
+   - Item prices
+   - Total amount
+   - Full shipping address
+   - Tracking number (if available)
+   - Estimated delivery date
+
+✅ Action buttons:
+   - View Details
+   - Track Order (for shipped)
+   - Download Invoice (for delivered)
+   - Cancel Order (for pending/processing)
+   - Download All Invoices (header)
+
+✅ Empty states for each tab
+✅ Loading states with spinner
+✅ Error handling with toasts
+
+2.3 CURRENT DESIGN STYLE
+-------------------------
+- Bootstrap tabs for filtering
+- Two-column layout in order cards
+- Shadow cards with borders
+- Multiple action buttons per order
+- Colored status badges (success, primary, danger, etc.)
+- USD currency format
+- Information-rich display
+- Icons from react-icons/fi
+
+2.4 CURRENT API INTEGRATION
+----------------------------
+✅ orderService.getOrders(filters)
+✅ orderService.cancelOrder(orderId)
+✅ orderService.getOrderById(orderId)
+✅ orderService.createOrder(data)
+
+2.5 CURRENT DATA STRUCTURE
+---------------------------
+Order Type:
+- _id, orderNumber, customer
+- items[] (with product details)
+- shippingAddress, billingAddress
+- paymentMethod, paymentStatus
+- orderStatus (pending/confirmed/processing/shipped/delivered/cancelled)
+- subtotal, shippingCost, tax, total
+- trackingNumber, estimatedDelivery
+- createdAt, updatedAt
+
+================================================================================
+3. NEW FIGMA DESIGN REQUIREMENTS
+================================================================================
+
+3.1 FIGMA SCREENS PROVIDED
+---------------------------
+✅ Screen 1: Orders Page (Empty State)
+✅ Screen 2: Orders List Page (With Orders)
+✅ Screen 3: Track Order Page - Stage 1 (Item Ordered)
+✅ Screen 4: Track Order Page - Stage 2 (Order Packed)
+✅ Screen 5: Track Order Page - Stage 3 (Delivered)
+✅ Screen 6: Rating Product Modal - Step 1 (Initial)
+✅ Screen 7: Rating Product Modal - Step 2 (Form)
+✅ Screen 8: Rating Product Modal - Step 3 (Success)
+✅ Screen 9: Exchange Product Modal - Step 1 (Choice)
+✅ Screen 10: Exchange Product Modal - Step 2 (Form)
+
+3.2 NEW DESIGN HIGHLIGHTS
+--------------------------
+🎨 **Design Approach:**
+   - Minimalist, clean white background
+   - No tabs (single scrollable list)
+   - Horizontal order cards (Image - Details - Action)
+   - Single prominent action button per order
+   - Brand logo header (PUFFN CLUB)
+   - Back navigation
+   - Subtitle/description text
+
+🎨 **Visual Elements:**
+   - Vertical timeline for order tracking (5 stages)
+   - Green checkmarks for completed steps
+   - Empty circles for pending steps
+   - Modal popups for actions
+   - Black primary buttons
+   - White/outline secondary buttons
+
+🎨 **Currency & Locale:**
+   - Indian Rupees (₹) instead of USD ($)
+   - Indian date formats
+
+3.3 KEY FEATURES (New)
+----------------------
+✅ Simplified order listing
+✅ Visual order tracking timeline
+✅ Integrated review/rating system
+✅ Exchange/return workflow
+✅ Share order functionality
+✅ Status-based action buttons
+
+================================================================================
+4. COMPARISON: CURRENT vs NEW DESIGN
+================================================================================
+
+┌─────────────────────┬──────────────────────┬─────────────────────┐
+│ ASPECT              │ CURRENT (Existing)   │ NEW (Figma)         │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Header              │ "My Orders" title    │ Logo + Back + Title │
+│                     │ Download All button  │ Subtitle text       │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Filtering           │ 4 Tabs (Bootstrap)   │ No tabs (single     │
+│                     │ All/Processing/      │ list)               │
+│                     │ Shipped/Delivered    │                     │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Order Card Layout   │ Two-column vertical  │ Horizontal single   │
+│                     │ Items left, summary  │ row (Image-Details- │
+│                     │ right                │ Action)             │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Information Density │ High (all details    │ Low (minimal info)  │
+│                     │ shown)               │                     │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Status Display      │ Colored badge + icon │ Text-based in       │
+│                     │                      │ delivery info       │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Product Display     │ All items in order   │ Single product      │
+│                     │ (multiple)           │ (TBD: first only?)  │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Shipping Address    │ Shown in card        │ Not visible in list │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Tracking Number     │ Shown if available   │ Not visible in list │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Action Buttons      │ Multiple (View,      │ Single prominent    │
+│                     │ Track, Invoice,      │ button based on     │
+│                     │ Cancel)              │ status              │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Card Style          │ Bootstrap shadow     │ Simple white cards  │
+│                     │ cards                │ with border         │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Currency            │ USD ($)              │ INR (₹)             │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Empty State         │ Generic message +    │ Brand-specific      │
+│                     │ icon                 │ message             │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Order Tracking      │ Not available        │ Visual timeline     │
+│                     │                      │ (5 stages)          │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Review/Rating       │ Not available        │ Integrated modal    │
+│                     │                      │ (3 steps)           │
+├─────────────────────┼──────────────────────┼─────────────────────┤
+│ Exchange/Return     │ Not available        │ Integrated modal    │
+│                     │                      │ (2 steps)           │
+└─────────────────────┴──────────────────────┴─────────────────────┘
+
+================================================================================
+5. PROPOSED FOLDER STRUCTURE
+================================================================================
+
+frontend/src/app/website/orders/
+│
+├── page.tsx                                    # Main orders list page
+├── [orderId]/
+│   └── track/
+│       └── page.tsx                            # Track order page
+│
+├── components/
+│   ├── OrderCard.tsx                           # Single order card
+│   ├── OrderCard.module.scss                   # Order card styles
+│   │
+│   ├── EmptyOrdersState.tsx                    # Empty state component
+│   │
+│   ├── TrackingTimeline.tsx                    # Order tracking timeline
+│   ├── TrackingTimeline.module.scss            # Timeline styles
+│   │
+│   ├── ProductCard.tsx                         # Product display card
+│   ├── ProductCard.module.scss                 # Product card styles
+│   │
+│   ├── modals/
+│   │   ├── ReviewModal.tsx                     # Review/rating modal
+│   │   ├── ReviewModal.module.scss             # Review modal styles
+│   │   │
+│   │   ├── ExchangeModal.tsx                   # Exchange product modal
+│   │   ├── ExchangeModal.module.scss           # Exchange modal styles
+│   │   │
+│   │   ├── ReturnModal.tsx                     # Return product modal (TBD)
+│   │   ├── ReturnModal.module.scss             # Return modal styles (TBD)
+│   │   │
+│   │   ├── CancelOrderModal.tsx                # Cancel confirmation modal (TBD)
+│   │   ├── CancelOrderModal.module.scss        # Cancel modal styles (TBD)
+│   │   │
+│   │   ├── ShareOrderModal.tsx                 # Share order modal (TBD)
+│   │   └── ShareOrderModal.module.scss         # Share modal styles (TBD)
+│   │
+│   └── shared/
+│       ├── PageHeader.tsx                      # Reusable page header
+│       ├── PageHeader.module.scss              # Header styles
+│       └── ActionButton.tsx                    # Styled action button
+│
+├── hooks/
+│   ├── useOrders.ts                            # Orders data hook
+│   ├── useOrderTracking.ts                     # Order tracking hook
+│   └── useOrderActions.ts                      # Order actions hook
+│
+├── types/
+│   └── orders.types.ts                         # TypeScript types
+│
+├── utils/
+│   ├── orderHelpers.ts                         # Helper functions
+│   └── orderConstants.ts                       # Constants & config
+│
+└── ORDERS_REDESIGN_DOCUMENTATION.txt           # This file
+
+Services (Shared):
+frontend/src/app/website/services/
+├── orderService.ts                             # Existing order API
+├── reviewService.ts                            # NEW: Review/rating API
+└── exchangeService.ts                          # NEW: Exchange/return API
+
+================================================================================
+6. SCREENS TO IMPLEMENT
+================================================================================
+
+6.1 ORDERS LIST PAGE
+--------------------
+Route: /website/orders
+File: page.tsx
+
+Layout:
+┌─────────────────────────────────────────────────────┐
+│ [PUFFN CLUB Logo]                          [Help]   │
+│ ← Orders                                             │
+│ Displays your past items (until track & trace...)   │
+│                                                      │
+│ ┌─────────────────────────────────────────────────┐ │
+│ │ Order ID: #FTS234578      Est Delivery: Oct 1st │ │
+│ │ [IMG] Rounded Neck T-Shirt      [Track Order]   │ │
+│ │       Size: B | Qty: 1                          │ │
+│ │       ₹499                                       │ │
+│ └─────────────────────────────────────────────────┘ │
+│                                                      │
+│ ┌─────────────────────────────────────────────────┐ │
+│ │ Order ID: #FTS234578      Delivered on Oct 1st  │ │
+│ │ [IMG] Rounded Neck T-Shirt  [Return/Exchange]   │ │
+│ │       Size: B | Qty: 1                          │ │
+│ │       ₹499                                       │ │
+│ └─────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────┘
+
+Empty State:
+┌─────────────────────────────────────────────────────┐
+│ [PUFFN CLUB Logo]                                    │
+│ ← Orders                                             │
+│ Displays your past items (until track & trace...)   │
+│                                                      │
+│              You haven't order anything yet.         │
+│        Go shop from our Puffn Club exclusive         │
+│                                                      │
+│              [Continue Shopping]                     │
+└─────────────────────────────────────────────────────┘
+
+Components:
+- PageHeader (Logo + Back + Title + Subtitle)
+- OrderCard (per order)
+- EmptyOrdersState
+- Help button/link
+
+Features:
+- Display all orders (no tabs)
+- Sort by date (newest first)
+- Status-based action button:
+  * Pending/Processing → "Track Order"
+  * Shipped → "Track Order"
+  * Delivered → "Return / Exchange"
+- Loading state
+- Empty state
+- Error handling
+
+6.2 TRACK ORDER PAGE
+--------------------
+Route: /website/orders/[orderId]/track
+File: [orderId]/track/page.tsx
+
+Layout:
+┌─────────────────────────────────────────────────────┐
+│ [PUFFN CLUB Logo]                          [Help]   │
+│ ← Track Order                                        │
+│ Displays order status & trace the goods of shipment │
+│                                                      │
+│ Timeline (Left)          Product Card (Right)        │
+│ ✓ Item Ordered          ┌──────────────────────┐    │
+│   Dec 1, 2024           │ [Product Image]      │    │
+│                         │                      │    │
+│ ○ Order Packed          │ Rounded Neck T-Shirt │    │
+│   Waiting...            │ Size: B  |  Qty: 1   │    │
+│                         │ ₹499                 │    │
+│ ○ Delivery Partner      └──────────────────────┘    │
+│   Pending...                                         │
+│                         [Cancel Order]               │
+│ ○ Out for Delivery      [Share Order details]       │
+│   Pending...                                         │
+│                                                      │
+│ ○ Estimated delivery                                │
+│   Oct 5, 2024                                        │
+└─────────────────────────────────────────────────────┘
+
+Timeline Stages:
+1. ✓ Item Ordered (with timestamp)
+2. ✓/○ Order Packed (with timestamp or "Waiting...")
+3. ✓/○ Delivery Partner (with timestamp or "Pending...")
+4. ✓/○ Out for Delivery (with timestamp or "Pending...")
+5. ✓/○ Item Delivered / Estimated delivery (with date)
+
+Action Buttons (Status-Based):
+- Early Stages: "Cancel Order" + "Share Order details"
+- Delivered: "Return / Exchange" + "Review Product"
+
+Components:
+- PageHeader
+- TrackingTimeline (5 stages)
+- ProductCard
+- ActionButton
+- ReviewModal (conditional)
+- ExchangeModal (conditional)
+- CancelOrderModal (conditional)
+- ShareOrderModal (conditional)
+
+6.3 REVIEW/RATING MODAL
+-----------------------
+Trigger: Click "Review Product" button on delivered order
+Component: components/modals/ReviewModal.tsx
+
+Step 1 - Initial State:
+┌─────────────────────────────────────┐
+│ Rate the Product              [X]   │
+│ Share your opinion on the product   │
+│                                     │
+│ Rating                              │
+│ Click here help us tailoring the    │
+│ user's                              │
+│                                     │
+│ Review                              │
+│ Write the review about the product  │
+│                                     │
+│        [Submit review]              │
+└─────────────────────────────────────┘
+
+Step 2 - Filled Form:
+┌─────────────────────────────────────┐
+│ Rate the Product              [X]   │
+│ Share your opinion on the product   │
+│                                     │
+│ Rating                              │
+│ ⭐⭐⭐⭐⭐                             │
+│                                     │
+│ Review                              │
+│ ┌─────────────────────────────────┐ │
+│ │ Thank loved the product and     │ │
+│ │ loved the quality... perfectly  │ │
+│ │ fits me tru... Thank you        │ │
+│ └─────────────────────────────────┘ │
+│                                     │
+│        [Submit review]              │
+└─────────────────────────────────────┘
+
+Step 3 - Success:
+┌─────────────────────────────────────┐
+│ Thank you for the review      [X]   │
+│                                     │
+│ Thank you for the review and rating │
+│ the product! It is                  │
+│ Helps our customers to trust the    │
+│ product! love,                      │
+│ Puffn team                          │
+│                                     │
+│        [Continue Shopping]          │
+└─────────────────────────────────────┘
+
+Features:
+- 5-star rating system (clickable stars)
+- Text area for review (multiline)
+- Character limit (optional)
+- Submit button (disabled until rating given)
+- Success confirmation
+- Close button
+- Backdrop click to close
+
+6.4 EXCHANGE PRODUCT MODAL
+--------------------------
+Trigger: Click "Return / Exchange" button on delivered order
+Component: components/modals/ExchangeModal.tsx
+
+Step 1 - Choice:
+┌─────────────────────────────────────┐
+│ Did you change your mind      [X]   │
+│                                     │
+│ Do you want to exchange or return   │
+│ the product                         │
+│ Contact us to change your size here │
+│                                     │
+│  [Exchange Product] [Return Product]│
+└─────────────────────────────────────┘
+
+Step 2 - Exchange Form:
+┌─────────────────────────────────────┐
+│ Exchange Product              [X]   │
+│ Exchange the size you want in given │
+│ the choice                          │
+│                                     │
+│ Select Size:                        │
+│ [M] [S] [L] [XL]                    │
+│                                     │
+│ Choose color:                       │
+│ [●Black] [●Tan]                     │
+│                                     │
+│ ⓘ Please ensure that the product   │
+│ tags and the original bill receipt  │
+│ are included with the exchange      │
+│ item. The product must be properly  │
+│ packed; otherwise, the exchange     │
+│ may not be processed and the item   │
+│ may be returned to you.             │
+│                                     │
+│ [Submit Exchange Request]           │
+│ [Cancel Exchange]                   │
+└─────────────────────────────────────┘
+
+Features:
+- Two-step flow (Choice → Form)
+- Size selection buttons (M/S/L/XL)
+- Color swatches (visual selection)
+- Important instructions/disclaimer
+- Submit exchange request
+- Cancel option
+- Validation (must select size & color)
+
+6.5 RETURN PRODUCT MODAL (TBD)
+------------------------------
+Trigger: Click "Return Product" in Exchange choice modal
+Status: NOT SHOWN IN FIGMA - NEEDS DESIGNER INPUT
+
+Possible Features:
+- Return reason selection
+- Photo upload (optional)
+- Bank details for refund
+- Return instructions
+
+6.6 CANCEL ORDER MODAL (TBD)
+----------------------------
+Trigger: Click "Cancel Order" button
+Status: NOT SHOWN IN FIGMA - NEEDS DESIGNER INPUT
+
+Possible Features:
+- Confirmation message
+- Cancellation reason (optional)
+- Yes/No buttons
+
+6.7 SHARE ORDER MODAL (TBD)
+---------------------------
+Trigger: Click "Share Order details" button
+Status: NOT SHOWN IN FIGMA - NEEDS DESIGNER INPUT
+
+Possible Features:
+- Share options (WhatsApp, Email, Copy Link, SMS)
+- Generate shareable tracking link
+- Social sharing
+
+================================================================================
+7. COMPONENT BREAKDOWN
+================================================================================
+
+7.1 PAGE HEADER COMPONENT
+--------------------------
+File: components/shared/PageHeader.tsx
+
+Props:
+- title: string                        # e.g., "Orders"
+- subtitle?: string                    # Optional description
+- showLogo?: boolean                   # Show PUFFN CLUB logo
+- showBack?: boolean                   # Show back button
+- showHelp?: boolean                   # Show help link
+- onBack?: () => void                  # Back button handler
+- onHelp?: () => void                  # Help link handler
+
+Usage:
+<PageHeader
+  title="Orders"
+  subtitle="Displays your past items (until track & trace the order)"
+  showLogo={true}
+  showBack={true}
+  showHelp={true}
+  onBack={() => router.back()}
+  onHelp={() => setShowHelpModal(true)}
+/>
+
+7.2 ORDER CARD COMPONENT
+------------------------
+File: components/OrderCard.tsx
+
+Props:
+- order: Order                         # Order object
+- onAction: (orderId, action) => void  # Action handler
+
+Features:
+- Horizontal layout
+- Product image (first item)
+- Order ID
+- Delivery status text
+- Product name, size, quantity
+- Price
+- Action button (dynamic based on status)
+
+Status-to-Action Mapping:
+- pending/processing → "Track Order"
+- shipped → "Track Order"
+- delivered → "Return / Exchange"
+
+7.3 TRACKING TIMELINE COMPONENT
+--------------------------------
+File: components/TrackingTimeline.tsx
+
+Props:
+- currentStage: number                 # Current stage (1-5)
+- stages: TimelineStage[]              # Array of stage data
+
+TimelineStage Type:
+{
+  label: string                        # e.g., "Item Ordered"
+  status: 'completed' | 'active' | 'pending'
+  timestamp?: string                   # e.g., "Dec 1, 2024"
+  message?: string                     # e.g., "Waiting..."
+}
+
+Visual:
+- Vertical dotted line connecting stages
+- Green checkmark for completed
+- Empty circle for pending
+- Display timestamp or status message
+
+7.4 PRODUCT CARD COMPONENT
+--------------------------
+File: components/ProductCard.tsx
+
+Props:
+- product: OrderItem                   # Product details
+- showPrice?: boolean                  # Show/hide price
+- size?: 'small' | 'medium' | 'large'  # Card size
+
+Features:
+- Product image
+- Product name
+- Size & Quantity display
+- Price (₹ format)
+
+7.5 REVIEW MODAL COMPONENT
+--------------------------
+File: components/modals/ReviewModal.tsx
+
+Props:
+- isOpen: boolean
+- onClose: () => void
+- orderId: string
+- productId: string
+- productName: string
+
+State Management:
+- currentStep: 1 | 2 | 3
+- rating: number (1-5)
+- reviewText: string
+
+Methods:
+- handleRatingChange(rating)
+- handleSubmit()
+- handleSuccess()
+
+7.6 EXCHANGE MODAL COMPONENT
+-----------------------------
+File: components/modals/ExchangeModal.tsx
+
+Props:
+- isOpen: boolean
+- onClose: () => void
+- orderId: string
+- productId: string
+- availableSizes: string[]
+- availableColors: Color[]
+
+State Management:
+- currentStep: 1 | 2
+- selectedSize: string
+- selectedColor: string
+
+Methods:
+- handleExchangeChoice()
+- handleReturnChoice()
+- handleSizeSelect(size)
+- handleColorSelect(color)
+- handleSubmitExchange()
+
+================================================================================
+8. PENDING CLARIFICATIONS (Designer Feedback Needed)
+================================================================================
+
+⏳ QUESTIONS FOR DESIGNER:
+
+8.1 RETURN PRODUCT FLOW
+------------------------
+Status: NOT SHOWN IN FIGMA
+Questions:
+- Should Return flow be similar to Exchange?
+- What form fields needed?
+  * Return reason dropdown?
+  * Photo upload for product condition?
+  * Bank details for refund?
+  * Comments/notes field?
+- Modal or separate page?
+- Same design pattern as Exchange modal?
+
+8.2 CANCEL ORDER CONFIRMATION
+------------------------------
+Status: NOT SHOWN IN FIGMA
+Questions:
+- Should there be a confirmation modal before canceling?
+- What information to show in confirmation?
+  * Order summary?
+  * Cancellation reason dropdown?
+  * Warning message?
+- Success message after cancellation?
+- Redirect after cancel or stay on same page?
+
+8.3 HELP FUNCTIONALITY
+----------------------
+Status: HELP LINK VISIBLE BUT NO SCREEN PROVIDED
+Questions:
+- What happens when user clicks "Help" link?
+- Options:
+  * Open FAQ modal?
+  * Navigate to contact/support page?
+  * Live chat widget?
+  * Phone/WhatsApp contact popup?
+  * Email support?
+- Should Help be contextual (different per page)?
+
+8.4 SHARE ORDER DETAILS
+-----------------------
+Status: BUTTON VISIBLE BUT NO SCREEN PROVIDED
+Questions:
+- What sharing options to provide?
+  * WhatsApp
+  * Email
+  * SMS
+  * Copy tracking link
+  * Social media (Facebook, Twitter, etc.)
+- What information to share?
+  * Tracking link only?
+  * Order summary?
+  * Estimated delivery date?
+- Modal or native share sheet?
+
+8.5 MULTIPLE ITEMS PER ORDER
+-----------------------------
+Status: FIGMA SHOWS ONLY ONE PRODUCT
+Questions:
+- If one order has 3-4 products, how to display?
+- Options:
+  A) Show only first product + "+2 more items" indicator
+  B) Show all products stacked vertically
+  C) Show all products in horizontal scroll
+  D) Show first product, expand on click
+- How does this affect Track Order page?
+- How does Exchange/Review work with multiple items?
+  * Select which item to exchange/review?
+  * Apply to all items?
+
+8.6 ORDER DETAILS / VIEW FULL ORDER
+------------------------------------
+Status: NOT MENTIONED IN FIGMA
+Questions:
+- Is there a "View Order Details" page?
+- What additional info to show?
+  * Payment details
+  * Full shipping address
+  * Billing address
+  * Order notes
+  * Price breakdown (subtotal, tax, shipping)
+- Separate page or expandable section?
+
+8.7 SIZE FORMAT
+---------------
+Status: FIGMA SHOWS "Size: B"
+Questions:
+- Is "Size: B" a new size labeling system?
+- Or is it product-specific (e.g., B for Bralette)?
+- Should we support standard sizes (S/M/L/XL) too?
+- How to handle different size systems per product?
+
+8.8 EXCHANGE TIME LIMIT POLICY
+-------------------------------
+Questions:
+- How many days after delivery can customer exchange?
+  * 7 days?
+  * 14 days?
+  * 30 days?
+- Should we show countdown/timer?
+- What happens when exchange period expires?
+  * Hide exchange button?
+  * Show "Exchange period expired" message?
+- Where to get this data? (API field or hardcoded?)
+
+================================================================================
+9. API DEPENDENCIES
+================================================================================
+
+9.1 EXISTING APIs (Already Available)
+--------------------------------------
+
+GET /api/website/orders
+Purpose: Get customer's orders
+Query Params:
+  - page: number
+  - limit: number
+  - status: string (optional filter)
+Response:
+{
+  orders: Order[],
+  pagination: {
+    currentPage: number,
+    totalPages: number,
+    totalOrders: number,
+    hasNextPage: boolean,
+    hasPrevPage: boolean
+  }
+}
+
+GET /api/website/orders/:orderId
+Purpose: Get single order details
+Response:
+{
+  order: Order
+}
+
+PUT /api/website/orders/:orderId/cancel
+Purpose: Cancel order
+Response:
+{
+  message: string,
+  order: Order
+}
+
+9.2 NEW APIs NEEDED
+-------------------
+
+POST /api/website/orders/:orderId/review
+Purpose: Submit product review/rating
+Request Body:
+{
+  productId: string,
+  rating: number (1-5),
+  reviewText: string,
+  customerName?: string
+}
+Response:
+{
+  message: string,
+  review: {
+    _id: string,
+    product: string,
+    customer: string,
+    rating: number,
+    comment: string,
+    createdAt: string
+  }
+}
+
+POST /api/website/orders/:orderId/exchange
+Purpose: Submit exchange request
+Request Body:
+{
+  productId: string,
+  reason?: string,
+  newSize: string,
+  newColor: string,
+  notes?: string
+}
+Response:
+{
+  message: string,
+  exchangeRequest: {
+    _id: string,
+    order: string,
+    product: string,
+    status: 'pending' | 'approved' | 'rejected',
+    newSize: string,
+    newColor: string,
+    createdAt: string
+  }
+}
+
+POST /api/website/orders/:orderId/return
+Purpose: Submit return request
+Request Body:
+{
+  productId: string,
+  reason: string,
+  photos?: string[],
+  bankDetails?: {
+    accountNumber: string,
+    ifscCode: string,
+    accountHolderName: string
+  },
+  notes?: string
+}
+Response:
+{
+  message: string,
+  returnRequest: {
+    _id: string,
+    order: string,
+    product: string,
+    status: 'pending' | 'approved' | 'rejected',
+    reason: string,
+    createdAt: string
+  }
+}
+
+GET /api/website/orders/:orderId/tracking
+Purpose: Get detailed tracking information
+Response:
+{
+  order: Order,
+  tracking: {
+    currentStage: number (1-5),
+    stages: [
+      {
+        name: string,
+        status: 'completed' | 'active' | 'pending',
+        timestamp?: string,
+        location?: string,
+        message?: string
+      }
+    ],
+    estimatedDelivery?: string,
+    carrier?: string,
+    trackingNumber?: string
+  }
+}
+
+POST /api/website/orders/:orderId/share
+Purpose: Generate shareable tracking link
+Response:
+{
+  shareUrl: string,
+  expiresAt: string
+}
+
+9.3 API FIELD ADDITIONS NEEDED
+-------------------------------
+
+Order Model Additions:
+- deliveredAt?: Date                   # Delivery completion date
+- exchangeEligibleUntil?: Date         # Last date for exchange
+- returnEligibleUntil?: Date           # Last date for return
+- reviewSubmitted?: boolean            # Has customer reviewed?
+
+OrderItem Model Additions:
+- availableSizes?: string[]            # Sizes available for exchange
+- availableColors?: Color[]            # Colors available for exchange
+
+9.4 SERVICE FILES TO CREATE
+----------------------------
+
+frontend/src/app/website/services/reviewService.ts
+Purpose: Handle review/rating operations
+Methods:
+- submitReview(orderId, productId, rating, reviewText)
+- getProductReviews(productId)
+- updateReview(reviewId, data)
+- deleteReview(reviewId)
+
+frontend/src/app/website/services/exchangeService.ts
+Purpose: Handle exchange/return operations
+Methods:
+- submitExchangeRequest(orderId, productId, size, color)
+- submitReturnRequest(orderId, productId, reason, details)
+- getExchangeStatus(exchangeId)
+- cancelExchangeRequest(exchangeId)
+
+frontend/src/app/website/services/trackingService.ts
+Purpose: Handle order tracking
+Methods:
+- getOrderTracking(orderId)
+- getTrackingTimeline(orderId)
+- shareOrderTracking(orderId)
+
+================================================================================
+10. IMPLEMENTATION CHECKLIST
+================================================================================
+
+10.1 SETUP & CONFIGURATION
+---------------------------
+☐ Create folder structure as per Section 5
+☐ Set up TypeScript types (orders.types.ts)
+☐ Create constants file (orderConstants.ts)
+☐ Create helper functions (orderHelpers.ts)
+☐ Update API endpoints configuration
+
+10.2 SHARED COMPONENTS
+----------------------
+☐ PageHeader component
+☐ ActionButton component
+☐ LoadingSpinner (reuse existing)
+☐ Toast notifications (reuse existing)
+
+10.3 ORDERS LIST PAGE
+---------------------
+☐ Redesign page.tsx with new layout
+☐ Remove Bootstrap tabs
+☐ Implement OrderCard component
+☐ Implement EmptyOrdersState component
+☐ Add Puffn Club logo header
+☐ Add back navigation
+☐ Add subtitle text
+☐ Add Help link (pending designer input)
+☐ Update currency format (USD → INR ₹)
+☐ Implement status-based action buttons
+☐ Handle loading states
+☐ Handle error states
+☐ Update responsive design (mobile-first)
+
+10.4 TRACK ORDER PAGE
+---------------------
+☐ Create [orderId]/track/page.tsx
+☐ Implement TrackingTimeline component
+☐ Implement ProductCard component
+☐ Fetch tracking data from API
+☐ Display 5-stage timeline
+☐ Update timeline based on order status
+☐ Show timestamps for completed stages
+☐ Implement "Cancel Order" button (early stages)
+☐ Implement "Share Order details" button
+☐ Implement "Return / Exchange" button (delivered)
+☐ Implement "Review Product" button (delivered)
+
+10.5 REVIEW/RATING MODAL
+------------------------
+☐ Create ReviewModal component
+☐ Implement 3-step flow
+☐ Add 5-star rating selector
+☐ Add review text area
+☐ Add character limit (if needed)
+☐ Implement submit validation
+☐ Implement success confirmation
+☐ Create reviewService.ts
+☐ Integrate review API
+☐ Handle API errors
+☐ Add loading state during submission
+
+10.6 EXCHANGE MODAL
+-------------------
+☐ Create ExchangeModal component
+☐ Implement 2-step flow (Choice → Form)
+☐ Add size selector buttons
+☐ Add color swatches
+☐ Add instruction text
+☐ Implement validation (size + color required)
+☐ Create exchangeService.ts
+☐ Integrate exchange API
+☐ Handle API errors
+☐ Add success confirmation
+☐ Add loading state during submission
+
+10.7 PENDING MODALS (After Designer Feedback)
+----------------------------------------------
+☐ ReturnModal component
+☐ CancelOrderModal component
+☐ ShareOrderModal component
+☐ HelpModal component (if needed)
+
+10.8 CUSTOM HOOKS
+-----------------
+☐ useOrders hook (fetch & manage orders)
+☐ useOrderTracking hook (fetch tracking data)
+☐ useOrderActions hook (cancel, share, etc.)
+☐ useReview hook (submit & manage reviews)
+☐ useExchange hook (submit & manage exchanges)
+
+10.9 STYLING
+------------
+☐ Create OrderCard.module.scss
+☐ Create TrackingTimeline.module.scss
+☐ Create ProductCard.module.scss
+☐ Create ReviewModal.module.scss
+☐ Create ExchangeModal.module.scss
+☐ Create PageHeader.module.scss
+☐ Ensure mobile responsiveness
+☐ Test on different screen sizes
+☐ Match Figma design pixel-perfect
+
+10.10 API INTEGRATION
+---------------------
+☐ Update orderService.ts with new methods
+☐ Create reviewService.ts
+☐ Create exchangeService.ts
+☐ Create trackingService.ts
+☐ Add error handling for all API calls
+☐ Add loading states for all API calls
+☐ Implement retry logic (if needed)
+☐ Add toast notifications for success/error
+
+10.11 BACKEND REQUIREMENTS
+---------------------------
+☐ Coordinate with backend team for new APIs
+☐ Provide API specifications
+☐ Review API responses
+☐ Test API endpoints
+☐ Update Order model with new fields
+☐ Create Review model (if doesn't exist)
+☐ Create ExchangeRequest model
+☐ Create ReturnRequest model
+
+10.12 TESTING
+-------------
+☐ Unit tests for components
+☐ Integration tests for API calls
+☐ E2E tests for user flows
+☐ Mobile responsiveness testing
+☐ Cross-browser testing
+☐ Accessibility testing
+☐ Performance testing
+☐ Error scenario testing
+
+10.13 DOCUMENTATION
+-------------------
+☐ Update component documentation
+☐ Create API documentation
+☐ Update user guide (if exists)
+☐ Create developer handoff docs
+
+================================================================================
+11. TESTING REQUIREMENTS
+================================================================================
+
+11.1 MANUAL TESTING CHECKLIST
+------------------------------
+
+Orders List Page:
+☐ Empty state displays correctly
+☐ Orders load successfully
+☐ Order cards display correct information
+☐ Action buttons work (Track Order, Return/Exchange)
+☐ Back navigation works
+☐ Help link works (when implemented)
+☐ Loading state shows while fetching
+☐ Error state shows on API failure
+☐ Mobile responsive design works
+☐ Currency displays as ₹ (INR)
+
+Track Order Page:
+☐ Timeline displays correct stages
+☐ Completed stages show green checkmarks
+☐ Pending stages show empty circles
+☐ Timestamps display correctly
+☐ Product card shows correct details
+☐ Cancel Order button works (early stages)
+☐ Share Order details works (when implemented)
+☐ Return/Exchange button works (delivered)
+☐ Review Product button works (delivered)
+☐ Back navigation works
+☐ Mobile responsive
+
+Review Modal:
+☐ Modal opens correctly
+☐ Star rating is clickable
+☐ Can select 1-5 stars
+☐ Text area accepts input
+☐ Submit button disabled until rating given
+☐ Submit button enabled after rating
+☐ API call succeeds
+☐ Success message displays
+☐ Modal closes after success
+☐ Can close modal via X button
+☐ Can close modal via backdrop click
+
+Exchange Modal:
+☐ Choice modal opens correctly
+☐ Exchange Product button works
+☐ Return Product button works (when implemented)
+☐ Size selector works
+☐ Can select different sizes
+☐ Color selector works
+☐ Can select different colors
+☐ Submit requires size + color selection
+☐ Validation works
+☐ API call succeeds
+☐ Success confirmation shows
+☐ Modal closes properly
+
+11.2 USER FLOWS TO TEST
+------------------------
+
+Flow 1: View Orders
+User: Logged in customer
+Steps:
+1. Navigate to /website/orders
+2. See list of orders
+3. Verify order information is correct
+4. Verify action buttons are appropriate per status
+
+Flow 2: Track Order (In Progress)
+User: Customer with pending/processing order
+Steps:
+1. Click "Track Order" button
+2. Navigate to tracking page
+3. See timeline with current stage highlighted
+4. Verify timestamps are correct
+5. Click "Cancel Order"
+6. Confirm cancellation
+7. Verify order is cancelled
+
+Flow 3: Track Order (Delivered)
+User: Customer with delivered order
+Steps:
+1. Click "Track Order" button
+2. Navigate to tracking page
+3. See completed timeline (all green checkmarks)
+4. Verify "Return/Exchange" and "Review Product" buttons visible
+5. Click each button to verify modals open
+
+Flow 4: Submit Review
+User: Customer with delivered order
+Steps:
+1. Navigate to tracking page for delivered order
+2. Click "Review Product"
+3. Review modal opens
+4. Select star rating (e.g., 5 stars)
+5. Type review text
+6. Click "Submit review"
+7. See success message
+8. Modal closes
+9. Review is saved
+
+Flow 5: Exchange Product
+User: Customer with delivered order (within exchange period)
+Steps:
+1. Navigate to tracking page for delivered order
+2. Click "Return / Exchange"
+3. Choice modal opens
+4. Click "Exchange Product"
+5. Exchange form shows
+6. Select new size
+7. Select new color
+8. Click "Submit Exchange Request"
+9. See success confirmation
+10. Exchange request is created
+
+Flow 6: Share Order
+User: Any customer with an order
+Steps:
+1. Navigate to tracking page
+2. Click "Share Order details"
+3. Share modal opens (when implemented)
+4. Select sharing method (WhatsApp/Email/etc.)
+5. Verify shareable link is generated
+6. Share successfully
+
+11.3 ERROR SCENARIOS TO TEST
+-----------------------------
+☐ Network failure during order fetch
+☐ Invalid order ID
+☐ Order not found (404)
+☐ Unauthorized access (401)
+☐ API timeout
+☐ Server error (500)
+☐ Review submission failure
+☐ Exchange submission failure
+☐ Cancel order failure
+☐ Invalid exchange period (expired)
+☐ Missing required fields
+☐ Invalid data format
+
+11.4 EDGE CASES TO TEST
+-----------------------
+☐ Order with no items (should not happen, but handle)
+☐ Order with many items (10+)
+☐ Very long product names
+☐ Very long review text
+☐ Order with missing tracking info
+☐ Order with missing delivery date
+☐ Delivered order outside exchange period
+☐ Already reviewed order (prevent duplicate)
+☐ Already exchanged order (prevent duplicate)
+☐ Cancelled order (hide action buttons)
+
+11.5 PERFORMANCE TESTING
+-------------------------
+☐ Page load time (under 2 seconds)
+☐ API response time (under 1 second)
+☐ Modal open/close animation smooth
+☐ Scroll performance with many orders
+☐ Image loading optimization
+☐ Bundle size optimization
+
+11.6 ACCESSIBILITY TESTING
+---------------------------
+☐ Keyboard navigation works
+☐ Focus management in modals
+☐ Screen reader compatibility
+☐ Alt text for images
+☐ ARIA labels for interactive elements
+☐ Color contrast meets WCAG standards
+☐ Form labels are descriptive
+
+================================================================================
+12. MIGRATION STRATEGY
+================================================================================
+
+12.1 APPROACH
+-------------
+Option A: Complete Redesign (Recommended)
+- Implement all new screens from scratch
+- Keep existing code as backup
+- Switch when new implementation is complete
+- Rollback if issues occur
+
+Option B: Incremental Migration
+- Update one screen at a time
+- Test each update independently
+- Gradual rollout to users
+
+12.2 ROLLOUT PLAN
+-----------------
+Phase 1: Core Pages (Week 1-2)
+- Orders List Page redesign
+- Track Order Page implementation
+- Basic API integration
+
+Phase 2: Modals & Actions (Week 2-3)
+- Review Modal implementation
+- Exchange Modal implementation
+- Share functionality (after designer feedback)
+
+Phase 3: Polish & Testing (Week 3-4)
+- Return Modal (after designer feedback)
+- Cancel Order Modal (after designer feedback)
+- Help functionality (after designer feedback)
+- Comprehensive testing
+- Bug fixes
+- Performance optimization
+
+Phase 4: Production Deployment (Week 4)
+- Final QA
+- User acceptance testing
+- Production deployment
+- Monitoring & feedback
+
+12.3 ROLLBACK PLAN
+------------------
+- Keep existing implementation as fallback
+- Feature flag to toggle between old/new
+- Monitor error rates
+- Quick rollback if critical issues
+- Gradual rollout to percentage of users
+
+================================================================================
+13. SUCCESS METRICS
+================================================================================
+
+User Engagement:
+- Order tracking page views
+- Review submission rate
+- Exchange request rate
+- Share order usage
+
+Performance:
+- Page load time < 2s
+- API response time < 1s
+- Error rate < 1%
+- Mobile performance score > 90
+
+User Satisfaction:
+- Customer feedback surveys
+- Reduced support tickets
+- Increased repeat orders
+- Positive reviews
+
+Business Impact:
+- Reduced return rate (clearer exchange process)
+- Increased review submissions
+- Better order tracking visibility
+- Improved customer retention
+
+================================================================================
+14. KNOWN LIMITATIONS & FUTURE ENHANCEMENTS
+================================================================================
+
+14.1 CURRENT LIMITATIONS
+------------------------
+- Multiple products per order display (pending designer input)
+- Return flow not defined (pending designer input)
+- Share functionality not defined (pending designer input)
+- Help functionality not defined (pending designer input)
+- No real-time order tracking updates
+- No push notifications for order updates
+
+14.2 FUTURE ENHANCEMENTS
+------------------------
+- Real-time order status updates (WebSocket/polling)
+- Push notifications for delivery updates
+- Photo upload for returns/exchanges
+- Multiple language support
+- Advanced filtering & sorting
+- Order search functionality
+- Reorder functionality
+- Save favorite orders
+- Bulk actions (download multiple invoices)
+- Order analytics dashboard
+
+================================================================================
+15. DEPENDENCIES & PREREQUISITES
+================================================================================
+
+15.1 FRONTEND DEPENDENCIES
+---------------------------
+Required:
+- react-bootstrap: ^2.x (already installed)
+- react-icons: ^5.x (already installed)
+- next: ^14.x (already installed)
+
+New Dependencies to Install:
+- react-rating-stars-component (for star rating) OR custom implementation
+- react-share (for social sharing) OR custom implementation
+
+15.2 BACKEND PREREQUISITES
+---------------------------
+- Review model implementation
+- ExchangeRequest model implementation
+- ReturnRequest model implementation
+- API endpoints for review, exchange, return
+- Order tracking data structure
+- Exchange eligibility calculation logic
+
+15.3 DESIGN PREREQUISITES
+--------------------------
+⏳ Pending Designer Feedback:
+- Return product flow design
+- Cancel order confirmation design
+- Share order modal design
+- Help functionality design
+- Multiple items per order display logic
+- Size format clarification
+
+15.4 TEAM COORDINATION
+----------------------
+- Backend team: API development & testing
+- Designer: Provide missing designs & clarifications
+- QA team: Test plan & execution
+- Product owner: Approve changes & priorities
+- DevOps: Deployment & monitoring setup
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================
+
+For questions, updates, or clarifications, contact:
+- Designer: For missing Figma screens and design questions
+- Backend Team: For API specifications and data structure
+- Product Owner: For business logic and user flow decisions
+
+Related Documentation:
+- Profile Page: /frontend/src/app/website/profile/PROFILE_PAGE_DOCUMENTATION.txt
+- Website Master Docs: /frontend/src/app/website/WEBSITE_MASTER_DOCUMENTATION.txt
+- Backend API: /server/WEBSITE_API_DOCUMENTATION.md
+- Main README: /frontend/README.md
+
+Last Updated: 2025-12-04
+Version: 1.0
+Status: PENDING DESIGNER FEEDBACK & IMPLEMENTATION

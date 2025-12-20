@@ -1,12 +1,14 @@
 "use client";
 
 import { Button } from "react-bootstrap";
-import { FiHeart } from "react-icons/fi";
+import Image from "next/image";
 import styles from "../styles.module.scss";
 
 interface ProductActionsProps {
   selectedSize: string;
   isWishlisted: boolean;
+  isAddedToCart: boolean;
+  onAddToBag: () => void;
   onGoToCart: () => void;
   onWishlistToggle: () => void;
 }
@@ -14,34 +16,35 @@ interface ProductActionsProps {
 export default function ProductActions({
   selectedSize,
   isWishlisted,
+  isAddedToCart,
+  onAddToBag,
   onGoToCart,
   onWishlistToggle,
 }: ProductActionsProps) {
   return (
     <div className="d-flex w-50 align-items-center gap-3 mb-4">
       <Button
-        variant="outline-dark"
+        variant={isAddedToCart ? "dark" : "outline-dark"}
         size="lg"
         className={`flex-grow-1 ${styles.goToCartBtn}`}
-        onClick={onGoToCart}
+        onClick={isAddedToCart ? onGoToCart : onAddToBag}
         disabled={!selectedSize}
       >
-        Go to Cart
+        {isAddedToCart ? "Go to Cart" : "Add to Bag"}
       </Button>
       <button
         type="button"
-        className={`btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center ${
-          styles.wishlistBtn
-        } ${isWishlisted ? styles.wishlisted : ""}`}
+        className="border-0 bg-transparent p-0"
         onClick={onWishlistToggle}
-        aria-label="Add to Wishlist"
+        aria-label={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+        style={{ cursor: "pointer" }}
       >
-        <FiHeart
-          size={24}
-          className="text-dark"
-          fill={isWishlisted ? "currentColor" : "none"}
+        <Image
+          src={isWishlisted ? "/images/whishlist-icon.svg" : "/images/add-whislisht.svg"}
+          alt={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          width={36}
+          height={36}
         />
-        <span className={styles.plusSign}>+</span>
       </button>
     </div>
   );

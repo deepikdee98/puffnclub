@@ -237,7 +237,6 @@ export default function CartItem({
         centered
         show={showSizeModal}
         onHide={() => setShowSizeModal(false)}
-        size="sm"
       >
         <Modal.Header className="border-0 pb-2">
           <div className="d-flex align-items-center w-100">
@@ -301,7 +300,6 @@ export default function CartItem({
         centered
         show={showQuantityModal}
         onHide={() => setShowQuantityModal(false)}
-        size="sm"
       >
         <Modal.Header className="border-0 pb-2">
           <div className="d-flex align-items-center w-100">

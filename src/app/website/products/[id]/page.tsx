@@ -58,6 +58,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
+  const [isAddedToCart, setIsAddedToCart] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -73,10 +74,16 @@ export default function ProductDetailPage() {
     }
   }, [product, isInWishlist]);
 
+  // Reset added to cart state when size, color, or quantity changes
+  useEffect(() => {
+    setIsAddedToCart(false);
+  }, [selectedSize, selectedColor, quantity]);
+
   const fetchProduct = async () => {
     setLoading(true);
     try {
       const response = await productService.getProductById(params.id as string);
+      console.log("response", response);
       if (response.product) {
         // Normalize product data to ensure arrays are always defined
         const normalizedProduct = normalizeProductData(response.product);
@@ -108,6 +115,9 @@ export default function ProductDetailPage() {
 
         // Check if product is in wishlist
         setIsWishlisted(isInWishlist(normalizedProduct._id));
+
+        // Reset added to cart state for new product
+        setIsAddedToCart(false);
 
         // Set default color from variants if not already set
         if (
@@ -188,9 +198,16 @@ export default function ProductDetailPage() {
         size: selectedSize,
         color: selectedColor,
       });
+      setIsAddedToCart(true);
+      toast.success("Item added to bag!");
     } catch (error) {
       console.error("Error adding to cart:", error);
+      toast.error("Failed to add item to cart");
     }
+  };
+
+  const handleGoToCart = () => {
+    router.push("/website/cart");
   };
 
   const handleWishlist = async () => {
@@ -247,9 +264,24 @@ export default function ProductDetailPage() {
   const getAvailableSizesForColor = (color: string) => {
     if (!product?.variants) return [];
     const variant = product.variants.find((v) => v.color === color);
-    if (!variant?.sizes) return [];
-    const isAvailable = (variant.stock ?? 0) > 0; // optional nuance
-    return variant.sizes.map((s) => ({ size: s, available: isAvailable }));
+    if (!variant) return [];
+    
+    // Handle new structure with sizeStocks
+    const variantAny = variant as any;
+    if (variantAny.sizeStocks && Array.isArray(variantAny.sizeStocks) && variantAny.sizeStocks.length > 0) {
+      return variantAny.sizeStocks.map((sizeStock: any) => ({
+        size: sizeStock.size,
+        available: sizeStock.available || (sizeStock.stock ?? 0) > 0,
+      }));
+    }
+    
+    // Handle legacy structure with sizes array
+    if (variant.sizes && Array.isArray(variant.sizes) && variant.sizes.length > 0) {
+      const isAvailable = (variant.stock ?? 0) > 0;
+      return variant.sizes.map((s) => ({ size: s, available: isAvailable }));
+    }
+    
+    return [];
   };
 
   if (loading) {
@@ -309,7 +341,14 @@ export default function ProductDetailPage() {
             {/* <Card className="border-0 shadow-sm h-100"> */}
             <div className="p-4">
               <ProductInfo
-                product={product}
+                product={{
+                  name: product.name,
+                  price: product.price,
+                  comparePrice: product.comparePrice,
+                  sku: product.sku || '',
+                  brand: product.brand,
+                  category: product.category,
+                }}
                 getDiscountPercentage={getDiscountPercentage}
               />
 
@@ -325,22 +364,24 @@ export default function ProductDetailPage() {
                 onSizeSelect={setSelectedSize}
               />
 
-              <QuantitySelector
+              {/* <QuantitySelector
                 quantity={quantity}
                 onQuantityChange={handleQuantityChange}
-              />
+              /> */}
 
               <ProductActions
                 selectedSize={selectedSize}
                 isWishlisted={isWishlisted}
-                onGoToCart={handleAddToCart}
+                isAddedToCart={isAddedToCart}
+                onAddToBag={handleAddToCart}
+                onGoToCart={handleGoToCart}
                 onWishlistToggle={handleWishlist}
               />
 
               <DeliveryInfo />
 
               {/* Stock Status */}
-              <div className="mt-3">
+              {/* <div className="mt-3">
                 <Badge
                   bg={product.totalStock > 0 ? "success" : "danger"}
                   className="px-3 py-2"
@@ -349,7 +390,7 @@ export default function ProductDetailPage() {
                     ? `${product.totalStock} items in stock`
                     : "Out of stock"}
                 </Badge>
-              </div>
+              </div> */}
               <ProductAdditionalDetails
                 product={product}
                 selectedColor={selectedColor}

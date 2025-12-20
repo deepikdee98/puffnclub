@@ -1,0 +1,653 @@
+================================================================================
+               SHARED COMPONENTS, CONTEXTS & SERVICES DOCUMENTATION
+================================================================================
+
+OVERVIEW: Reusable components, global state management, and API services
+
+================================================================================
+LAYOUT & PROVIDERS
+================================================================================
+
+FILE: layout.tsx
+
+PURPOSE:
+Wrapper component that provides global state and common layout elements for
+all website pages.
+
+STRUCTURE:
+<AuthProvider>
+  <CartProvider>
+    <WishlistProvider>
+      <Header />
+      <main>{children}</main>
+      <Footer />
+    </WishlistProvider>
+  </CartProvider>
+</AuthProvider>
+
+FEATURES:
+- Provides authentication state to all pages
+- Provides cart state to all pages
+- Provides wishlist state to all pages
+- Renders header and footer on all pages
+- Imports Bootstrap CSS
+- Imports global website styles (website.scss)
+
+================================================================================
+SHARED COMPONENTS
+================================================================================
+
+1. HEADER (components/NewHeader.tsx)
+   PURPOSE: Main navigation and branding
+   FEATURES:
+   - Logo/Brand name
+   - Navigation links (Home, Products, Collections, etc.)
+   - Search bar (planned)
+   - User account dropdown
+   - Cart icon with badge count
+   - Wishlist icon with badge count
+   - Login/Logout button
+   - Mobile responsive menu
+   - Sticky on scroll (optional)
+
+   CONTEXT USAGE:
+   - useAuth() - Check login status, get user name
+   - useCart() - Get cart count
+   - useWishlist() - Get wishlist count
+
+   NAVIGATION LINKS:
+   - Home → /website
+   - Products → /website/products
+   - Collections → /website/collections
+   - About → /website/aboutus
+   - Contact → /website/contactus
+   - FAQ → /website/faq
+
+2. FOOTER (components/NewFooter.tsx)
+   PURPOSE: Footer with links and information
+   SECTIONS:
+   - About Us section
+   - Quick Links
+   - Customer Service
+   - Contact Information
+   - Social Media icons
+   - Newsletter signup
+   - Payment method icons
+   - Copyright notice
+
+   FEATURES:
+   - Multi-column layout
+   - Responsive (stacks on mobile)
+   - Newsletter subscription form
+   - Social media links
+   - Site map links
+
+3. OLD HEADER/FOOTER (components/Header.tsx, Footer.tsx)
+   STATUS: Deprecated, replaced by NewHeader/NewFooter
+   NOTE: May still be referenced in some files
+
+================================================================================
+CONTEXTS (STATE MANAGEMENT)
+================================================================================
+
+1. AUTH CONTEXT (contexts/AuthContext.tsx)
+
+   PURPOSE: Manage global authentication state
+
+   STATE:
+   - customer: Customer | null
+   - isAuthenticated: boolean
+   - isLoading: boolean
+
+   METHODS:
+   - login(email, password) - Login with credentials
+   - register(data) - Register new customer
+   - logout() - Clear auth and logout
+   - updateCustomer(customer) - Update customer data
+
+   INITIALIZATION:
+   - On mount, check localStorage for token
+   - If token exists, fetch profile to validate
+   - Load customer data if valid
+   - Clear invalid tokens
+
+   STORAGE:
+   - website_token - JWT auth token
+   - refreshToken - Refresh token
+   - customer - Customer object
+   - user_info - Temp user info during signup
+   - user_mobile - Temp mobile during signup
+
+   USAGE:
+   ```tsx
+   const { customer, isAuthenticated, login, logout } = useAuth();
+   ```
+
+2. CART CONTEXT (contexts/CartContext.tsx)
+
+   PURPOSE: Manage global shopping cart state
+
+   STATE:
+   - cart: Cart | null
+   - isLoading: boolean
+
+   METHODS:
+   - addToCart(data) - Add item to cart
+   - updateCartItem(itemId, quantity) - Update item quantity
+   - removeFromCart(itemId) - Remove item
+   - clearCart() - Remove all items
+   - refreshCart() - Reload cart from API
+   - getCartCount() - Get total items count
+   - getCartTotal() - Get total amount
+
+   BEHAVIOR:
+   - Auto-loads cart when user logs in
+   - Clears cart when user logs out
+   - Shows toasts for all operations
+   - Requires authentication for all operations
+
+   USAGE:
+   ```tsx
+   const { cart, addToCart, removeFromCart } = useCart();
+   ```
+
+3. WISHLIST CONTEXT (contexts/WishlistContext.tsx)
+
+   PURPOSE: Manage global wishlist state
+
+   STATE:
+   - wishlist: Wishlist | null
+   - isLoading: boolean
+
+   METHODS:
+   - addToWishlist(data) - Add product to wishlist
+   - removeFromWishlist(productId) - Remove product
+   - clearWishlist() - Clear all items
+   - refreshWishlist() - Reload from API
+   - getWishlistCount() - Get total items
+   - isInWishlist(productId) - Check if product in wishlist
+
+   BEHAVIOR:
+   - Auto-loads wishlist when user logs in
+   - Clears wishlist when user logs out
+   - Shows toasts for operations
+   - Requires authentication
+
+   USAGE:
+   ```tsx
+   const { wishlist, addToWishlist, isInWishlist } = useWishlist();
+   ```
+
+================================================================================
+API SERVICES
+================================================================================
+
+1. API CONFIGURATION (services/api.ts)
+
+   PURPOSE: Centralized API configuration and helpers
+
+   BASE URL:
+   - Development: http://localhost:5000/api
+   - Production: process.env.NEXT_PUBLIC_API_URL
+
+   ENDPOINTS:
+   - All endpoints defined in API_ENDPOINTS constant
+   - Organized by feature (WEBSITE, AUTH, CART, etc.)
+
+   HELPER FUNCTIONS:
+
+   getAuthToken():
+     - Retrieves JWT token from localStorage
+     - Returns null if not found
+
+   setAuthToken(token):
+     - Stores JWT token in localStorage
+
+   removeAuthToken():
+     - Removes JWT token from localStorage
+
+   createAuthHeaders():
+     - Creates headers with Authorization: Bearer <token>
+     - Includes Content-Type: application/json
+
+   apiRequest<T>(url, options):
+     - Generic API request function
+     - Handles auth headers
+     - Parses JSON responses
+     - Throws errors for non-OK responses
+
+2. AUTH SERVICE (services/authService.ts)
+
+   METHODS:
+   - register(data) - Register new customer
+   - login(credentials) - Login with email/password
+   - loginWithOtp(otp, sessionId) - Login with OTP
+   - sendOtp(identifier) - Send OTP to phone/email
+   - verifyOtp(otp, sessionId, identifier) - Verify OTP
+   - resendOtp(sessionId, identifier) - Resend OTP
+   - getProfile() - Get current user profile
+   - updateProfile(data) - Update profile
+   - changePassword(data) - Change password
+   - forgotPassword(email) - Request password reset
+   - resetPassword(token, password) - Reset password
+   - logout() - Clear local storage
+
+3. PRODUCT SERVICE (services/productService.ts)
+
+   METHODS:
+   - getProducts(filters) - Get all products with filters
+   - getFeaturedProducts(limit) - Get featured products
+   - getProductById(id) - Get single product
+   - getProductsByCategory(category, filters) - Filter by category
+   - searchProducts(query) - Search products
+
+   TYPES:
+   - Product, ProductFilters, ProductsResponse
+
+4. CART SERVICE (services/cartService.ts)
+
+   METHODS:
+   - getCart() - Get current cart
+   - addToCart(data) - Add item to cart
+   - updateCartItem(itemId, data) - Update item
+   - removeFromCart(itemId) - Remove item
+   - clearCart() - Clear all items
+
+   TYPES:
+   - Cart, CartItem, AddToCartData
+
+5. WISHLIST SERVICE (services/wishlistService.ts)
+
+   METHODS:
+   - getWishlist() - Get current wishlist
+   - addToWishlist(data) - Add product
+   - removeFromWishlist(itemId) - Remove item
+   - clearWishlist() - Clear all items
+
+   TYPES:
+   - Wishlist, WishlistItem, AddToWishlistData
+
+6. ORDER SERVICE (services/orderService.ts)
+
+   METHODS:
+   - getOrders(filters) - Get order history
+   - getOrderById(id) - Get single order
+   - createOrder(data) - Create new order
+   - cancelOrder(id) - Cancel order
+   - trackOrder(id) - Get tracking info (planned)
+
+   TYPES:
+   - Order, OrderFilters, CreateOrderData
+
+7. ADDRESS SERVICE (services/addressService.ts)
+
+   METHODS:
+   - list() - Get all addresses
+   - create(data) - Add new address
+   - update(id, data) - Update address
+   - delete(id) - Delete address
+   - setDefault(id) - Set as default address
+
+   TYPES:
+   - Address, AddressInput
+
+8. BANNER SERVICE (services/bannerService.ts)
+
+   METHODS:
+   - getBanners() - Get active banners
+
+   TYPES:
+   - Banner
+
+9. CONTACT SERVICE (services/contactService.ts)
+
+   METHODS:
+   - submitContactForm(data) - Submit contact inquiry
+   - subscribeNewsletter(data) - Subscribe to newsletter
+
+10. FAQ SERVICE (services/faqService.ts)
+
+    METHODS:
+    - getFaqs() - Get all FAQs
+
+11. REVIEW SERVICE (services/reviewService.ts)
+
+    METHODS:
+    - getProductReviews(productId) - Get product reviews
+    - getProductReviewStats(productId) - Get rating stats
+    - createReview(data) - Write review (planned)
+
+    TYPES:
+    - Review, ReviewStats
+
+12. OTP SERVICE (services/otpService.ts)
+
+    METHODS:
+    - sendOtp(identifier) - Send OTP
+    - verifyOtp(otp, sessionId, identifier) - Verify OTP
+    - resendOtp(sessionId, identifier) - Resend OTP
+
+================================================================================
+UTILITY FUNCTIONS
+================================================================================
+
+1. PRODUCT UTILS (utils/productUtils.ts)
+
+   normalizeProductData(product):
+     PURPOSE: Ensure product data has consistent structure
+     NORMALIZES:
+     - images → [] if undefined
+     - variants → [] if undefined
+     - tags → [] if undefined
+     - availableSizes → [] if undefined
+     - Handles comparePrice vs compareAtPrice
+     RETURNS: Normalized product object
+
+   normalizeProductsData(products):
+     PURPOSE: Normalize array of products
+     RETURNS: Array of normalized products
+
+2. OTP UTILS (utils/otpUtils.ts)
+
+   Functions for OTP validation and formatting (if any)
+
+================================================================================
+ANIMATION COMPONENTS
+================================================================================
+
+FILE: constants/FadeUpOnScroll.tsx
+
+COMPONENTS:
+
+1. FadeUpOnScroll:
+   - Fades in and slides up when element enters viewport
+   - Uses Intersection Observer
+   - Smooth transition
+
+2. FlipXOnScroll:
+   - Flips horizontally when entering viewport
+
+3. FlipYOnScroll:
+   - Flips vertically when entering viewport
+
+4. ZoomInOnScroll:
+   - Zooms in when entering viewport
+
+USAGE:
+```tsx
+<FadeUpOnScroll>
+  <YourComponent />
+</FadeUpOnScroll>
+```
+
+CONFIGURATION:
+- Threshold: 0.1 (10% visibility triggers)
+- Once: Animation plays once
+- Smooth CSS transitions
+
+================================================================================
+STYLING
+================================================================================
+
+GLOBAL STYLES (styles/website.scss):
+- Bootstrap customizations
+- Global CSS variables
+- Common utility classes
+- Typography styles
+- Color schemes
+- Spacing utilities
+- Animation keyframes
+
+SCSS MODULES:
+- Component-specific styles
+- Naming: [component].module.scss
+- Scoped to component
+- Prevents style conflicts
+
+BOOTSTRAP:
+- Version: React Bootstrap
+- Grid system
+- Components (Card, Button, Form, etc.)
+- Utilities
+- Responsive breakpoints
+
+================================================================================
+COMMON UI PATTERNS
+================================================================================
+
+1. LOADING STATES:
+   ```tsx
+   {loading ? (
+     <LoadingSpinner />
+   ) : (
+     <Content />
+   )}
+   ```
+
+2. EMPTY STATES:
+   ```tsx
+   {items.length === 0 ? (
+     <EmptyMessage />
+   ) : (
+     <ItemList />
+   )}
+   ```
+
+3. ERROR HANDLING:
+   ```tsx
+   try {
+     await apiCall();
+     toast.success("Success!");
+   } catch (error) {
+     toast.error(error.message);
+   }
+   ```
+
+4. AUTHENTICATION CHECKS:
+   ```tsx
+   if (!isAuthenticated) {
+     toast.error("Please login");
+     router.push("/website/auth/login");
+     return;
+   }
+   ```
+
+5. TOAST NOTIFICATIONS:
+   ```tsx
+   import { toast } from 'react-toastify';
+
+   toast.success("Item added to cart!");
+   toast.error("Failed to add item");
+   toast.info("Info message");
+   toast.warning("Warning message");
+   ```
+
+================================================================================
+TYPE DEFINITIONS
+================================================================================
+
+COMMON TYPES:
+
+Customer:
+{
+  _id: string
+  fullName: string
+  firstName?: string
+  lastName?: string
+  email?: string
+  phone: string
+  addresses?: Address[]
+}
+
+Product:
+{
+  _id: string
+  name: string
+  description: string
+  price: number
+  comparePrice?: number
+  images: string[]
+  category: string
+  brand: string
+  tags: string[]
+  variants?: Variant[]
+  availableSizes: string[]
+  totalStock: number
+  rating?: number
+  reviewCount?: number
+}
+
+Cart:
+{
+  _id: string
+  customer: string
+  items: CartItem[]
+  totalItems: number
+  totalAmount: number
+}
+
+Wishlist:
+{
+  _id: string
+  customer: string
+  items: WishlistItem[]
+  totalItems: number
+}
+
+Order:
+{
+  id: string
+  orderNumber: string
+  date: string
+  orderStatus: string
+  items: OrderItem[]
+  total: number
+  shippingAddress: Address
+  trackingNumber?: string
+}
+
+Address:
+{
+  _id: string
+  type: string
+  street: string
+  city: string
+  state: string
+  zipCode: string
+  country: string
+  isDefault: boolean
+}
+
+================================================================================
+ERROR HANDLING STANDARDS
+================================================================================
+
+1. API ERRORS:
+   - Log to console for debugging
+   - Show user-friendly toast message
+   - Don't expose technical details to user
+
+2. VALIDATION ERRORS:
+   - Show inline field errors
+   - Prevent form submission
+   - Clear errors on input change
+
+3. NETWORK ERRORS:
+   - Show "Network error, please try again"
+   - Provide retry mechanism
+   - Check internet connection
+
+4. AUTHENTICATION ERRORS:
+   - Clear invalid tokens
+   - Redirect to login page
+   - Show appropriate message
+
+================================================================================
+PERFORMANCE BEST PRACTICES
+================================================================================
+
+✓ Use React.memo for expensive components
+✓ Use useMemo for expensive calculations
+✓ Use useCallback for event handlers
+✓ Lazy load images
+✓ Code splitting with dynamic imports
+✓ Minimize bundle size
+✓ Optimize re-renders
+✓ Debounce search inputs
+✓ Throttle scroll events
+✓ Cache API responses
+
+================================================================================
+SECURITY BEST PRACTICES
+================================================================================
+
+✓ Store tokens in localStorage (not cookies for now)
+✓ Use HTTPS in production
+✓ Validate all user inputs
+✓ Sanitize data before display
+✓ Use secure headers
+✓ Implement CSRF protection
+✓ Rate limit API requests
+✓ Use environment variables for secrets
+✓ Don't log sensitive data
+✓ Keep dependencies updated
+
+================================================================================
+TESTING STRATEGY
+================================================================================
+
+UNIT TESTS:
+- Test utility functions
+- Test service functions
+- Test context providers
+- Test custom hooks
+
+INTEGRATION TESTS:
+- Test user flows
+- Test API integration
+- Test context + components
+
+E2E TESTS:
+- Test critical user journeys
+- Test checkout flow
+- Test authentication flow
+- Test product browsing
+
+TOOLS:
+- Jest for unit/integration
+- React Testing Library
+- Cypress for E2E
+- Mock Service Worker for API mocking
+
+================================================================================
+RELATED FILES
+================================================================================
+
+Layout & Providers:
+- layout.tsx
+- contexts/AuthContext.tsx
+- contexts/CartContext.tsx
+- contexts/WishlistContext.tsx
+
+Components:
+- components/NewHeader.tsx
+- components/NewFooter.tsx
+
+Services:
+- services/api.ts
+- services/*.ts (all service files)
+
+Utils:
+- utils/productUtils.ts
+- utils/otpUtils.ts
+
+Styles:
+- styles/website.scss
+- **/*.module.scss
+
+Constants:
+- constants/FadeUpOnScroll.tsx
+
+================================================================================
+END OF SHARED COMPONENTS DOCUMENTATION
+================================================================================

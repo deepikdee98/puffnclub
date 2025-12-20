@@ -1,7 +1,7 @@
 import { Row, Col, Button } from "react-bootstrap";
 import { FiStar, FiHeart } from "react-icons/fi";
 import Link from "next/link";
-import styles from "../../../Home/style.module.scss"; // adjust path as needed
+import styles from "../../../Home/style.module.scss";
 
 export default function RelatedProducts({
   products,
@@ -11,7 +11,7 @@ export default function RelatedProducts({
 }: any) {
   return (
     <>
-      <Row className="mt-5  align-items-center">
+      <Row className="mt-5 align-items-center">
         <Col xs={8}>
           <h5 className="fw-bold mb-0">You might also like</h5>
         </Col>
@@ -24,31 +24,31 @@ export default function RelatedProducts({
           </Link>
         </Col>
       </Row>
-      <Row className="pt-3">
+      <Row className="pt-3 justify-content-center g-4">
         {products.slice(0, 3).map((product: any) => (
           <Col
             lg={4}
             md={6}
-            xs={12}
+            xs={6}
             key={product.id}
-            className="mb-4 d-flex flex-column align-items-center"
+            className={`d-flex flex-column ${styles.productCard}`}
           >
-            <div
-              style={{ width: "100%", position: "relative", marginBottom: 8 }}
-            >
-              <Link href={`/website/products/${product.id}`}>
+            <div className={styles.imageWrapper}>
+              <Link
+                className="text-dark text-decoration-none"
+                href={`/website/products/${product.id}`}
+                passHref
+              >
                 <img
-                  src={product.image}
+                  src={product.image || "https://via.placeholder.com/300x300"}
                   alt={product.name}
                   className={styles.productImage}
-                  style={{ cursor: "pointer" }}
                 />
               </Link>
               <button
                 type="button"
                 className={styles.wishlistBtn}
                 aria-label="Add to wishlist"
-                style={{ right: 12, top: 10 }}
                 onClick={() =>
                   handleAddToWishlist && handleAddToWishlist(product.id)
                 }
@@ -57,36 +57,31 @@ export default function RelatedProducts({
               </button>
             </div>
 
-            <div className="w-100 px-1 mb-2">
+            <div className={`w-100 ${styles.productInfo}`}>
               <Link
+                className="text-dark text-decoration-none"
                 href={`/website/products/${product.id}`}
-                className="text-decoration-none text-dark"
+                passHref
               >
-                <div className="d-flex align-items-center mb-1">
-                  <div className="fw-semibold flex-grow-1">{product.name}</div>
-                  {product.rating && product.rating > 0 ? (
-                    <>
-                      <span className="ms-2">{product.rating.toFixed(1)}</span>
-                      <FiStar className="text-warning ms-1" size={15} />
-                      {product.reviews && product.reviews > 0 && (
-                        <span className="text-muted ms-1" style={{ fontSize: 13 }}>
-                          ({product.reviews})
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-muted ms-2" style={{ fontSize: 13 }}>
-                      No reviews
-                    </span>
+                <div className={`mb-2 ${styles.productNameRatingContainer}`}>
+                  <strong className={styles.productName}>{product.name}</strong>
+                  {product.rating && product.rating > 0 && (
+                    <div className={styles.ratingBadge}>
+                      <span className={styles.ratingText}>
+                        {product.rating.toFixed(1)}
+                      </span>
+                      <FiStar className={styles.ratingIcon} size={12} />
+                    </div>
                   )}
                 </div>
               </Link>
-              <div className="d-flex align-items-center">
-                <span className="fw-bold text-dark">
+
+              <div className={styles.priceContainer}>
+                <span className={styles.currentPrice}>
                   {formatCurrency(product.price)}
                 </span>
                 {product.comparePrice && (
-                  <span className="text-muted text-decoration-line-through ms-2">
+                  <span className={styles.comparePrice}>
                     {formatCurrency(product.comparePrice)}
                   </span>
                 )}

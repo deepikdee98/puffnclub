@@ -105,4 +105,37 @@ export const orderService = {
       }
     );
   },
+
+  // Get order tracking information
+  getOrderTracking: async (orderId: string): Promise<{
+    success: boolean;
+    tracking: {
+      status: string;
+      awbCode?: string;
+      courierName?: string;
+      trackingUrl?: string;
+      currentLocation?: string;
+      estimatedDelivery?: string;
+      trackingHistory?: any[];
+      shipmentDetails?: any;
+      message?: string;
+      trackingNumber?: string;
+    };
+  }> => {
+    return apiRequest<{
+      success: boolean;
+      tracking: {
+        status: string;
+        awbCode?: string;
+        courierName?: string;
+        trackingUrl?: string;
+        currentLocation?: string;
+        estimatedDelivery?: string;
+        trackingHistory?: any[];
+        shipmentDetails?: any;
+        message?: string;
+        trackingNumber?: string;
+      };
+    }>(API_ENDPOINTS.WEBSITE.ORDER_TRACKING(orderId));
+  },
 };

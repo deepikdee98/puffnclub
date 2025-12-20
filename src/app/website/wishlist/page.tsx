@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { Container, Row, Col, Card, Button, Badge } from "react-bootstrap";
-import { FiHeart, FiShoppingBag, FiTrash2 } from "react-icons/fi";
+import { Container, Row, Col, Button } from "react-bootstrap";
+import { FiHeart, FiStar } from "react-icons/fi";
 import Link from "next/link";
+import Image from "next/image";
 import { LoadingSpinner } from "@/app/components";
 import { useAuth } from "../contexts/AuthContext";
 import { useWishlist } from "../contexts/WishlistContext";
@@ -124,112 +125,106 @@ export default function WishlistPage() {
       <Row>
         <Col>
           {/* Page Header */}
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <div>
-              <h2 className="mb-1">My Wishlist</h2>
-              <p className="text-muted mb-0">{items.length} items</p>
-            </div>
-            <Button variant="outline-dark" as="a" href="/website/products">
-              Continue Shopping
-            </Button>
+          <div className="mb-4">
+            <h2 className="mb-1">My Wishlist</h2>
+            <p className="text-muted mb-0">Keep track of what you love and purchase later.</p>
           </div>
 
           {/* Wishlist Items */}
           <Row>
             {items.map(({ _id, product }) => (
-              <Col lg={3} md={3} sm={6} key={_id} className="mb-4">
+              <Col lg={4} md={4} sm={6} key={_id} className="mb-4">
                 <FlipYOnScroll>
-                  <Card className="border-0 shadow-sm h-100 wishlist-card">
-                    <div className="position-relative">
+                  <div className="wishlist-item">
+                    {/* Product Image */}
+                    <div className="position-relative mb-3">
                       <Link href={`/website/products/${product._id}`}>
-                        <Card.Img
-                          className="cursor-pointer object-fit-cover"
-                          variant="top"
+                        <img
                           src={
                             product.images?.[0] ||
                             "https://via.placeholder.com/400x400"
                           }
+                          alt={product.name}
+                          className="w-100 cursor-pointer"
+                          style={{
+                            objectFit: "cover",
+                            aspectRatio: "1/1",
+                            borderRadius: "8px",
+                          }}
                         />
                       </Link>
 
-                      {/* Product Badge */}
-                      {product.tags?.length > 0 && (
-                        <Badge
-                          bg="dark"
-                          className="position-absolute top-0 start-0 m-2"
-                        >
-                          {product.tags[0]}
-                        </Badge>
-                      )}
-
-                      {/* Remove Button */}
-                      <Button
-                        variant="light"
-                        className="position-absolute top-0 end-0 m-2 rounded-circle"
+                      {/* Wishlist Heart Icon */}
+                      <button
+                        className="position-absolute top-0 end-0 m-3 border-0 bg-transparent"
                         onClick={() => handleRemove(product._id)}
                         title="Remove from Wishlist"
+                        style={{ cursor: "pointer" }}
                       >
-                        <FiTrash2 size={16} />
-                      </Button>
+                        <Image
+                          src="/images/whishlist-icon.svg"
+                          alt="Remove from wishlist"
+                          width={24}
+                          height={24}
+                        />
+                      </button>
                     </div>
 
-                    <Card.Body>
-                      <div className="mb-2">
-                        <h6 className="mb-1 text-truncate">{product.name}</h6>
-                        {product.brand && (
-                          <small className="text-muted">{product.brand}</small>
-                        )}
+                    {/* Product Details */}
+                    <div className="mb-2">
+                      <h6 className="mb-1" style={{ fontSize: "14px", fontWeight: "500" }}>
+                        {product.name}
+                      </h6>
+
+                      {/* Star Rating */}
+                      <div className="d-flex align-items-center gap-1 mb-2">
+                        <span style={{ fontSize: "14px", fontWeight: "500" }}>
+                          {product.rating || "4.5"}
+                        </span>
+                        <FiStar
+                          size={14}
+                          style={{ fill: "#FFC107", color: "#FFC107" }}
+                        />
                       </div>
 
-                      {product.color && (
-                        <div className="mb-2">
-                          <Badge bg="light" text="dark" className="me-1">
-                            {product.color}
-                          </Badge>
-                        </div>
-                      )}
-
-                      <div className="mb-3">
-                        <div className="d-flex align-items-center">
-                          <span className="fw-bold text-dark me-2">
-                            Rs. {product.price}
-                          </span>{" "}
-                          {product.compareAtPrice && (
-                            <>
-                              <small className="text-muted text-decoration-line-through me-2">
-                                Rs. {product.compareAtPrice}
-                              </small>
-                              <Badge bg="success" className="small">
-                                {Math.round(
-                                  ((product.compareAtPrice - product.price) /
-                                    product.compareAtPrice) *
-                                    100
-                                )}
-                                % OFF
-                              </Badge>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="d-grid gap-2">
-                        {product.inStock !== false ? (
-                          <Button
-                            variant="dark"
-                            onClick={() => moveToBag(product._id)}
-                            className="d-flex align-items-center justify-content-center"
+                      {/* Price */}
+                      <div className="d-flex align-items-center gap-2 mb-3">
+                        <span className="fw-bold" style={{ fontSize: "16px" }}>
+                          ₹ {product.price}
+                        </span>
+                        {product.compareAtPrice && (
+                          <span
+                            className="text-muted text-decoration-line-through"
+                            style={{ fontSize: "14px" }}
                           >
-                            <FiShoppingBag className="me-2" />
-                            Move to Bag
-                          </Button>
-                        ) : (
-                          <Button variant="outline-secondary" disabled>
-                            Out of Stock
-                          </Button>
+                            ₹ {product.compareAtPrice}
+                          </span>
                         )}
                       </div>
-                    </Card.Body>
-                  </Card>
+                    </div>
+
+                    {/* Add to Bag Button */}
+                    <div className="d-grid">
+                      {product.inStock !== false ? (
+                        <Button
+                          variant="dark"
+                          onClick={() => moveToBag(product._id)}
+                          style={{
+                            backgroundColor: "#000",
+                            border: "none",
+                            padding: "10px",
+                            fontSize: "14px",
+                          }}
+                        >
+                          Add to bag
+                        </Button>
+                      ) : (
+                        <Button variant="outline-secondary" disabled>
+                          Out of Stock
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </FlipYOnScroll>
               </Col>
             ))}

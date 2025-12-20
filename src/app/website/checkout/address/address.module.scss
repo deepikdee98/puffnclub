@@ -1,0 +1,114 @@
+.addressPage {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.formLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.formControl {
+  background-color: #f5f5f5 !important;
+  border: none !important;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+
+  &:focus {
+    background-color: #f5f5f5 !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  &.isInvalid {
+    border: 1px solid #dc3545 !important;
+  }
+}
+
+.errorText {
+  color: #dc3545;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.addAddressButton {
+  color: #28a745;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    color: #218838;
+  }
+}
+
+.addressCard {
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+}
+
+.summaryCard {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border-radius: 0.5rem;
+  position: sticky;
+  top: 20px;
+}
+
+.continueButton {
+  width: 100%;
+  padding: 0.75rem;
+  font-weight: 500;
+  background-color: #000;
+  border: none;
+
+  &:hover {
+    background-color: #333;
+  }
+}
+
+.productPreview {
+  img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 0.25rem;
+  }
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+
+  .label {
+    color: #6c757d;
+  }
+
+  .value {
+    font-weight: 500;
+  }
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+
+  .label {
+    font-weight: 600;
+  }
+
+  .value {
+    font-weight: 600;
+    font-size: 1.25rem;
+  }
+}

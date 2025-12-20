@@ -1,262 +1,531 @@
 "use client";
-import { Container, Row, Col, Card, Alert } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
+import Link from "next/link";
+import Image from "next/image";
+import "./TermsOfService.scss";
 
 const TermsOfService = () => {
   return (
-    <Container className="py-5">
+    <Container className="py-4">
+      {/* Back Navigation */}
       <Row>
-        <Col lg={12} className="mx-auto">
-          <div className="text-center mb-5">
-            <h1 className="display-5 fw-bold mb-3">Terms of Service</h1>
-            <p className="lead text-muted">Last updated: January 1, 2024</p>
+        <Col lg={10} className="mx-auto">
+          <Link
+            href="/"
+            className="back-link d-inline-flex align-items-center text-decoration-none mb-4"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              className="me-2"
+            >
+              <path
+                d="M12.5 15L7.5 10L12.5 5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Terms and Condition</span>
+          </Link>
+        </Col>
+      </Row>
+
+      {/* Main Content - Terms and Condition Section */}
+      <Row>
+        <Col lg={10} className="mx-auto">
+          <div className="d-flex justify-content-end align-items-center mb-4">
+            <span className="fw-semibold me-2">Effective Date:</span>
+            <span className="text-muted">[Insert Date]</span>
           </div>
 
-          <Alert variant="info" className="mb-4">
-            <Alert.Heading className="h6">Important Notice</Alert.Heading>
-            Please read these Terms of Service carefully before using our
-            website. By accessing or using ShopEase, you agree to be bound by
-            these terms.
-          </Alert>
+          <div className="mb-5">
+            <p className="text-muted">
+              Welcome to Puffin Club! By using our website{" "}
+              <a
+                href="https://puffinclub.com"
+                className="text-success text-decoration-none"
+              >
+                www.puffinclub.com
+              </a>
+              , you agree to comply with the following terms and conditions:
+            </p>
+          </div>
 
-          <Card className="border-0 shadow-sm">
-            <Card.Body className="p-3 p-md-5">
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">1. Acceptance of Terms</h3>
-                <p className="text-muted">
-                  By accessing and using ShopEase ("we," "our," or "us"), you
-                  accept and agree to be bound by the terms and provision of
-                  this agreement. If you do not agree to abide by the above,
-                  please do not use this service.
-                </p>
-              </section>
+          {/* Eligibility */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Eligibility</h5>
+            <p className="text-muted">
+              You must be at least 18 years old to use this website or make a
+              purchase.
+            </p>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">2. Description of Service</h3>
-                <p className="text-muted mb-3">
-                  ShopEase is an e-commerce platform that allows users to:
-                </p>
-                <ul className="text-muted">
-                  <li>Browse and purchase products from our catalog</li>
-                  <li>Create user accounts and manage orders</li>
-                  <li>Leave product reviews and ratings</li>
-                  <li>Access customer support services</li>
-                  <li>Receive promotional communications (with consent)</li>
-                </ul>
-              </section>
+          {/* Account Responsibilities */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Account Responsibilities</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                You are responsible for maintaining the confidentiality of your
+                account and password.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Puffin Club reserves the right to suspend or terminate accounts
+                for misuse or fraudulent activity.
+              </li>
+            </ul>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">3. User Accounts</h3>
-                <h6 className="fw-bold mb-2">Account Creation</h6>
-                <p className="text-muted mb-3">
-                  To make purchases, you must create an account with accurate
-                  and complete information. You are responsible for maintaining
-                  the confidentiality of your account credentials.
-                </p>
+          {/* Orders and Payments */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Orders and Payments</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                All orders are subject to acceptance and availability.
+                Fulfillment must be completed at checkout.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Puffin Club reserves the right to cancel any order due to
+                pricing errors, stock issues, or suspected fraud.
+              </li>
+            </ul>
+          </section>
 
-                <h6 className="fw-bold mb-2">Account Responsibilities</h6>
-                <ul className="text-muted mb-3">
-                  <li>Provide accurate, current, and complete information</li>
-                  <li>Maintain and update your information as needed</li>
-                  <li>Protect your password and account security</li>
-                  <li>Notify us immediately of unauthorized use</li>
-                  <li>
-                    Accept responsibility for all activities under your account
-                  </li>
-                </ul>
-              </section>
+          {/* Shipping and Delivery */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Shipping and Delivery</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                We aim to ship promptly, but delays may occur due to third-party
+                couriers.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Puffin Club is not liable for lost or misplaced items once in
+                the care of a shipping partner.
+              </li>
+            </ul>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">4. Orders and Payment</h3>
-                <h6 className="fw-bold mb-2">Order Acceptance</h6>
-                <p className="text-muted mb-3">
-                  All orders are subject to acceptance and availability. We
-                  reserve the right to refuse or cancel orders at our
-                  discretion, including but not limited to:
-                </p>
-                <ul className="text-muted mb-3">
-                  <li>Product unavailability</li>
-                  <li>Pricing errors</li>
-                  <li>Suspected fraudulent activity</li>
-                  <li>Violation of these terms</li>
-                </ul>
+          {/* Intellectual Property */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Intellectual Property</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                All content on Puffin Club, including images, product designs,
+                and descriptions, is our property.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                You may not copy or misuse our content without written
+                permission.
+              </li>
+            </ul>
+          </section>
 
-                <h6 className="fw-bold mb-2">Pricing and Payment</h6>
-                <ul className="text-muted">
-                  <li>
-                    All prices are in USD and subject to change without notice
-                  </li>
-                  <li>Payment is due at the time of order placement</li>
-                  <li>
-                    We accept major credit cards and other specified payment
-                    methods
-                  </li>
-                  <li>
-                    You authorize us to charge your payment method for all fees
-                  </li>
-                </ul>
-              </section>
+          {/* Limitation of Liability */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Limitation of Liability</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Puffin Club is not responsible for indirect, incidental, or
+                consequential damages.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Our liability is limited to the value of the purchased product.
+              </li>
+            </ul>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">5. Shipping and Delivery</h3>
-                <p className="text-muted mb-3">
-                  We will make every effort to deliver products within the
-                  estimated timeframes, but delivery dates are not guaranteed.
-                  Risk of loss and title pass to you upon delivery to the
-                  shipping carrier.
-                </p>
-                <ul className="text-muted">
-                  <li>Shipping costs are calculated at checkout</li>
-                  <li>International orders may be subject to customs duties</li>
-                  <li>
-                    Delivery times may vary based on location and shipping
-                    method
-                  </li>
-                  <li>
-                    We are not responsible for shipping delays beyond our
-                    control
-                  </li>
-                </ul>
-              </section>
+          {/* Prohibited Activities */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Prohibited Activities</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Using this website for unlawful purposes.
+              </li>
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Engaging in fraudulent activity or misrepresentation.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Interfering with the website's security or functionality.
+              </li>
+            </ul>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">6. Returns and Refunds</h3>
-                <p className="text-muted mb-3">
-                  We want you to be satisfied with your purchase. Our return
-                  policy includes:
-                </p>
-                <ul className="text-muted">
-                  <li>30-day return window from delivery date</li>
-                  <li>Items must be in original condition and packaging</li>
-                  <li>
-                    Some items may not be eligible for return (perishables,
-                    personalized items)
-                  </li>
-                  <li>Return shipping costs may apply</li>
-                  <li>Refunds processed within 5-10 business days</li>
-                </ul>
-              </section>
+          {/* Governing Law */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Governing Law</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                These Terms are governed by the laws of [Your Jurisdiction].
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Disputes are resolved in the courts of that jurisdiction.
+              </li>
+            </ul>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">7. User Conduct</h3>
-                <p className="text-muted mb-3">You agree not to:</p>
-                <ul className="text-muted">
-                  <li>Use our service for any unlawful purpose</li>
-                  <li>Violate any applicable laws or regulations</li>
-                  <li>Infringe on intellectual property rights</li>
-                  <li>Transmit harmful or malicious code</li>
-                  <li>Interfere with the proper functioning of our website</li>
-                  <li>Impersonate others or provide false information</li>
-                  <li>Engage in fraudulent activities</li>
-                </ul>
-              </section>
+          {/* Changes to Terms */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Changes to Terms</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Puffin Club may update these Terms at any time.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Continued use of the website constitutes acceptance of the
+                updated terms.
+              </li>
+            </ul>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">8. Intellectual Property</h3>
-                <p className="text-muted">
-                  The content on ShopEase, including but not limited to text,
-                  graphics, logos, images, and software, is protected by
-                  copyright, trademark, and other intellectual property laws.
-                  You may not reproduce, distribute, or create derivative works
-                  without our express written permission.
-                </p>
-              </section>
+          {/* Contact Us */}
+          <section className="mb-5">
+            <h5 className="fw-bold mb-3">Contact Us</h5>
+            <div className="d-flex align-items-start mb-2">
+              <Image
+                src="/images/mail-icon.svg"
+                alt="Email"
+                width={20}
+                height={20}
+                className="me-2 mt-1 flex-shrink-0"
+              />
+              <span className="text-muted">support@puffinclub.com</span>
+            </div>
+            <div className="d-flex align-items-start">
+              <Image
+                src="/images/globe-icon.svg"
+                alt="Website"
+                width={20}
+                height={20}
+                className="me-2 mt-1 flex-shrink-0"
+              />
+              <span className="text-muted">www.puffinclub.com</span>
+            </div>
+          </section>
+        </Col>
+      </Row>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">9. Privacy</h3>
-                <p className="text-muted">
-                  Your privacy is important to us. Please review our Privacy
-                  Policy, which also governs your use of our services, to
-                  understand our practices regarding the collection and use of
-                  your personal information.
-                </p>
-              </section>
+      {/* Refund & Return Policy Section */}
+      <Row>
+        <Col lg={10} className="mx-auto">
+          <hr className="my-5" />
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">10. Disclaimers</h3>
-                <div className="bg-warning bg-opacity-10 p-3 rounded mb-3">
-                  <p className="text-muted mb-0">
-                    <strong>
-                      OUR SERVICES ARE PROVIDED "AS IS" WITHOUT WARRANTIES OF
-                      ANY KIND.
-                    </strong>
-                    We disclaim all warranties, express or implied, including
-                    but not limited to warranties of merchantability, fitness
-                    for a particular purpose, and non-infringement.
-                  </p>
-                </div>
-              </section>
+          <div className="d-flex justify-content-end align-items-center mb-4">
+            <span className="fw-semibold me-2">Effective Date:</span>
+            <span className="text-muted">[Insert Date]</span>
+          </div>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">11. Limitation of Liability</h3>
-                <p className="text-muted">
-                  In no event shall ShopEase be liable for any indirect,
-                  incidental, special, consequential, or punitive damages,
-                  including but not limited to loss of profits, data, or
-                  business interruption, arising out of your use of our
-                  services.
-                </p>
-              </section>
+          <section className="mb-4">
+            <h4 className="fw-bold mb-4">Refund & Return Policy</h4>
+            <p className="text-muted mb-4">
+              At Puffin Club, we want you to be satisfied with your purchases.
+            </p>
+            <p className="text-muted">
+              Please review our return and refund terms:
+            </p>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">12. Indemnification</h3>
-                <p className="text-muted">
-                  You agree to indemnify and hold harmless ShopEase and its
-                  affiliates from any claims, damages, or expenses arising from
-                  your use of our services or violation of these terms.
-                </p>
-              </section>
+          {/* Return Eligibility */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Return Eligibility</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Returns are accepted only for damaged or defective products.
+              </li>
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>A mandatory
+                unboxing video, along with clear visibility of the received item
+                eligibility.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Items must be unused, unwashed, and in original packaging with
+                all tags intact.
+              </li>
+            </ul>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">13. Termination</h3>
-                <p className="text-muted">
-                  We may terminate or suspend your account and access to our
-                  services at any time, with or without notice, for conduct that
-                  we believe violates these terms or is harmful to other users
-                  or our business interests.
-                </p>
-              </section>
+          {/* Exchange Policy */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Exchange Policy</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Exchanges are available only for size-related issues.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Defective or damaged items may be exchanged; instead of being
+                subject to stock availability.
+              </li>
+            </ul>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">14. Governing Law</h3>
-                <p className="text-muted">
-                  These terms shall be governed by and construed in accordance
-                  with the laws of [Your State/Country], without regard to its
-                  conflict of law provisions. Any disputes shall be resolved in
-                  the courts of [Your Jurisdiction].
-                </p>
-              </section>
+          {/* Non-Returnable Items */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Non-Returnable Items</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Products that are not damaged or defective, items without
+                unboxing video proof.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Perishable goods or consumables, clearance or sale items, unless
+                defective.
+              </li>
+            </ul>
+          </section>
 
-              <section className="mb-5">
-                <h3 className="fw-bold mb-3">15. Changes to Terms</h3>
-                <p className="text-muted">
-                  We reserve the right to modify these terms at any time.
-                  Changes will be effective upon posting to our website. Your
-                  continued use of our services after changes are posted
-                  constitutes acceptance of the modified terms.
-                </p>
-              </section>
+          {/* Refund Process */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Refund Process</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Contact{" "}
+                <a
+                  href="mailto:support@puffinclub.com"
+                  className="text-success text-decoration-none"
+                >
+                  support@puffinclub.com
+                </a>{" "}
+                with your order detail and proof.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Refunds are processed within 7-10 business days after
+                inspection.
+              </li>
+            </ul>
+          </section>
 
-              <div className="bg-light p-4 rounded">
-                <h5 className="fw-bold mb-3">Contact Information</h5>
-                <p className="text-muted mb-2">
-                  If you have questions about these Terms of Service, please
-                  contact us:
-                </p>
-                <ul className="list-unstyled text-muted mb-0">
-                  <li>
-                    <strong>Email:</strong> legal@shopease.com
-                  </li>
-                  <li>
-                    <strong>Phone:</strong> 1-800-SHOPEASE
-                  </li>
-                  <li>
-                    <strong>Address:</strong> 123 Commerce Street, Suite 100,
-                    Business City, BC 12345
-                  </li>
-                </ul>
-              </div>
-            </Card.Body>
-          </Card>
+          {/* Shipping Costs */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Shipping Costs</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                If we return shipping is free one it or not a side.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Customer pays for returns due to personal reasons.
+              </li>
+            </ul>
+          </section>
+
+          {/* Contact Us */}
+          <section className="mb-5">
+            <h5 className="fw-bold mb-3">Contact Us</h5>
+            <div className="d-flex align-items-start mb-2">
+              <Image
+                src="/images/mail-icon.svg"
+                alt="Email"
+                width={20}
+                height={20}
+                className="me-2 mt-1 flex-shrink-0"
+              />
+              <span className="text-muted">support@puffinclub.com</span>
+            </div>
+            <div className="d-flex align-items-start">
+              <Image
+                src="/images/globe-icon.svg"
+                alt="Website"
+                width={20}
+                height={20}
+                className="me-2 mt-1 flex-shrink-0"
+              />
+              <span className="text-muted">www.puffinclub.com</span>
+            </div>
+          </section>
+        </Col>
+      </Row>
+
+      {/* Shipping Policy Section */}
+      <Row>
+        <Col lg={10} className="mx-auto">
+          <hr className="my-5" />
+
+          <div className="d-flex justify-content-end align-items-center mb-4">
+            <span className="fw-semibold me-2">Effective Date:</span>
+            <span className="text-muted">[Insert Date]</span>
+          </div>
+
+          <section className="mb-4">
+            <h4 className="fw-bold mb-4">Shipping Policy</h4>
+            <p className="text-muted">
+              At Puffin Club, we aim to deliver your orders as quickly and
+              securely.
+            </p>
+          </section>
+
+          {/* Order Processing */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Order Processing</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Orders are processed within 3-7 business days, excluding
+                weekends and holidays.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                You will receive a confirmation email with a shipping details
+                when processed.
+              </li>
+            </ul>
+          </section>
+
+          {/* Delivery Time */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Delivery Time</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Standard Shipping: 5-7 business days.
+              </li>
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Express Shipping: 3-5 business days.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Delivery times may vary due to location or courier services.
+              </li>
+            </ul>
+          </section>
+
+          {/* Shipping Charges */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Shipping Charges</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Calculated at checkout, free if shipping may apply for orders
+                above a certain value.
+              </li>
+            </ul>
+          </section>
+
+          {/* Lost or Delayed Packages */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Lost or Delayed Packages</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Puffin Club is not liable for delays caused by couriers, weather
+                disruptions, or unforeseen circumstances.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Contact{" "}
+                <a
+                  href="mailto:support@puffinclub.com"
+                  className="text-success text-decoration-none"
+                >
+                  support@puffinclub.com
+                </a>{" "}
+                for lost or delayed orders.
+              </li>
+            </ul>
+          </section>
+
+          {/* International Shipping */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">International Shipping</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Currently, we only available for [mention countries/regions if
+                applicable].
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Delivery times may vary due to customs and local postal
+                services.
+              </li>
+            </ul>
+          </section>
+
+          {/* Address Accuracy */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Address Accuracy</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Please ensure shipping address is complete and correct to avoid
+                delivery issues.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Puffin Club is not responsible for incorrect addressing leading
+                to delivery failures.
+              </li>
+            </ul>
+          </section>
+
+          {/* Tracking Orders */}
+          <section className="mb-4">
+            <h5 className="fw-bold mb-3">Tracking Orders</h5>
+            <ul className="list-unstyled ps-0 mb-0">
+              <li className="text-muted mb-2 position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                You will receive a tracking number when your order ships.
+              </li>
+              <li className="text-muted position-relative ps-3">
+                <span className="position-absolute start-0">•</span>
+                Track your order via the courier's website for updates.
+              </li>
+            </ul>
+          </section>
+
+          {/* Contact Us */}
+          <section className="mb-5">
+            <h5 className="fw-bold mb-3">Contact Us</h5>
+            <div className="d-flex align-items-start mb-2">
+              <Image
+                src="/images/mail-icon.svg"
+                alt="Email"
+                width={20}
+                height={20}
+                className="me-2 mt-1 flex-shrink-0"
+              />
+              <span className="text-muted">support@puffinclub.com</span>
+            </div>
+            <div className="d-flex align-items-start">
+              <Image
+                src="/images/globe-icon.svg"
+                alt="Website"
+                width={20}
+                height={20}
+                className="me-2 mt-1 flex-shrink-0"
+              />
+              <span className="text-muted">www.puffinclub.com</span>
+            </div>
+          </section>
         </Col>
       </Row>
     </Container>

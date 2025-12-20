@@ -1,0 +1,500 @@
+================================================================================
+                      AUTHENTICATION SYSTEM DOCUMENTATION
+================================================================================
+
+OVERVIEW: Complete OTP-based authentication system for customer login/register
+
+================================================================================
+AUTHENTICATION FLOW
+================================================================================
+
+The website uses OTP (One-Time Password) based authentication supporting both
+phone number and email verification. This provides a passwordless login
+experience for better security and user convenience.
+
+================================================================================
+DIRECTORY STRUCTURE
+================================================================================
+
+/auth/
+├── login-new/                    # Current OTP-based login (ACTIVE)
+│   ├── page.tsx                  # Main login page
+│   ├── components/
+│   │   ├── MobileLoginPopup.tsx  # Phone number input modal
+│   │   ├── EmailLoginPopup.tsx   # Email input modal
+│   │   └── OtpPopup.tsx          # OTP verification modal
+│   ├── schemas/
+│   │   └── validationSchemas.ts  # Form validation rules
+│   └── services/
+│       └── otpService.ts         # OTP-specific API calls
+├── login/                        # Old login (DEPRECATED)
+├── register/                     # Registration page (TODO)
+└── otp/                          # Standalone OTP page (TODO)
+
+================================================================================
+MAIN LOGIN PAGE (login-new/page.tsx)
+================================================================================
+
+ROUTE: /website/auth/login-new
+
+FUNCTIONALITY:
+- Provides two login methods: Phone or Email
+- Manages authentication workflow
+- Handles OTP sending and verification
+- Stores auth tokens and redirects
+
+STATE MANAGEMENT:
+- showPhoneModal: Boolean - Phone login modal visibility
+- showEmailModal: Boolean - Email login modal visibility
+- showOtpModal: Boolean - OTP verification modal visibility
+- sessionId: String - OTP session identifier from backend
+- identifier: String - Phone number or email entered
+- identifierType: "mobile" | "email" - Type of identifier
+- loading: Boolean - Loading state for API calls
+- error: String - Error message to display
+- success: String - Success message to display
+- activeTab: "phone" | "email" - Selected login method
+
+USER FLOW:
+1. User lands on login page
+2. Selects login method (Phone or Email)
+3. Clicks "Continue with Phone" or "Continue with Email"
+4. Modal opens for entering phone/email
+5. User enters phone/email and submits
+6. Backend sends OTP to phone/email
+7. OTP modal opens
+8. User enters OTP
+9. Backend verifies OTP
+10. Token stored, user redirected to homepage
+
+================================================================================
+KEY FUNCTIONS
+================================================================================
+
+handlePhoneOtpRequest(mobile: string):
+  PURPOSE: Send OTP to phone number
+  API: POST /website/auth/send-otp
+  BODY: { mobile: string }
+  SUCCESS:
+    - Stores sessionId
+    - Opens OTP modal
+    - Shows success message
+  ERROR: Shows error toast
+
+handleEmailOtpRequest(email: string):
+  PURPOSE: Send OTP to email address
+  API: POST /website/auth/send-otp
+  BODY: { email: string }
+  SUCCESS:
+    - Stores sessionId
+    - Opens OTP modal
+    - Shows success message
+  ERROR: Shows error toast
+
+handleOtpVerification(otp: string):
+  PURPOSE: Verify entered OTP
+  API: POST /website/auth/verify-otp
+  BODY: { sessionId, otp, mobile/email }
+  SUCCESS:
+    - Stores auth token (setAuthToken)
+    - Stores user data in localStorage
+    - Redirects to /website
+  ERROR: Shows error toast
+
+handleResendOtp():
+  PURPOSE: Resend OTP if user didn't receive
+  API: POST /website/auth/resend-otp
+  BODY: { sessionId, mobile/email }
+  SUCCESS:
+    - Updates sessionId if new one provided
+    - Shows success message
+  ERROR: Shows error toast
+
+================================================================================
+COMPONENT: MobileLoginPopup.tsx
+================================================================================
+
+PURPOSE: Modal for entering phone number
+
+PROPS:
+- show: Boolean - Modal visibility
+- onHide: () => void - Close modal callback
+- onOtpRequested: (mobile: string) => void - OTP request callback
+- loading: Boolean - Loading state
+
+FEATURES:
+- Phone number input field
+- Validation (required, format check)
+- Loading state during API call
+- Error display
+- Cancel and Submit buttons
+
+VALIDATION:
+- Must be 10 digits
+- Only numbers allowed
+- Required field
+
+================================================================================
+COMPONENT: EmailLoginPopup.tsx
+================================================================================
+
+PURPOSE: Modal for entering email address
+
+PROPS:
+- show: Boolean - Modal visibility
+- onHide: () => void - Close modal callback
+- onOtpRequested: (email: string) => void - OTP request callback
+- loading: Boolean - Loading state
+
+FEATURES:
+- Email input field
+- Email format validation
+- Loading state during API call
+- Error display
+- Cancel and Submit buttons
+
+VALIDATION:
+- Valid email format
+- Required field
+
+================================================================================
+COMPONENT: OtpPopup.tsx
+================================================================================
+
+PURPOSE: Modal for entering and verifying OTP
+
+PROPS:
+- show: Boolean - Modal visibility
+- onHide: () => void - Close modal callback
+- onConfirm: (otp: string) => void - OTP verification callback
+- onResend: () => void - Resend OTP callback
+- identifier: String - Phone/Email that received OTP
+- loading: Boolean - Loading state
+
+FEATURES:
+- 6-digit OTP input (individual boxes)
+- Auto-focus on next input
+- Backspace handling
+- Resend OTP button with countdown timer
+- Verification button
+- Loading state
+
+OTP INPUT:
+- 6 separate input boxes
+- Only numbers allowed
+- Auto-advance to next box
+- Paste support (splits digits)
+- Backspace moves to previous box
+
+RESEND OTP:
+- Disabled for 60 seconds after send
+- Countdown timer displayed
+- Re-enabled after countdown
+
+================================================================================
+VALIDATION SCHEMAS (schemas/validationSchemas.ts)
+================================================================================
+
+phoneSchema:
+  - Phone number validation
+  - Format: 10 digits
+  - Required field
+
+emailSchema:
+  - Email format validation
+  - Required field
+
+otpSchema:
+  - 6 digits
+  - Numbers only
+  - Required field
+
+================================================================================
+AUTH CONTEXT (contexts/AuthContext.tsx)
+================================================================================
+
+PURPOSE: Global authentication state management
+
+STATE:
+- customer: Customer | null - Current logged-in customer
+- isAuthenticated: Boolean - Login status
+- isLoading: Boolean - Initial auth check loading
+
+FUNCTIONS:
+
+login(email, password):
+  - Email/password login (legacy)
+  - Stores customer and token
+  - Shows success toast
+
+register(data):
+  - Register new customer
+  - May trigger OTP flow
+  - Shows appropriate message
+
+logout():
+  - Clears all auth data
+  - Removes tokens from localStorage
+  - Clears customer state
+  - Shows logout toast
+
+updateCustomer(customer):
+  - Updates customer data
+  - Syncs with localStorage
+
+INITIALIZATION:
+- On mount, checks for existing token
+- Verifies token by fetching profile
+- Loads customer data if valid
+- Clears invalid tokens
+
+STORAGE KEYS:
+- website_token: JWT auth token
+- refreshToken: Refresh token
+- customer: Customer object
+- user_info: User info during signup
+- user_mobile: Mobile number during signup
+
+================================================================================
+API ENDPOINTS
+================================================================================
+
+1. SEND OTP:
+   POST /website/auth/send-otp
+
+   Request Body (Phone):
+   {
+     "mobile": "9876543210"
+   }
+
+   Request Body (Email):
+   {
+     "email": "user@example.com"
+   }
+
+   Response:
+   {
+     "success": true,
+     "sessionId": "uuid-session-id",
+     "message": "OTP sent successfully"
+   }
+
+2. VERIFY OTP:
+   POST /website/auth/verify-otp
+
+   Request Body (Phone):
+   {
+     "sessionId": "uuid-session-id",
+     "otp": "123456",
+     "mobile": "9876543210"
+   }
+
+   Request Body (Email):
+   {
+     "sessionId": "uuid-session-id",
+     "otp": "123456",
+     "email": "user@example.com"
+   }
+
+   Response:
+   {
+     "success": true,
+     "token": "jwt-auth-token",
+     "user": {
+       "_id": "user-id",
+       "fullName": "John Doe",
+       "phone": "9876543210",
+       "email": "user@example.com"
+     },
+     "message": "Login successful"
+   }
+
+3. RESEND OTP:
+   POST /website/auth/resend-otp
+
+   Request Body:
+   {
+     "sessionId": "uuid-session-id",
+     "mobile": "9876543210"  // or "email"
+   }
+
+   Response:
+   {
+     "success": true,
+     "sessionId": "new-uuid-session-id",  // Optional
+     "message": "OTP resent successfully"
+   }
+
+4. GET PROFILE:
+   GET /website/auth/profile
+   Headers: Authorization: Bearer <token>
+
+   Response:
+   {
+     "success": true,
+     "customer": { ... }
+   }
+
+5. LOGIN (Legacy):
+   POST /website/auth/login
+
+   Request Body:
+   {
+     "email": "user@example.com",
+     "password": "password123"
+   }
+
+6. REGISTER:
+   POST /website/auth/register
+
+   Request Body:
+   {
+     "fullName": "John Doe",
+     "email": "user@example.com",
+     "phone": "9876543210",
+     "password": "password123"
+   }
+
+================================================================================
+TOKEN MANAGEMENT
+================================================================================
+
+STORAGE:
+- Token stored in localStorage as 'website_token'
+- Refresh token stored as 'refreshToken'
+- Customer data stored as 'customer'
+
+USAGE:
+- All authenticated API calls include:
+  Authorization: Bearer <token>
+
+TOKEN FUNCTIONS (services/api.ts):
+
+getAuthToken():
+  - Retrieves token from localStorage
+  - Returns null if not found
+
+setAuthToken(token):
+  - Stores token in localStorage
+  - Called after successful login
+
+removeAuthToken():
+  - Removes token from localStorage
+  - Called during logout
+
+createAuthHeaders():
+  - Creates headers object with token
+  - Used in all authenticated API calls
+
+================================================================================
+PROTECTED ROUTES
+================================================================================
+
+PAGES REQUIRING AUTHENTICATION:
+- /website/cart (Checkout)
+- /website/profile
+- /website/orders
+- /website/wishlist
+
+BEHAVIOR:
+- If not authenticated, redirect to /website/auth/login-new
+- Or show "Please login" message with login button
+
+HOW IT WORKS:
+- Components check: isAuthenticated from AuthContext
+- If false, show login prompt or redirect
+
+================================================================================
+USER OBJECT STRUCTURE
+================================================================================
+
+Customer Type:
+{
+  _id: string
+  fullName: string
+  firstName?: string
+  lastName?: string
+  email?: string
+  phone: string
+  addresses?: Address[]
+  createdAt: string
+  updatedAt: string
+}
+
+Address Type:
+{
+  _id: string
+  type: string          // "home", "work", etc.
+  street: string
+  city: string
+  state: string
+  zipCode: string
+  country: string
+  isDefault: boolean
+}
+
+================================================================================
+ERROR HANDLING
+================================================================================
+
+COMMON ERRORS:
+- "Failed to send OTP" - Network error or invalid phone/email
+- "Invalid OTP" - Wrong OTP entered
+- "OTP expired" - OTP timeout (usually 5-10 minutes)
+- "Session expired" - SessionId invalid
+
+ERROR DISPLAY:
+- Toast notifications (react-toastify)
+- Alert components on page
+- Form field errors
+
+LOGGING:
+- All errors logged to console
+- API errors include response status and message
+
+================================================================================
+SECURITY FEATURES
+================================================================================
+
+✓ OTP-based passwordless authentication
+✓ JWT token-based session management
+✓ HTTPS required for production
+✓ Token expiration handling
+✓ Session ID for OTP verification
+✓ Phone/Email verification
+
+⚠ IMPROVEMENTS NEEDED:
+  - Rate limiting on OTP requests
+  - CAPTCHA for bot prevention
+  - Token refresh mechanism
+  - Logout on all devices
+  - Two-factor authentication option
+  - Session timeout warning
+
+================================================================================
+PENDING TASKS
+================================================================================
+
+☐ Complete register page implementation
+☐ Email/password login (fallback option)
+☐ Forgot password flow
+☐ Change password functionality
+☐ Social login (Google, Facebook)
+☐ Biometric login (fingerprint, face ID)
+☐ Remember me functionality
+☐ Account deletion
+☐ Email verification for new accounts
+
+================================================================================
+RELATED FILES
+================================================================================
+
+- contexts/AuthContext.tsx - Auth state management
+- services/api.ts - API configuration and token helpers
+- services/authService.ts - Auth API calls
+- utils/otpUtils.ts - OTP utility functions
+- layout.tsx - AuthProvider wrapper
+
+================================================================================
+END OF AUTHENTICATION DOCUMENTATION
+================================================================================

@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Badge, Button, Tab, Tabs, Table } from 'react-bootstrap';
-import { FiPackage, FiTruck, FiCheck, FiX, FiEye, FiDownload } from 'react-icons/fi';
-import Link from 'next/link';
-import { LoadingSpinner } from '@/app/components';
-import { orderService, Order, OrderFilters } from '../services/orderService';
-import { authService } from '../services/authService';
-import { toast } from 'react-toastify';
-
-
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Container, Spinner } from "react-bootstrap";
+import { toast } from "react-toastify";
+import PageHeader from "./components/shared/PageHeader";
+import OrderCard from "./components/OrderCard";
+import EmptyOrdersState from "./components/EmptyOrdersState";
+import { orderService } from "../services/orderService";
+import type { Order, OrderAction } from "./types/orders.types";
 
 export default function OrdersPage() {
-  const [activeTab, setActiveTab] = useState('all');
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadOrders();
@@ -23,256 +23,69 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await orderService.getOrders();
-      setOrders(response.orders || []);
-    } catch (error) {
-      console.error('Error loading orders:', error);
-      toast.error('Failed to load orders');
+      setOrders((response.orders || []) as unknown as Order[]);
+    } catch (err: any) {
+      console.error("Error loading orders:", err);
+      setError("Failed to load orders. Please try again.");
+      toast.error("Failed to load orders");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancelOrder = async (orderId: string) => {
-    try {
-      await orderService.cancelOrder(orderId);
-      loadOrders(); // Reload orders
-      toast.success('Order cancelled');
-    } catch (error) {
-      console.error('Error cancelling order:', error);
-      toast.error('Failed to cancel order');
+  const handleOrderAction = (orderId: string, action: OrderAction) => {
+    switch (action) {
+      case "track":
+        router.push(`/website/orders/${orderId}/track`);
+        break;
+      case "exchange":
+        // This will open exchange/return modal on track page
+        router.push(`/website/orders/${orderId}/track?action=exchange`);
+        break;
+      case "cancel":
+        // This will open cancel modal on track page
+        router.push(`/website/orders/${orderId}/track?action=cancel`);
+        break;
+      case "review":
+        // This will open review modal on track page
+        router.push(`/website/orders/${orderId}/track?action=review`);
+        break;
+      default:
+        router.push(`/website/orders/${orderId}/track`);
     }
   };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'delivered': return 'success';
-      case 'shipped': return 'primary';
-      case 'processing': return 'info';
-      case 'pending': return 'warning';
-      case 'cancelled': return 'danger';
-      default: return 'secondary';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'delivered': return <FiCheck />;
-      case 'shipped': return <FiTruck />;
-      case 'processing': return <FiPackage />;
-      case 'cancelled': return <FiX />;
-      default: return <FiPackage />;
-    }
-  };
-
-  const filterOrders = (status: string) => {
-    if (status === 'all') return orders;
-    // Use orderStatus from type definition
-    return orders.filter(order => (order as any).status === status || order.orderStatus === status);
-  };
-
-  const filteredOrders = filterOrders(activeTab);
-
-  const renderOrderCard = (order: any) => (
-    <Card key={order.id} className="border-0 shadow-sm mb-4">
-      <Card.Header className="bg-white border-0 d-flex justify-content-between align-items-center">
-        <div>
-          <h6 className="mb-1">Order {order.orderNumber}</h6>
-          <small className="text-muted">Placed on {formatDate(order.date)}</small>
-        </div>
-        <div className="d-flex align-items-center gap-2">
-          <Badge bg={getStatusVariant(order.orderStatus || (order as any).status)} className="d-flex align-items-center gap-1">
-            {getStatusIcon(order.orderStatus || (order as any).status)}
-            {(order.orderStatus || (order as any).status).charAt(0).toUpperCase() + (order.orderStatus || (order as any).status).slice(1)}
-          </Badge>
-          <Button variant="outline-primary" size="sm">
-            <FiEye className="me-1" />
-            View Details
-          </Button>
-        </div>
-      </Card.Header>
-      <Card.Body>
-        <Row>
-          <Col md={8}>
-            <div className="order-items">
-              {order.items.map((item: any, index: number) => (
-                <div key={item.id} className="d-flex align-items-center mb-3">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="rounded me-3"
-                    style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                  />
-                  <div className="flex-grow-1">
-                    <h6 className="mb-1">{item.name}</h6>
-                    <div className="d-flex gap-3 text-muted small">
-                      <span>Size: {item.size}</span>
-                      <span>Color: {item.color}</span>
-                      <span>Qty: {item.quantity}</span>
-                    </div>
-                  </div>
-                  <div className="text-end">
-                    <span className="fw-bold">{formatCurrency(item.price)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Col>
-          <Col md={4}>
-            <div className="order-summary">
-              <div className="d-flex justify-content-between mb-2">
-                <span>Total Amount:</span>
-                <span className="fw-bold">{formatCurrency(order.total)}</span>
-              </div>
-              <div className="mb-3">
-                <small className="text-muted">
-                  <strong>Shipping Address:</strong><br />
-                  {order.shippingAddress.name}<br />
-                  {order.shippingAddress.address}
-                </small>
-              </div>
-              {order.trackingNumber && (
-                <div className="mb-2">
-                  <small className="text-muted">
-                    <strong>Tracking:</strong> {order.trackingNumber}
-                  </small>
-                </div>
-              )}
-              {order.estimatedDelivery && (
-                <div className="mb-3">
-                  <small className="text-muted">
-                    <strong>Est. Delivery:</strong> {formatDate(order.estimatedDelivery)}
-                  </small>
-                </div>
-              )}
-              <div className="d-flex gap-2">
-                {(order.orderStatus === 'shipped' || (order as any).status === 'shipped') && (
-                  <Button variant="outline-primary" size="sm" className="flex-fill">
-                    Track Order
-                  </Button>
-                )}
-                {(order.orderStatus === 'delivered' || (order as any).status === 'delivered') && (
-                  <Button variant="outline-secondary" size="sm" className="flex-fill">
-                    <FiDownload className="me-1" />
-                    Invoice
-                  </Button>
-                )}
-                {((order.orderStatus === 'pending' || order.orderStatus === 'processing') || ((order as any).status === 'pending' || (order as any).status === 'processing')) && (
-                  <Button 
-                    variant="outline-danger" 
-                    size="sm" 
-                    className="flex-fill"
-                    onClick={() => handleCancelOrder(order.id)}
-                  >
-                    Cancel Order
-                  </Button>
-                )}
-              </div>
-            </div>
-          </Col>
-        </Row>
-      </Card.Body>
-    </Card>
-  );
 
   return (
-    <Container className="py-4">
-      <Row>
-        <Col>
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2>My Orders</h2>
-            <Button variant="outline-primary">
-              <FiDownload className="me-2" />
-              Download All Invoices
-            </Button>
+    <>
+      <Container className="py-4">
+        {loading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="dark" />
+            <p className="mt-3 text-muted">Loading your orders...</p>
           </div>
-
-          <Tabs
-            activeKey={activeTab}
-            onSelect={(k) => setActiveTab(k || 'all')}
-            className="mb-4"
-          >
-            <Tab eventKey="all" title={`All Orders (${orders.length})`}>
-              <div className="orders-list">
-                {loading ? (
-                  <div className="text-center py-5">
-                    <LoadingSpinner />
-                    <p className="mt-3 text-muted">Loading your orders...</p>
-                  </div>
-                ) : filteredOrders.length === 0 ? (
-                  <div className="text-center py-5">
-                    <FiPackage size={48} className="text-muted mb-3" />
-                    <h5 className="text-muted">No orders found</h5>
-                    <p className="text-muted">You haven't placed any orders yet.</p>
-                    <Button as="a" href="/website/products" variant="primary">
-                      Start Shopping
-                    </Button>
-                  </div>
-                ) : (
-                  filteredOrders.map(renderOrderCard)
-                )}
-              </div>
-            </Tab>
-
-            <Tab eventKey="processing" title={`Processing (${filterOrders('processing').length})`}>
-              <div className="orders-list">
-                {filterOrders('processing').length === 0 ? (
-                  <div className="text-center py-5">
-                    <FiPackage size={48} className="text-muted mb-3" />
-                    <h5 className="text-muted">No processing orders</h5>
-                    <p className="text-muted">You don't have any orders being processed.</p>
-                  </div>
-                ) : (
-                  filterOrders('processing').map(renderOrderCard)
-                )}
-              </div>
-            </Tab>
-
-            <Tab eventKey="shipped" title={`Shipped (${filterOrders('shipped').length})`}>
-              <div className="orders-list">
-                {filterOrders('shipped').length === 0 ? (
-                  <div className="text-center py-5">
-                    <FiTruck size={48} className="text-muted mb-3" />
-                    <h5 className="text-muted">No shipped orders</h5>
-                    <p className="text-muted">You don't have any orders that have been shipped.</p>
-                  </div>
-                ) : (
-                  filterOrders('shipped').map(renderOrderCard)
-                )}
-              </div>
-            </Tab>
-
-            <Tab eventKey="delivered" title={`Delivered (${filterOrders('delivered').length})`}>
-              <div className="orders-list">
-                {filterOrders('delivered').length === 0 ? (
-                  <div className="text-center py-5">
-                    <FiCheck size={48} className="text-muted mb-3" />
-                    <h5 className="text-muted">No delivered orders</h5>
-                    <p className="text-muted">You don't have any delivered orders.</p>
-                  </div>
-                ) : (
-                  filterOrders('delivered').map(renderOrderCard)
-                )}
-              </div>
-            </Tab>
-          </Tabs>
-        </Col>
-      </Row>
-    </Container>
+        ) : error ? (
+          <div className="text-center py-5">
+            <p className="text-danger mb-3">{error}</p>
+            <button onClick={loadOrders} className="btn btn-dark">
+              Try Again
+            </button>
+          </div>
+        ) : orders.length === 0 ? (
+          <EmptyOrdersState />
+        ) : (
+          <div className="orders-list">
+            {orders.map((order) => (
+              <OrderCard
+                key={order._id}
+                order={order}
+                onAction={handleOrderAction}
+              />
+            ))}
+          </div>
+        )}
+      </Container>
+    </>
   );
 }

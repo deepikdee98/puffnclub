@@ -1,0 +1,57 @@
+// Privacy Policy - Minimal Custom Styles
+// Only includes styles that cannot be achieved with Bootstrap classes
+
+// Back Link Hover Effect
+.back-link {
+  color: #666;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: #333;
+  }
+  
+  svg {
+    color: #666;
+  }
+}
+
+// Success Links Hover
+.text-success.text-decoration-none {
+  transition: opacity 0.2s ease;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+// Footer
+.privacy-footer {
+  background-color: #f8f8f8;
+  border-top: 1px solid #e5e5e5;
+  
+  svg {
+    color: #333;
+  }
+  
+  .social-icon {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    color: #666;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      border-color: #333;
+      color: #333;
+    }
+  }
+  
+  a.text-muted {
+    transition: color 0.2s ease;
+    
+    &:hover {
+      color: #333 !important;
+    }
+  }
+}

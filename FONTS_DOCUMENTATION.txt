@@ -1,0 +1,163 @@
+================================================================================
+                    PUFFN CLUB - FONTS DOCUMENTATION
+================================================================================
+
+📚 FONT FAMILIES
+================================================================================
+
+1. BEBAS NEUE (Headings Font)
+   - Used for: All headings (h1, h2, h3, h4, h5, h6)
+   - Weight: 400 (Regular only)
+   - Style: Uppercase, bold display font
+   - CSS Variable: var(--font-bebas-neue)
+   - Characteristics: Letter-spacing: 1px, Text-transform: uppercase
+
+2. INSTRUMENT SANS (Body Font)
+   - Used for: Body text, paragraphs, buttons, labels, inputs, forms
+   - Weights: 400 (Regular), 500 (Medium), 600 (Semi-Bold), 700 (Bold)
+   - CSS Variable: var(--font-instrument-sans)
+   - Supports: Regular and Italic styles
+
+
+📋 FONT WEIGHT REFERENCE
+================================================================================
+
+Instrument Sans Weights:
+- 400 = Regular/Normal    → Use: font-weight: 400 or class="fw-normal"
+- 500 = Medium            → Use: font-weight: 500
+- 600 = Semi-Bold         → Use: font-weight: 600 or class="fw-semibold"
+- 700 = Bold              → Use: font-weight: 700 or class="fw-bold"
+
+Bebas Neue Weights:
+- 400 = Regular (only)    → Always bold-looking by design
+
+
+🎨 COLOR VARIABLES
+================================================================================
+
+CSS Variable              Hex Code    Color Name
+--primary-color          #007bff     Blue
+--secondary-color        #6c757d     Gray
+--success-color          #28a745     Green
+--danger-color           #dc3545     Red
+--warning-color          #ffc107     Yellow
+--info-color             #17a2b8     Cyan
+--light-color            #f8f9fa     Light Gray
+--dark-color             #343a40     Dark Gray/Black
+
+
+💻 USAGE EXAMPLES
+================================================================================
+
+HEADINGS (Automatic - Uses Bebas Neue):
+<h1>Main Heading</h1>
+<h2>Sub Heading</h2>
+
+BODY TEXT (Automatic - Uses Instrument Sans):
+<p>Regular paragraph text</p>
+<button>Button text</button>
+<label>Form label</label>
+
+FONT WEIGHTS:
+<p className="fw-bold">Bold text (700)</p>
+<p className="fw-semibold">Semi-bold (600)</p>
+<p className="fw-normal">Regular (400)</p>
+<p style={{ fontWeight: 500 }}>Medium weight (500)</p>
+
+COLORS - CSS Variables:
+<p style={{ color: 'var(--primary-color)' }}>Blue text</p>
+<p style={{ color: 'var(--success-color)' }}>Green text</p>
+
+COLORS - Bootstrap Classes:
+<p className="text-primary">Blue text</p>
+<p className="text-danger">Red text</p>
+<p className="text-success">Green text</p>
+
+COLORS - Direct Hex:
+<p style={{ color: '#28a745' }}>Green text</p>
+
+
+📁 FILE LOCATIONS
+================================================================================
+
+Font Configuration:
+- /frontend/src/app/layout.tsx (Lines 2, 11-23, 56)
+
+Global Styles:
+- /frontend/src/styles/globals.scss (Lines 1-119)
+
+Font Variables:
+- CSS Variables set in layout.tsx and referenced in globals.scss
+
+
+⚙️ TECHNICAL DETAILS
+================================================================================
+
+Loading Method:
+- Next.js `next/font/google` for optimized loading
+- Google Fonts CDN as fallback (in <head>)
+- Font display: swap (for better performance)
+
+Font Configuration Location:
+File: /frontend/src/app/layout.tsx
+
+Import Statement:
+import { Bebas_Neue, Instrument_Sans } from "next/font/google";
+
+Applied to Body:
+className={`${instrumentSans.variable} ${bebasNeue.variable} ${instrumentSans.className}`}
+
+
+✅ BEST PRACTICES
+================================================================================
+
+1. Use Bebas Neue for:
+   - Page titles
+   - Section headings
+   - Important callouts
+   - Navigation items (if needed uppercase)
+
+2. Use Instrument Sans for:
+   - All body copy
+   - Descriptions
+   - Form elements
+   - Buttons
+   - Cards content
+
+3. Font Weight Guidelines:
+   - 400 (Regular): Default body text
+   - 500 (Medium): Emphasis, subtle highlighting
+   - 600 (Semi-Bold): Subheadings, important labels
+   - 700 (Bold): Strong emphasis, key information
+
+4. Color Usage:
+   - Use CSS variables for consistency
+   - Prefer Bootstrap classes for common colors
+   - Use hex codes only when necessary
+
+
+🔧 CUSTOMIZATION
+================================================================================
+
+To add new font weights for Instrument Sans:
+Edit /frontend/src/app/layout.tsx
+
+const instrumentSans = Instrument_Sans({
+  subsets: ["latin"],
+  weight: ['400', '500', '600', '700', '800'], // Add 800 if needed
+  variable: '--font-instrument-sans',
+  display: 'swap',
+});
+
+To add new colors:
+Edit /frontend/src/styles/globals.scss
+
+:root {
+  --custom-color: #123456;
+}
+
+
+================================================================================
+Last Updated: 2025-12-16
+Project: PuffnClub E-commerce
+================================================================================

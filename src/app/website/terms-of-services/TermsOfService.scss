@@ -1,0 +1,25 @@
+// Terms of Service - Minimal Custom Styles
+// Only includes styles that cannot be achieved with Bootstrap classes
+
+// Back Link Hover Effect
+.back-link {
+  color: #666;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: #333;
+  }
+  
+  svg {
+    color: #666;
+  }
+}
+
+// Links with Success Color Hover
+.text-success.text-decoration-none {
+  transition: opacity 0.2s ease;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}

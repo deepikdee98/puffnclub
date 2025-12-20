@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./style.module.scss";
 import { Container } from "react-bootstrap";
+import classNames from "classnames";
 
 const storyCards = [
   {
@@ -28,7 +29,9 @@ const BrandStory: React.FC = () => (
       <p className="text-center text-muted mb-4">
         A vision, to a men’s clothing brand redefining everyday essentials.
       </p>
-      <div className={styles.cardsWrapper}>
+      <div
+        className={classNames("text-center text-md-start", styles.cardsWrapper)}
+      >
         {storyCards.map((card) => (
           <div className={styles.storyCard} key={card.heading}>
             <h5 className="fw-semibold mb-2">{card.heading}</h5>

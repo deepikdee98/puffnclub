@@ -1,0 +1,622 @@
+================================================================================
+                        STATIC PAGES DOCUMENTATION
+================================================================================
+
+OVERVIEW: Informational and utility pages (About, Contact, FAQ, Privacy, Terms)
+
+================================================================================
+ABOUT US PAGE
+================================================================================
+
+FILE: aboutus/page.tsx
+ROUTE: /website/aboutus
+
+PURPOSE:
+Tell the brand story, mission, vision, and values. Build trust and connect
+with customers emotionally.
+
+CONTENT (Typical):
+- Company history and founding story
+- Mission statement
+- Vision for the future
+- Core values
+- Team introduction
+- Brand philosophy
+- Why choose us
+- Achievements/milestones
+- Customer testimonials
+
+FEATURES:
+- Rich text content
+- Images/photos
+- Team member profiles
+- Timeline (optional)
+- Statistics/numbers
+- Call-to-action sections
+
+STYLING:
+- Professional and engaging
+- Brand-aligned colors
+- High-quality images
+- Readable typography
+- Responsive layout
+
+================================================================================
+CONTACT US PAGE
+================================================================================
+
+FILE: contactus/page.tsx
+ROUTE: /website/contactus
+
+NOTE: There are two contact pages (contactus/ and contact/)
+This is a duplicate and should be consolidated.
+
+PURPOSE:
+Provide multiple ways for customers to get in touch with support or sales.
+
+FEATURES:
+
+1. CONTACT FORM:
+   - Name (required)
+   - Email (required)
+   - Phone (optional)
+   - Subject (required)
+   - Message (required, textarea)
+   - Submit button
+
+2. CONTACT INFORMATION:
+   - Business address
+   - Phone number(s)
+   - Email address(es)
+   - Business hours
+   - Social media links
+
+3. MAP:
+   - Embedded Google Maps (optional)
+   - Store/office location
+
+4. OTHER CHANNELS:
+   - WhatsApp link
+   - Live chat (planned)
+   - Social media links
+
+FORM SUBMISSION:
+API: POST /website/contact
+BODY:
+{
+  name: string
+  email: string
+  phone?: string
+  subject: string
+  message: string
+}
+
+RESPONSE:
+{
+  success: true
+  message: "Message sent successfully"
+}
+
+SUCCESS:
+- Show success toast
+- Clear form fields
+- Optional: Redirect to thank you message
+
+ERROR:
+- Show error toast
+- Keep form data
+- Highlight validation errors
+
+VALIDATION:
+- Email format validation
+- Required field validation
+- Message minimum length
+- Phone format (if provided)
+
+================================================================================
+FAQ PAGE
+================================================================================
+
+FILE: faq/page.tsx
+ROUTE: /website/faq
+
+PURPOSE:
+Answer frequently asked questions to reduce support burden and help customers
+find quick answers.
+
+STRUCTURE:
+
+1. ACCORDION LAYOUT:
+   - Questions as accordion headers
+   - Answers expand on click
+   - One or multiple open at once
+   - Bootstrap Accordion component
+
+2. CATEGORIES:
+   - Shipping & Delivery
+   - Returns & Exchanges
+   - Payment & Pricing
+   - Product Information
+   - Account & Orders
+   - General
+
+3. SEARCH:
+   - Search box to filter FAQs (planned)
+   - Real-time filtering
+   - Highlight matching terms
+
+DATA SOURCE:
+API: GET /website/faqs
+RETURNS:
+{
+  success: true
+  faqs: [
+    {
+      _id: string
+      question: string
+      answer: string
+      category: string
+      order: number
+      isActive: boolean
+    }
+  ]
+}
+
+DISPLAY:
+- Group by category
+- Sort by order field
+- Only show active FAQs
+- Collapsible sections
+
+FEATURES:
+- "Was this helpful?" feedback (planned)
+- "Still have questions? Contact us" CTA
+- Related FAQs suggestions (planned)
+
+================================================================================
+PRIVACY POLICY PAGE
+================================================================================
+
+FILE: privacy/page.tsx
+ROUTE: /website/privacy
+
+PURPOSE:
+Explain how customer data is collected, used, stored, and protected.
+Legal requirement for GDPR and other privacy laws.
+
+TYPICAL SECTIONS:
+
+1. Information We Collect:
+   - Personal information (name, email, phone)
+   - Shipping address
+   - Payment information
+   - Browsing data (cookies, IP address)
+   - Device information
+
+2. How We Use Information:
+   - Order processing
+   - Communication
+   - Marketing (with consent)
+   - Improve services
+   - Fraud prevention
+
+3. Information Sharing:
+   - Service providers (payment, shipping)
+   - Legal requirements
+   - Business transfers
+   - With consent
+
+4. Data Security:
+   - Encryption (SSL)
+   - Secure storage
+   - Access controls
+   - Regular audits
+
+5. Your Rights:
+   - Access your data
+   - Correct inaccuracies
+   - Delete data (right to be forgotten)
+   - Opt-out of marketing
+   - Data portability
+
+6. Cookies:
+   - Types of cookies used
+   - How to disable cookies
+   - Cookie preferences
+
+7. Third-Party Links:
+   - Disclaimer for external sites
+   - Not responsible for their privacy
+
+8. Children's Privacy:
+   - Age restrictions
+   - Parental consent
+
+9. Changes to Policy:
+   - How updates are communicated
+   - Last updated date
+
+10. Contact Information:
+    - Data protection officer
+    - Email for privacy inquiries
+
+LEGAL COMPLIANCE:
+- GDPR (EU)
+- CCPA (California)
+- Other regional laws
+
+CONTENT:
+- Plain language
+- Clear sections
+- Easy to navigate
+- Printable/downloadable (PDF)
+
+================================================================================
+TERMS OF SERVICE PAGE
+================================================================================
+
+FILE: terms-of-services/page.tsx
+ROUTE: /website/terms-of-services
+
+PURPOSE:
+Legal agreement between the business and customers. Defines rights,
+responsibilities, and limitations.
+
+TYPICAL SECTIONS:
+
+1. Acceptance of Terms:
+   - By using site, you agree to terms
+   - Age restrictions (18+)
+
+2. Account Registration:
+   - Accuracy of information
+   - Account security
+   - Prohibited activities
+
+3. Products and Services:
+   - Product descriptions
+   - Pricing
+   - Availability
+   - Right to modify offerings
+
+4. Orders and Payment:
+   - Order acceptance
+   - Payment methods
+   - Pricing errors
+   - Taxes and fees
+
+5. Shipping and Delivery:
+   - Delivery timeframes
+   - Shipping costs
+   - Risk of loss
+   - Delivery failures
+
+6. Returns and Refunds:
+   - Return policy summary
+   - Link to detailed return policy
+   - Refund processing time
+   - Non-returnable items
+
+7. Intellectual Property:
+   - Trademarks
+   - Copyrights
+   - User-generated content
+   - Prohibited uses
+
+8. User Conduct:
+   - Prohibited activities
+   - Account suspension/termination
+   - Legal consequences
+
+9. Limitation of Liability:
+   - Disclaimer of warranties
+   - Limitation of damages
+   - Indemnification
+
+10. Dispute Resolution:
+    - Governing law
+    - Jurisdiction
+    - Arbitration
+    - Class action waiver
+
+11. Modifications:
+    - Right to change terms
+    - Notice of changes
+    - Continued use = acceptance
+
+12. Contact Information:
+    - Legal inquiries
+    - Customer support
+
+CONTENT:
+- Legal language (consult lawyer)
+- Clear structure
+- Easy to find
+- Last updated date
+- Version history (optional)
+
+================================================================================
+COLLECTIONS PAGE
+================================================================================
+
+FILE: collections/page.tsx
+ROUTE: /website/collections
+
+PURPOSE:
+Showcase curated product collections (e.g., Summer Collection, Best Sellers,
+New Arrivals, Sale Items).
+
+FEATURES:
+
+1. COLLECTION CARDS:
+   - Collection image
+   - Collection name
+   - Description
+   - Product count
+   - "View Collection" button
+
+2. COLLECTION DETAIL:
+   - Click card → Navigate to products page with collection filter
+   - Example: /website/products?collection=summer-2024
+
+3. LAYOUTS:
+   - Grid layout
+   - Feature collections
+   - Seasonal collections
+
+COMPONENT:
+- ShopByCollection.tsx
+- Displays collection grid
+- Links to filtered product pages
+
+DATA SOURCE:
+- Can be static or from API
+- Collections managed in admin panel (future)
+
+PLANNED FEATURES:
+☐ Collection API endpoint
+☐ Dynamic collection creation
+☐ Collection scheduling (start/end dates)
+☐ Collection banners
+☐ Collection stories
+
+================================================================================
+SHARED FEATURES ACROSS STATIC PAGES
+================================================================================
+
+1. SEO OPTIMIZATION:
+   - Meta titles
+   - Meta descriptions
+   - Open Graph tags
+   - Structured data
+   - Canonical URLs
+
+2. BREADCRUMBS:
+   - Navigation path
+   - Home > Page Name
+
+3. LAYOUT:
+   - Consistent header/footer
+   - Clean, readable design
+   - Mobile responsive
+
+4. LEGAL LINKS:
+   - Always accessible in footer
+   - Cross-linked between pages
+
+5. LAST UPDATED:
+   - Show last updated date
+   - Especially for legal pages
+
+================================================================================
+CONTENT MANAGEMENT
+================================================================================
+
+CURRENT STATE:
+- Static content hardcoded in components
+- Manual updates required
+- No versioning
+
+FUTURE CMS:
+☐ Admin panel for content editing
+☐ Rich text editor
+☐ Version control
+☐ Preview before publish
+☐ Scheduling
+☐ Multi-language support
+☐ SEO settings per page
+
+================================================================================
+STYLING & DESIGN
+================================================================================
+
+CONSISTENCY:
+- Use same design system
+- Bootstrap components
+- Brand colors
+- Typography scale
+- Spacing system
+
+TYPOGRAPHY:
+- Clear headings hierarchy
+- Readable body text
+- Proper line height
+- Adequate contrast
+
+RESPONSIVE:
+- Mobile-first design
+- Tablet breakpoints
+- Desktop optimization
+- Print-friendly (legal pages)
+
+ACCESSIBILITY:
+- Proper heading structure
+- Alt text for images
+- Keyboard navigation
+- Screen reader friendly
+- Color contrast compliance
+
+================================================================================
+NAVIGATION TO STATIC PAGES
+================================================================================
+
+FOOTER LINKS:
+- About Us
+- Contact Us
+- FAQ
+- Privacy Policy
+- Terms of Service
+
+HEADER LINKS:
+- About (sometimes)
+- Contact
+- FAQ
+
+OTHER PLACES:
+- Checkout (legal links)
+- Account settings (legal links)
+- Product pages (FAQ link)
+
+================================================================================
+PENDING IMPROVEMENTS
+================================================================================
+
+☐ Consolidate duplicate contact pages
+☐ Add CMS for content management
+☐ Improve SEO for all pages
+☐ Add FAQ search functionality
+☐ Add live chat widget
+☐ Create PDF versions of legal docs
+☐ Add newsletter signup on all pages
+☐ Implement analytics tracking
+☐ Add social sharing buttons
+☐ Create printable versions
+☐ Add language selector (i18n)
+☐ Improve mobile UX
+☐ Add schema markup
+☐ Create sitemap.xml
+☐ Add robots.txt
+
+================================================================================
+CONTACT FORM API
+================================================================================
+
+ENDPOINT: POST /website/contact
+
+REQUEST:
+{
+  name: string (required)
+  email: string (required, valid email)
+  phone: string (optional)
+  subject: string (required)
+  message: string (required, min 10 chars)
+}
+
+RESPONSE (Success):
+{
+  success: true
+  message: "Thank you for contacting us! We'll get back to you soon."
+}
+
+RESPONSE (Error):
+{
+  success: false
+  message: "Failed to send message"
+  errors: {
+    email: "Invalid email format"
+  }
+}
+
+BACKEND HANDLING:
+- Validate input
+- Save to database
+- Send email notification to admin
+- Send confirmation email to customer
+- Optional: Create support ticket
+
+================================================================================
+FAQ API
+================================================================================
+
+ENDPOINT: GET /website/faqs
+
+QUERY PARAMS:
+- category (optional): Filter by category
+- search (optional): Search in questions/answers
+
+RESPONSE:
+{
+  success: true
+  faqs: [
+    {
+      _id: "faq1"
+      question: "What is your return policy?"
+      answer: "You can return items within 30 days..."
+      category: "Returns & Exchanges"
+      order: 1
+      isActive: true
+      createdAt: "2024-01-01"
+      updatedAt: "2024-01-01"
+    }
+  ]
+}
+
+================================================================================
+NEWSLETTER SUBSCRIPTION
+================================================================================
+
+ENDPOINT: POST /website/newsletter/subscribe
+
+REQUEST:
+{
+  email: string (required, valid email)
+}
+
+RESPONSE (Success):
+{
+  success: true
+  message: "Successfully subscribed to newsletter!"
+}
+
+RESPONSE (Already Subscribed):
+{
+  success: false
+  message: "This email is already subscribed"
+}
+
+FEATURES:
+- Email validation
+- Double opt-in (email confirmation)
+- Unsubscribe link in emails
+- Preference management
+- GDPR compliance
+
+BACKEND:
+- Store in newsletter database
+- Send welcome email
+- Integrate with email marketing tool (Mailchimp, SendGrid)
+
+================================================================================
+RELATED FILES
+================================================================================
+
+Static Pages:
+- aboutus/page.tsx
+- contactus/page.tsx
+- contact/page.tsx (duplicate)
+- faq/page.tsx
+- privacy/page.tsx
+- terms-of-services/page.tsx
+- collections/page.tsx
+- collections/ShopByCollection.tsx
+
+Services:
+- services/contactService.ts
+- services/faqService.ts
+
+Components:
+- components/NewFooter.tsx (links to static pages)
+
+================================================================================
+END OF STATIC PAGES DOCUMENTATION
+================================================================================

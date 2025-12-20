@@ -71,6 +71,24 @@ export const API_ENDPOINTS = {
       GET_ACTIVE: `${API_BASE_URL}/coupons/active`,
       VALIDATE: `${API_BASE_URL}/coupons/validate`,
     },
+    
+    // Shipping & Delivery endpoints (Shiprocket)
+    SHIPPING: {
+      GET_RATES: `${API_BASE_URL}/website/shipping/rates`,
+      CHECK_SERVICEABILITY: (pincode: string) => `${API_BASE_URL}/website/shipping/serviceability/${pincode}`,
+    },
+    
+    // Order tracking endpoint
+    ORDER_TRACKING: (orderId: string) => `${API_BASE_URL}/website/orders/${orderId}/tracking`,
+    
+    // Exchange & Return endpoints
+    EXCHANGE_RETURNS: {
+      LIST: `${API_BASE_URL}/website/exchange-returns`,
+      GET_BY_ID: (requestId: string) => `${API_BASE_URL}/website/exchange-returns/${requestId}`,
+      CANCEL: (requestId: string) => `${API_BASE_URL}/website/exchange-returns/${requestId}/cancel`,
+      EXCHANGE: (orderId: string) => `${API_BASE_URL}/website/orders/${orderId}/exchange`,
+      RETURN: (orderId: string) => `${API_BASE_URL}/website/orders/${orderId}/return`,
+    },
   },
 };
 

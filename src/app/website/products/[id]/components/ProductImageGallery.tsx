@@ -304,13 +304,13 @@ export default function ProductImageGallery({
           </Badge>
         )} */}
         {/* Wishlist button */}
-        <Button
+        {/* <Button
           variant={isWishlisted ? "danger" : "light"}
           className="position-absolute top-0 end-0 m-3 rounded-circle"
           onClick={onWishlistToggle}
         >
           <FiHeart fill={isWishlisted ? "currentColor" : "none"} />
-        </Button>
+        </Button> */}
 
         {/* Thumbnails */}
         <div className="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-2 p-2 thumbnail-container-style">

@@ -82,6 +82,8 @@ export interface ProductFilters {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   search?: string;
+  sizes?: string | string[];
+  colors?: string | string[];
 }
 
 export const productService = {

@@ -1,0 +1,9 @@
+.filterSidebar {
+  border-right: 1px solid #dee2e6;
+  padding-right: 20px;
+
+  @media (max-width: 991px) {
+    border-right: none;
+    padding-right: 15px;
+  }
+}

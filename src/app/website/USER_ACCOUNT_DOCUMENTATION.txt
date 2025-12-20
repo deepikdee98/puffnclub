@@ -1,0 +1,579 @@
+================================================================================
+                    USER ACCOUNT MANAGEMENT DOCUMENTATION
+================================================================================
+
+OVERVIEW: Profile, Orders, and Wishlist pages for customer account management
+
+================================================================================
+PROFILE PAGE
+================================================================================
+
+FILE: profile/page.tsx
+ROUTE: /website/profile
+REQUIRES: Authentication
+
+PURPOSE:
+Central hub for managing user account information, addresses, and quick access
+to orders, wishlist, and cart.
+
+================================================================================
+PROFILE PAGE FEATURES
+================================================================================
+
+1. NAVIGATION BUTTONS:
+   - Orders button → /website/orders
+   - Wishlist button → /website/wishlist
+   - Cart button → /website/cart
+   - Shows badge counts (planned)
+
+2. USER INFO DISPLAY (components/UserInfo.tsx):
+   - User full name
+   - Profile picture (planned)
+   - Member since date (planned)
+   - Account statistics (planned)
+
+3. MANAGE ACCOUNT TABS:
+   TAB 1 - ACCOUNT DETAILS:
+     - Edit full name
+     - Edit email
+     - Edit phone number
+     - Update button
+     - Form validation
+     NOTE: Update API integration pending
+
+   TAB 2 - ADDRESSES:
+     - List all saved addresses
+     - Add new address
+     - Edit existing address
+     - Delete address
+     - Set default address
+     - Uses AddressSelection component
+
+================================================================================
+STATE MANAGEMENT
+================================================================================
+
+- selectedAddress: UIAddress - Currently selected address
+- apiAddresses: UIAddress[] - All user addresses
+- isLoadingAddresses: Boolean - Address loading state
+- formName: String - Name field value
+- formEmail: String - Email field value
+- formPhone: String - Phone field value
+
+================================================================================
+KEY FUNCTIONS
+================================================================================
+
+fetchAddresses():
+  PURPOSE: Load user addresses from API
+  API: GET /website/addresses
+  PROCESS:
+    1. Fetch addresses from backend
+    2. Map to UI format (street→address, zipCode→pincode)
+    3. Set default address as selected
+  ERROR: Console log, no toast
+
+handleUpdate(e):
+  PURPOSE: Update user account details
+  STATUS: Placeholder (shows alert)
+  TODO: Implement API call to update customer info
+
+Address Management:
+  - Handled by AddressSelection component
+  - Uses addressService for CRUD operations
+
+================================================================================
+ORDERS PAGE
+================================================================================
+
+FILE: orders/page.tsx
+ROUTE: /website/orders
+REQUIRES: Authentication
+
+PURPOSE:
+Display order history with filtering, status tracking, and order management.
+
+================================================================================
+ORDERS PAGE FEATURES
+================================================================================
+
+1. ORDER FILTERING TABS:
+   - All Orders
+   - Processing Orders
+   - Shipped Orders
+   - Delivered Orders
+   - Each tab shows count
+
+2. ORDER CARDS:
+   Each order displays:
+   - Order number
+   - Order date
+   - Order status badge
+   - View details button
+   - Order items with:
+     * Product image
+     * Product name
+     * Size, Color, Quantity
+     * Price
+   - Total amount
+   - Shipping address
+   - Tracking number (if shipped)
+   - Estimated delivery date
+
+3. ORDER ACTIONS:
+   - Track Order (if shipped)
+   - Download Invoice (if delivered)
+   - Cancel Order (if pending/processing)
+   - View Details (all orders)
+
+4. BULK ACTIONS:
+   - Download All Invoices button (header)
+
+5. EMPTY STATES:
+   - No orders: "Start Shopping" CTA
+   - No orders in tab: Tab-specific message
+
+================================================================================
+STATE MANAGEMENT - ORDERS
+================================================================================
+
+- activeTab: String - Selected filter tab
+- orders: Order[] - All user orders
+- loading: Boolean - Loading state
+
+================================================================================
+KEY FUNCTIONS - ORDERS
+================================================================================
+
+loadOrders():
+  PURPOSE: Fetch all customer orders
+  API: GET /website/orders
+  UPDATES: orders state
+  ERROR: Toast notification
+
+handleCancelOrder(orderId):
+  PURPOSE: Cancel pending/processing order
+  API: POST /website/orders/{orderId}/cancel
+  SUCCESS: Reload orders, show toast
+  ERROR: Toast notification
+
+filterOrders(status):
+  PURPOSE: Filter orders by status
+  LOGIC:
+    - "all" → Return all orders
+    - Other → Filter by orderStatus or status field
+  RETURN: Filtered order array
+
+getStatusVariant(status):
+  PURPOSE: Get Bootstrap color variant for status badge
+  MAPPING:
+    - delivered → success (green)
+    - shipped → primary (blue)
+    - processing → info (cyan)
+    - pending → warning (yellow)
+    - cancelled → danger (red)
+
+getStatusIcon(status):
+  PURPOSE: Get icon for order status
+  MAPPING:
+    - delivered → FiCheck
+    - shipped → FiTruck
+    - processing → FiPackage
+    - cancelled → FiX
+
+renderOrderCard(order):
+  PURPOSE: Render individual order card
+  DISPLAYS: All order details and actions
+
+================================================================================
+ORDER DATA STRUCTURE
+================================================================================
+
+Order Type:
+{
+  id: string  // or _id
+  orderNumber: string
+  date: string  // ISO date
+  orderStatus: string  // "pending", "processing", "shipped", "delivered"
+  status: string  // Alternative field name
+  items: [
+    {
+      id: string
+      name: string
+      image: string
+      size: string
+      color: string
+      quantity: number
+      price: number
+    }
+  ]
+  total: number
+  shippingAddress: {
+    name: string
+    address: string
+    city?: string
+    state?: string
+    pincode?: string
+  }
+  trackingNumber?: string
+  estimatedDelivery?: string
+  paymentMethod: string
+  subtotal: number
+  tax: number
+  shipping: number
+  discount: number
+}
+
+================================================================================
+ORDER STATUSES
+================================================================================
+
+PENDING:
+  - Order placed, payment pending
+  - Action: Cancel allowed
+
+PROCESSING:
+  - Payment confirmed, preparing order
+  - Action: Cancel allowed
+
+SHIPPED:
+  - Order dispatched
+  - Action: Track order
+
+DELIVERED:
+  - Order delivered to customer
+  - Action: Download invoice
+
+CANCELLED:
+  - Order cancelled by customer or admin
+  - Action: None
+
+================================================================================
+WISHLIST PAGE
+================================================================================
+
+FILE: wishlist/page.tsx
+ROUTE: /website/wishlist
+REQUIRES: Authentication
+
+PURPOSE:
+Display and manage products saved to wishlist. Allow moving items to cart.
+
+================================================================================
+WISHLIST PAGE FEATURES
+================================================================================
+
+1. WISHLIST ITEMS GRID:
+   - Product cards in grid layout
+   - Each card shows:
+     * Product image
+     * Product name
+     * Brand
+     * Color
+     * Current price
+     * Compare price (strikethrough)
+     * Discount percentage badge
+     * Product tags/badges
+     * "Move to Bag" button
+     * Remove button (trash icon)
+
+2. PAGE HEADER:
+   - Title: "My Wishlist"
+   - Item count
+   - "Continue Shopping" button
+
+3. EMPTY STATES:
+   - Not logged in:
+     * Heart icon
+     * "Please Log In" message
+     * Login button
+
+   - Empty wishlist:
+     * Heart icon
+     * "Your Wishlist is Empty" message
+     * "Continue Shopping" button
+
+4. LOADING STATE:
+   - LoadingSpinner
+   - "Loading your wishlist..." message
+
+================================================================================
+STATE MANAGEMENT - WISHLIST
+================================================================================
+
+Context State (from useWishlist):
+- wishlist: Wishlist object
+- isLoading: Boolean
+- refreshWishlist()
+- removeFromWishlist()
+
+Cart Context (from useCart):
+- addToCart()
+
+Auth Context (from useAuth):
+- isAuthenticated
+
+================================================================================
+KEY FUNCTIONS - WISHLIST
+================================================================================
+
+refreshWishlist():
+  PURPOSE: Reload wishlist from API
+  TRIGGER: Page load (if authenticated)
+  API: GET /website/wishlist
+  UPDATES: Wishlist context state
+
+handleRemove(productId):
+  PURPOSE: Remove product from wishlist
+  API: DELETE /website/wishlist/item/{itemId}
+  PROCESS:
+    1. Find wishlist item by productId
+    2. Call removeFromWishlist with item._id
+  SUCCESS: Item removed, toast shown
+  ERROR: Toast notification
+
+moveToBag(productId):
+  PURPOSE: Add product to cart and remove from wishlist
+  PROCESS:
+    1. Find wishlist item
+    2. Prepare cart payload:
+       - productId
+       - quantity: 1
+       - size: first available size
+       - color: product color
+    3. Call addToCart()
+    4. Call removeFromWishlist()
+  SUCCESS: Both operations complete, toast shown
+  ERROR: Toast notification, log to console
+
+formatCurrency(amount):
+  PURPOSE: Format price as USD
+  RETURN: "$X.XX" format
+
+================================================================================
+WISHLIST DATA STRUCTURE
+================================================================================
+
+Wishlist Type:
+{
+  _id: string
+  customer: string  // Customer ID
+  items: WishlistItem[]
+  totalItems: number
+  createdAt: string
+  updatedAt: string
+}
+
+WishlistItem Type:
+{
+  _id: string  // Wishlist item ID
+  product: {
+    _id: string  // Product ID
+    name: string
+    brand: string
+    price: number
+    compareAtPrice: number
+    color: string
+    images: string[]
+    availableSizes: string[]
+    tags: string[]
+    inStock: boolean
+  }
+  addedAt: string
+}
+
+================================================================================
+API ENDPOINTS USED
+================================================================================
+
+PROFILE:
+1. GET /website/auth/profile
+   Returns: Customer data
+
+2. PATCH /website/auth/profile (TODO)
+   Body: { fullName?, email?, phone? }
+   Returns: Updated customer
+
+3. GET /website/addresses
+   Returns: List of addresses
+
+4. POST /website/addresses
+   Body: Address object
+   Returns: Created address
+
+5. PATCH /website/addresses/{id}
+   Body: Address fields
+   Returns: Updated address
+
+6. DELETE /website/addresses/{id}
+   Returns: Success message
+
+7. PATCH /website/addresses/{id}/default
+   Returns: Updated address list
+
+ORDERS:
+1. GET /website/orders
+   Returns: { success, orders: Order[] }
+
+2. GET /website/orders/{id}
+   Returns: { success, order: Order }
+
+3. POST /website/orders/{id}/cancel
+   Returns: { success, message }
+
+4. GET /website/orders/{id}/invoice (TODO)
+   Returns: PDF file
+
+WISHLIST:
+1. GET /website/wishlist
+   Returns: { success, wishlist: Wishlist }
+
+2. POST /website/wishlist/add
+   Body: { productId }
+   Returns: { success, wishlist: Wishlist }
+
+3. DELETE /website/wishlist/item/{itemId}
+   Returns: { success, wishlist: Wishlist }
+
+4. DELETE /website/wishlist/clear
+   Returns: { success, wishlist: Wishlist }
+
+================================================================================
+CONTEXT USAGE
+================================================================================
+
+useAuth():
+  - customer - User data
+  - isAuthenticated - Login status
+  - updateCustomer() - Update user info
+
+useWishlist():
+  - wishlist - Wishlist data
+  - isLoading - Loading state
+  - addToWishlist() - Add product
+  - removeFromWishlist() - Remove product
+  - isInWishlist() - Check if product in wishlist
+  - refreshWishlist() - Reload data
+
+useCart():
+  - addToCart() - Add to cart from wishlist
+
+addressService:
+  - list() - Get addresses
+  - create() - Add address
+  - update() - Edit address
+  - delete() - Remove address
+  - setDefault() - Set default
+
+orderService:
+  - getOrders() - Fetch order history
+  - getOrderById() - Get single order
+  - cancelOrder() - Cancel order
+
+================================================================================
+RESPONSIVE DESIGN
+================================================================================
+
+PROFILE:
+Mobile: Single column, stacked tabs
+Tablet: Compact layout
+Desktop: Centered max-width: 600px
+
+ORDERS:
+Mobile: Stacked order cards, vertical layout
+Tablet: 2-column item layout
+Desktop: Full card layout with side-by-side items/summary
+
+WISHLIST:
+Mobile: 2 columns (col-6)
+Tablet: 3 columns (col-md-3)
+Desktop: 4 columns (col-lg-3)
+
+================================================================================
+ERROR HANDLING
+================================================================================
+
+- Not authenticated → Show login prompt/redirect
+- API errors → Toast notifications
+- Empty states → Helpful messages with CTAs
+- Address CRUD errors → Toast notifications
+- Order cancellation errors → Toast notifications
+
+================================================================================
+LOADING STATES
+================================================================================
+
+- Profile: No explicit loading (uses customer from context)
+- Addresses: isLoadingAddresses state
+- Orders: LoadingSpinner + message
+- Wishlist: LoadingSpinner + message
+
+================================================================================
+ANIMATIONS
+================================================================================
+
+- Wishlist cards: FlipYOnScroll animation
+- Smooth transitions on state changes
+- Button hover effects
+- Card hover effects
+
+================================================================================
+PENDING FEATURES
+================================================================================
+
+PROFILE:
+☐ Profile picture upload
+☐ Password change
+☐ Email verification
+☐ Phone verification
+☐ Deactivate account
+☐ Download account data
+☐ Account statistics (total orders, spending, etc.)
+
+ORDERS:
+☐ Order tracking integration (Shiprocket)
+☐ Invoice download
+☐ Return/Exchange request
+☐ Order search
+☐ Date range filter
+☐ Export orders to CSV
+☐ Reorder functionality
+☐ Order notes/comments
+
+WISHLIST:
+☐ Wishlist sharing (share link)
+☐ Multiple wishlists
+☐ Wishlist name/description
+☐ Move all to cart
+☐ Sort wishlist (newest, price)
+☐ Wishlist privacy settings
+☐ Price drop notifications
+☐ Back in stock notifications
+
+================================================================================
+RELATED FILES
+================================================================================
+
+Profile:
+- profile/page.tsx
+- profile/components/UserInfo.tsx
+- profile/components/UserAddresses.tsx
+
+Orders:
+- orders/page.tsx
+- services/orderService.ts
+
+Wishlist:
+- wishlist/page.tsx
+- contexts/WishlistContext.tsx
+- services/wishlistService.ts
+
+Shared:
+- contexts/AuthContext.tsx
+- services/addressService.ts
+- cart/components/AddressSelection.tsx
+- cart/components/AddressForm.tsx
+
+================================================================================
+END OF USER ACCOUNT DOCUMENTATION
+================================================================================

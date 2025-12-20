@@ -1,0 +1,536 @@
+================================================================================
+                         PRODUCTS PAGE DOCUMENTATION
+================================================================================
+
+OVERVIEW: Product browsing, filtering, and detail pages
+
+================================================================================
+PRODUCT LISTING PAGE
+================================================================================
+
+FILE: products/page.tsx
+ROUTE: /website/products
+       /website/products?category={categorySlug}
+
+PURPOSE:
+Display all products with filtering, sorting, and pagination capabilities.
+
+================================================================================
+FEATURES & FUNCTIONALITY
+================================================================================
+
+1. PRODUCT DISPLAY:
+   - Grid view (default, 3-4 columns)
+   - List view (optional, full-width rows)
+   - Product cards with:
+     * Product image
+     * Product name
+     * Brand
+     * Price (current and compare price)
+     * Star ratings
+     * Review count
+     * Tags/badges (Sale, New Arrival, etc.)
+     * Add to wishlist button
+     * View details link
+
+2. FILTERING:
+   - Category filter (radio buttons)
+   - Brand filter (currently hidden)
+   - Price range filter (currently hidden)
+   - URL parameter support (?category=...)
+
+3. SORTING:
+   - Name (A-Z)
+   - Price: Low to High
+   - Price: High to Low
+   - Rating (planned)
+
+4. PAGINATION:
+   - Page numbers
+   - Previous/Next navigation
+   - Shows max 5 page numbers at a time
+   - Jump to specific page
+
+5. VIEW MODES:
+   - Grid view (compact cards)
+   - List view (detailed rows with more info)
+
+================================================================================
+STATE MANAGEMENT
+================================================================================
+
+- products: Product[] - Current page products
+- loading: Boolean - Loading state
+- viewMode: "grid" | "list" - Display mode
+- sortBy: String - Current sort method
+- selectedCategory: CategoryKey - Selected category
+- selectedBrand: String - Selected brand (not active)
+- selectedPriceRange: Object - Selected price range (not active)
+- currentPage: Number - Current page number
+- productsPerPage: 12 - Items per page
+- pagination: Object - Pagination metadata
+- initialized: Boolean - URL params parsed
+
+================================================================================
+KEY FUNCTIONS
+================================================================================
+
+loadProducts():
+  PURPOSE: Fetch products with filters applied
+  API CALLS:
+    - /website/products (all products)
+    - /website/products/category/{category} (filtered)
+  PROCESS:
+    1. Build filters object
+    2. Determine API endpoint based on category
+    3. Fetch products
+    4. Normalize product data
+    5. Fetch review stats for each product
+    6. Update state with merged data
+  FILTERS APPLIED:
+    - category
+    - minPrice, maxPrice
+    - sortBy, sortOrder
+    - page, limit
+
+handleAddToWishlist(productId):
+  - Adds product to wishlist
+  - Uses WishlistContext
+  - Shows toast notification
+
+renderStars(rating):
+  - Displays star rating visually
+  - Full and half stars
+
+renderPagination():
+  - Renders pagination controls
+  - Handles page navigation
+  - Shows ellipsis for large page counts
+
+================================================================================
+CATEGORY MAPPING
+================================================================================
+
+categoryMapping Object:
+{
+  "All": { display: "All", value: "All" },
+  "T-Shirts": { display: "T-Shirts", value: "T-Shirt" },
+  "Oversize T-Shirts": { display: "Oversize T-Shirts", value: "Over_Size" }
+}
+
+PURPOSE:
+- Maps frontend display names to backend category values
+- Handles URL parameter variations
+
+URL PARAMETER HANDLING:
+- Accepts: "t-shirt", "T-Shirt", "tshirt", "T-SHIRT"
+- Normalizes to correct category key
+
+================================================================================
+PRODUCT DETAIL PAGE
+================================================================================
+
+FILE: products/[id]/page.tsx
+ROUTE: /website/products/{productId}
+
+PURPOSE:
+Display complete product information for a single product.
+
+================================================================================
+COMPONENTS USED
+================================================================================
+
+1. ProductImageGallery:
+   - Shows product images for selected color
+   - Image carousel/gallery
+   - Zoom on click (planned)
+   - Badge display (New, Best Seller)
+   - Wishlist toggle button
+
+2. ProductInfo:
+   - Product name
+   - Brand
+   - Price (current and compare)
+   - Discount percentage
+   - Rating and review count
+   - Short description
+
+3. ColorSelector:
+   - Shows available colors from variants
+   - Visual color swatches
+   - Click to select color
+   - Updates image gallery
+
+4. SizeSelector:
+   - Shows available sizes for selected color
+   - Size buttons (S, M, L, XL, etc.)
+   - Disabled if out of stock
+   - Shows availability
+
+5. QuantitySelector:
+   - +/- buttons to adjust quantity
+   - Min: 1, Max: 10
+   - Displays current quantity
+
+6. ProductActions:
+   - "Add to Cart" button
+   - "Add to Wishlist" button
+   - Handles authentication check
+   - Shows loading states
+
+7. DeliveryInfo:
+   - Delivery estimates
+   - Shipping information
+   - Return policy
+   - COD availability
+
+8. ProductAdditionalDetails:
+   - Material/fabric info
+   - Care instructions
+   - Size chart link
+   - Product specifications
+
+9. ProductDescriptionAndReviews:
+   - Tabbed interface
+   - Description tab: Full product description
+   - Reviews tab: Customer reviews with:
+     * Average rating
+     * Review count
+     * Individual reviews
+     * Rating distribution
+     * Write review button (planned)
+
+10. RelatedProducts:
+    - Shows similar products
+    - Horizontal scrollable carousel
+    - Product cards with basic info
+    - Links to product detail pages
+
+================================================================================
+PRODUCT DATA STRUCTURE
+================================================================================
+
+Product Type:
+{
+  _id: string
+  name: string
+  description: string
+  brand: string
+  price: number
+  comparePrice?: number
+  compareAtPrice?: number  // Alternative field name
+  category: string
+  subcategory?: string
+  tags: string[]
+  images: string[]
+  primaryImage?: string
+
+  // Variants (color-based)
+  variants?: [
+    {
+      color: string
+      images: string[]
+      sizes: string[]
+      stock: number
+    }
+  ]
+
+  // Legacy fields
+  color?: string
+  availableSizes: string[]
+  totalStock: number
+  inStock: boolean
+
+  // Review data (fetched separately)
+  rating?: number
+  reviewCount?: number
+
+  // Metadata
+  featured: boolean
+  trending: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+================================================================================
+DATA FLOW - PRODUCT DETAIL
+================================================================================
+
+1. PAGE LOAD:
+   - Extract productId from URL params
+   - Fetch product data
+
+2. FETCH PRODUCT:
+   API: GET /website/product/{id}
+   RESPONSE:
+   {
+     product: Product
+     relatedProducts: Product[]
+   }
+
+3. DATA NORMALIZATION:
+   - Normalize product (ensure arrays exist)
+   - Normalize related products
+
+4. FETCH REVIEW STATS:
+   - For main product: GET /reviews/product/{id}/stats
+   - For each related product: GET /reviews/product/{id}/stats
+   - Merge review data with product data
+
+5. SET DEFAULTS:
+   - Default color: First variant color or product.color
+   - Default size: First available size
+   - Quantity: 1
+
+6. CHECK WISHLIST:
+   - Check if product is in wishlist
+   - Update wishlist icon state
+
+7. RENDER:
+   - Display product info
+   - Show selected color images
+   - Enable size selection
+   - Show related products
+
+================================================================================
+KEY FUNCTIONS - PRODUCT DETAIL
+================================================================================
+
+fetchProduct():
+  - Fetches product by ID
+  - Normalizes product data
+  - Fetches review stats
+  - Sets default selections
+  - Handles errors
+
+handleAddToCart():
+  - Validates size selection
+  - Checks authentication
+  - Adds product to cart with:
+    * productId
+    * quantity
+    * size
+    * color
+  - Shows success/error toast
+  - Redirects to login if not authenticated
+
+handleWishlist():
+  - Checks authentication
+  - Adds or removes from wishlist
+  - Updates wishlist icon state
+  - Shows toast notification
+
+handleQuantityChange(change):
+  - Increments/decrements quantity
+  - Enforces min (1) and max (10) limits
+
+getAvailableSizesForColor(color):
+  - Filters variants by color
+  - Returns sizes for that color
+  - Returns availability status
+
+getDiscountPercentage():
+  - Calculates discount from comparePrice
+  - Returns percentage (0 if no discount)
+
+================================================================================
+PRODUCT NORMALIZATION
+================================================================================
+
+PURPOSE: Ensure consistent data structure
+
+normalizeProductData(product):
+  - Ensures all array fields exist (default to [])
+  - Handles missing images
+  - Handles missing variants
+  - Handles missing tags
+  - Standardizes field names
+  - Prevents undefined errors
+
+Fields Normalized:
+  - images → [] if missing
+  - variants → [] if missing
+  - tags → [] if missing
+  - availableSizes → [] if missing
+
+================================================================================
+REVIEW SYSTEM
+================================================================================
+
+FUNCTIONALITY:
+- Fetch review statistics for products
+- Display average rating
+- Display total review count
+- Show individual reviews
+- Star rating visualization
+
+API ENDPOINT:
+GET /reviews/product/{productId}/stats
+
+RESPONSE:
+{
+  averageRating: number  // 0-5
+  totalReviews: number
+  ratingDistribution: {
+    5: number,
+    4: number,
+    3: number,
+    2: number,
+    1: number
+  }
+}
+
+DISPLAY:
+- Star icons (full/half stars)
+- Rating number (e.g., 4.5)
+- Review count (e.g., "123 reviews")
+
+PLANNED:
+- Write review functionality
+- Review images
+- Verified purchase badge
+- Helpful votes
+- Sort/filter reviews
+
+================================================================================
+RESPONSIVE DESIGN
+================================================================================
+
+MOBILE:
+- Single column layout
+- Stacked product info
+- Full-width images
+- Collapsed filters
+
+TABLET:
+- 2-column product grid
+- Side-by-side image and info
+
+DESKTOP:
+- 3-4 column product grid
+- Gallery on left, details on right
+- Visible filters sidebar
+- Related products carousel
+
+================================================================================
+API ENDPOINTS USED
+================================================================================
+
+1. GET /website/products
+   Query Params:
+   - page, limit
+   - sortBy, sortOrder
+   - category
+   - minPrice, maxPrice
+   - search (planned)
+
+2. GET /website/products/category/{category}
+   Query Params: Same as above (except category)
+
+3. GET /website/products/featured
+   Query Params: limit
+
+4. GET /website/product/{id}
+   Returns: Product + related products
+
+5. GET /reviews/product/{id}/stats
+   Returns: Rating statistics
+
+6. GET /categories/dropdown
+   Returns: Category list
+
+================================================================================
+CONTEXT USAGE
+================================================================================
+
+useCart():
+  - addToCart() - Add product to cart
+
+useAuth():
+  - isAuthenticated - Check login status
+
+useWishlist():
+  - addToWishlist() - Add to wishlist
+  - removeFromWishlist() - Remove from wishlist
+  - isInWishlist() - Check if in wishlist
+
+================================================================================
+ERROR HANDLING
+================================================================================
+
+- Product not found → Show "Product not found" message
+- API errors → Toast notification + console log
+- Image load failures → Fallback placeholder image
+- Missing data → Safe defaults (empty arrays, 0 values)
+
+================================================================================
+LOADING STATES
+================================================================================
+
+- Product list: LoadingSpinner + "Loading products..."
+- Product detail: LoadingSpinner + "Loading product details..."
+- Add to cart: Button disabled + loading text
+- Reviews: Loading indicator in reviews section
+
+================================================================================
+PERFORMANCE OPTIMIZATIONS
+================================================================================
+
+✓ Suspense wrapper for product list
+✓ Parallel review fetching (Promise.all)
+✓ Data normalization prevents crashes
+✓ Pagination reduces data load
+
+⚠ IMPROVEMENTS NEEDED:
+  - Image lazy loading
+  - Virtual scrolling for long lists
+  - Product data caching
+  - Optimistic UI updates
+  - Debounced search
+  - Intersection Observer for infinite scroll
+
+================================================================================
+PENDING FEATURES
+================================================================================
+
+☐ Advanced filtering (multi-select)
+☐ Price range slider
+☐ Search functionality
+☐ Product comparison
+☐ Quick view modal
+☐ Size guide/chart modal
+☐ Image zoom functionality
+☐ Product videos
+☐ 360° product view
+☐ Stock notifications
+☐ Recently viewed products
+☐ Share product (social media)
+☐ Print product info
+☐ Write product reviews
+☐ Q&A section
+
+================================================================================
+RELATED FILES
+================================================================================
+
+Product Listing:
+- products/page.tsx
+- services/productService.ts
+- utils/productUtils.ts
+- constants/FadeUpOnScroll.tsx
+
+Product Detail:
+- products/[id]/page.tsx
+- products/[id]/components/* (all components)
+- products/[id]/styles.module.scss
+- PRODUCT_DETAIL_PAGE_DOCUMENTATION.txt (existing)
+
+Services:
+- services/productService.ts
+- services/reviewService.ts
+- contexts/CartContext.tsx
+- contexts/WishlistContext.tsx
+
+================================================================================
+END OF PRODUCTS DOCUMENTATION
+================================================================================

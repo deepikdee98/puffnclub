@@ -68,16 +68,18 @@ export default function RootLayout({
         <LayoutWrapper>{children}</LayoutWrapper>
 
         <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
+          position="top-center"
+          autoClose={4000}
+          hideProgressBar={true}
           newestOnTop={false}
+          closeButton={false}
           closeOnClick
           rtl={false}
-          pauseOnFocusLoss
-          draggable
+          pauseOnFocusLoss={false}
+          draggable={false}
           pauseOnHover
           theme="light"
+          className="custom-toast-container"
         />
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" />
