@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { FiHeart, FiStar } from "react-icons/fi";
 import Link from "next/link";
@@ -11,9 +11,21 @@ import { useWishlist } from "../contexts/WishlistContext";
 import { useCart } from "../contexts/CartContext";
 import { toast } from "react-toastify";
 import { FlipYOnScroll } from "../constants/FadeUpOnScroll";
+import MobileLoginPopup from "../auth/login-new/components/MobileLoginPopup";
+import OtpPopup from "../auth/login-new/components/OtpPopup";
+import { API_ENDPOINTS, setAuthToken } from "../services/api";
+import { useRouter } from "next/navigation";
 
 export default function WishlistPage() {
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
+  
+  // Login popup states
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [showOtpPopup, setShowOtpPopup] = useState(false);
+  const [otpMobile, setOtpMobile] = useState("");
+  const [sessionId, setSessionId] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
   const { wishlist, isLoading, refreshWishlist, removeFromWishlist } =
     useWishlist();
   const { addToCart } = useCart();
@@ -22,6 +34,124 @@ export default function WishlistPage() {
     if (isAuthenticated) refreshWishlist();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
+
+  const handleOtpRequested = async (mobile: string) => {
+    console.log("🔵 handleOtpRequested called with mobile:", mobile);
+    setLoginLoading(true);
+
+    try {
+      console.log(
+        "🔵 Sending OTP request to:",
+        API_ENDPOINTS.WEBSITE.AUTH.SEND_OTP
+      );
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.SEND_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile }),
+      });
+
+      const data = await response.json();
+      console.log("🔵 Response:", data);
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to send OTP");
+      }
+
+      // Store session info
+      setSessionId(data.sessionId);
+      setOtpMobile(mobile);
+
+      // Close login popup and open OTP popup
+      setShowLoginPopup(false);
+      setShowOtpPopup(true);
+    } catch (err: any) {
+      console.error("❌ Error sending OTP:", err);
+      toast.error(err.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleOtpConfirm = async (otp: string) => {
+    console.log("🔵 handleOtpConfirm called with OTP:", otp);
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.VERIFY_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          mobile: otpMobile,
+          otp,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("🔵 Verify OTP Response:", data);
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Invalid OTP");
+      }
+
+      // Store auth token
+      if (data.token) {
+        setAuthToken(data.token);
+
+        // Store user data if available
+        if (data.user) {
+          localStorage.setItem("website_user", JSON.stringify(data.user));
+        }
+
+        // Close modal and refresh wishlist
+        setShowOtpPopup(false);
+        toast.success("Login successful!");
+        setTimeout(() => {
+          window.location.reload(); // Reload to update auth context and refresh wishlist
+        }, 500);
+      }
+    } catch (err: any) {
+      console.error("❌ Error verifying OTP:", err);
+      toast.error(err.message || "Invalid OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleOtpResend = async () => {
+    console.log("🔵 handleOtpResend called for mobile:", otpMobile);
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.RESEND_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          mobile: otpMobile,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("🔵 Resend OTP Response:", data);
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to resend OTP");
+      }
+
+      // Update session ID if backend returns a new one
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+      }
+
+      toast.success(data.message || "OTP resent successfully!");
+    } catch (err: any) {
+      console.error("❌ Error resending OTP:", err);
+      toast.error(err.message || "Failed to resend OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -67,20 +197,43 @@ export default function WishlistPage() {
   // Not logged in state
   if (!isAuthenticated) {
     return (
-      <Container className="py-5">
-        <div className="text-center">
-          <div className="mb-4">
-            <FiHeart size={80} className="text-muted" />
+      <>
+        <Container className="py-5">
+          <div className="text-center">
+            <div className="mb-4">
+              <FiHeart size={80} className="text-muted" />
+            </div>
+            <h3 className="mb-3">Please Log In</h3>
+            <p className="text-muted mb-4">
+              You need to be logged in to view your wishlist
+            </p>
+            <Button 
+              onClick={() => setShowLoginPopup(true)} 
+              variant="dark" 
+              size="lg"
+            >
+              Login / Sign Up
+            </Button>
           </div>
-          <h3 className="mb-3">Please Log In</h3>
-          <p className="text-muted mb-4">
-            You need to be logged in to view your wishlist
-          </p>
-          <Button as="a" href="/website/auth/login" variant="dark" size="lg">
-            Login / Sign Up
-          </Button>
-        </div>
-      </Container>
+        </Container>
+
+        {/* Login Popups */}
+        <MobileLoginPopup
+          show={showLoginPopup}
+          onHide={() => setShowLoginPopup(false)}
+          onOtpRequested={handleOtpRequested}
+          loading={loginLoading}
+        />
+
+        <OtpPopup
+          show={showOtpPopup}
+          onHide={() => setShowOtpPopup(false)}
+          onConfirm={handleOtpConfirm}
+          onResend={handleOtpResend}
+          identifier={otpMobile}
+          loading={loginLoading}
+        />
+      </>
     );
   }
 
@@ -231,6 +384,23 @@ export default function WishlistPage() {
           </Row>
         </Col>
       </Row>
+
+      {/* Login Popups */}
+      <MobileLoginPopup
+        show={showLoginPopup}
+        onHide={() => setShowLoginPopup(false)}
+        onOtpRequested={handleOtpRequested}
+        loading={loginLoading}
+      />
+
+      <OtpPopup
+        show={showOtpPopup}
+        onHide={() => setShowOtpPopup(false)}
+        onConfirm={handleOtpConfirm}
+        onResend={handleOtpResend}
+        identifier={otpMobile}
+        loading={loginLoading}
+      />
     </Container>
   );
 }

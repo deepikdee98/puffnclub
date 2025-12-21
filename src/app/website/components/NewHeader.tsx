@@ -22,13 +22,13 @@ export default function Header() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const { customer, logout } = useAuth();
+  const { customer, isAuthenticated, logout } = useAuth();
   const [cartCount] = useState(3); // Replace with actual cart count
   const [wishlistCount] = useState(5); // Replace with actual wishlist count
 
   const handleLogout = async () => {
     await logout();
-    router.push("/auth/login");
+    router.push("/website");
   };
 
   const handleOtpRequested = async (mobile: string) => {
@@ -246,18 +246,32 @@ export default function Header() {
               </Link>
 
               <div className="position-relative">
-                {/* Mobile - Direct link to profile */}
-                <Link
-                  href="/website/profile"
-                  className="btn btn-link text-dark p-0 border-0 d-lg-none"
-                >
-                  <Image
-                    src="/images/profile-icon.svg"
-                    alt="Profile"
-                    width={20}
-                    height={20}
-                  />
-                </Link>
+                {/* Mobile - Profile link with auth check */}
+                {isAuthenticated ? (
+                  <Link
+                    href="/website/profile"
+                    className="btn btn-link text-dark p-0 border-0 d-lg-none"
+                  >
+                    <Image
+                      src="/images/profile-icon.svg"
+                      alt="Profile"
+                      width={20}
+                      height={20}
+                    />
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => setShowLoginPopup(true)}
+                    className="btn btn-link text-dark p-0 border-0 d-lg-none"
+                  >
+                    <Image
+                      src="/images/profile-icon.svg"
+                      alt="Profile"
+                      width={20}
+                      height={20}
+                    />
+                  </button>
+                )}
 
                 {/* Desktop - Profile dropdown */}
                 <div className={`d-none d-lg-block ${styles.profileDropdown}`}>
@@ -322,28 +336,28 @@ export default function Header() {
           {mobileMenuOpen && (
             <div className="d-flex flex-column gap-3 py-3 mt-3 border-top">
               <Link
-                href="/products"
+                href="/website/products"
                 className="text-dark text-decoration-none"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Products
               </Link>
               <Link
-                href="/categories"
+                href="/website/collections"
                 className="text-dark text-decoration-none"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Categories
+                New Collection
               </Link>
               <Link
-                href="/about"
+                href="/website/about"
                 className="text-dark text-decoration-none"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 About
               </Link>
               <Link
-                href="/contactus"
+                href="/website/contactus"
                 className="text-dark text-decoration-none"
                 onClick={() => setMobileMenuOpen(false)}
               >
