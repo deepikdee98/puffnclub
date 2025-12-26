@@ -15,7 +15,7 @@ import MobileLoginPopup from "../auth/login-new/components/MobileLoginPopup";
 import OtpPopup from "../auth/login-new/components/OtpPopup";
 import { API_ENDPOINTS, setAuthToken } from "../services/api";
 
-export default function WishlistPage() {
+export default function WishlistPage() { 
   const { isAuthenticated } = useAuth();
   const { wishlist, isLoading, refreshWishlist, removeFromWishlist } =
     useWishlist();
