@@ -84,6 +84,7 @@ export interface ProductFilters {
   search?: string;
   sizes?: string | string[];
   colors?: string | string[];
+  inStock?: boolean;
 }
 
 export const productService = {
