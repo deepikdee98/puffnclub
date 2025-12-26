@@ -44,7 +44,13 @@ export const productSchema = yup.object().shape({
     .array()
     .of(
       yup.object().shape({
-        color: yup.string().required("Color is required"),
+        color: yup
+          .string()
+          .required("Color is required")
+          .matches(
+            /^#[0-9A-Fa-f]{6}$/,
+            "Color must be a valid HEX code (e.g., #FF5733)"
+          ),
         sizeStocks: yup
           .array()
           .of(
@@ -92,6 +98,32 @@ export const productSchema = yup.object().shape({
   metaDescription: yup
     .string()
     .max(160, "Meta description must not exceed 160 characters"),
+  sizeChartImage: yup.mixed<File>().nullable(),
+  sizeChartImagePreview: yup.string().nullable(),
+  sizeChartMeasurements: yup
+    .array()
+    .of(
+      yup.object().shape({
+        size: yup.string().required("Size is required"),
+        length: yup
+          .number()
+          .required("Length is required")
+          .positive("Length must be positive"),
+        chest: yup
+          .number()
+          .required("Chest is required")
+          .positive("Chest must be positive"),
+        sleeve: yup
+          .number()
+          .required("Sleeve is required")
+          .positive("Sleeve must be positive"),
+      })
+    )
+    .nullable(),
+  sizeChartUnit: yup
+    .string()
+    .oneOf(["inches", "cm"], "Unit must be inches or cm")
+    .nullable(),
 });
 
 export interface SizeStock {
@@ -109,6 +141,13 @@ export interface Variant {
   imagePreviews: string[];
 }
 
+export interface SizeChartMeasurement {
+  size: string;
+  length: number;
+  chest: number;
+  sleeve: number;
+}
+
 export interface ProductFormData {
   name: string;
   description: string;
@@ -123,4 +162,8 @@ export interface ProductFormData {
   featured: boolean;
   metaTitle?: string;
   metaDescription?: string;
+  sizeChartImage?: File | null;
+  sizeChartImagePreview?: string | null;
+  sizeChartMeasurements?: SizeChartMeasurement[];
+  sizeChartUnit?: "inches" | "cm";
 }

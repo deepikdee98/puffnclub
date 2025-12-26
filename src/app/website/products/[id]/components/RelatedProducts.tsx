@@ -9,6 +9,11 @@ export default function RelatedProducts({
   renderStars,
   handleAddToWishlist,
 }: any) {
+  // Don't render the component if there are no products
+  if (!products || products.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <Row className="mt-5 align-items-center">

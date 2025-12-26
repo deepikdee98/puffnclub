@@ -140,30 +140,95 @@ export default function VariantCard({
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3">
-              <Form.Label>Color *</Form.Label>
+              <Form.Label>Color (HEX) *</Form.Label>
               <Controller
                 name={`variants.${index}.color`}
                 control={control}
-                render={({ field }) => (
-                  <Form.Select
-                    {...field}
-                    isInvalid={!!errors.variants?.[index]?.color}
-                    disabled={isLoading}
-                  >
-                    <option value="">Select color</option>
-                    {availableColors.map((color) => (
-                      <option key={color} value={color}>
-                        {color}
-                      </option>
-                    ))}
-                  </Form.Select>
-                )}
+                render={({ field: { value, onChange, ...field } }) => {
+                  const hexValue = value && /^#[0-9A-Fa-f]{6}$/.test(value) ? value : "#000000";
+                  
+                  const handleColorChange = (newValue: string) => {
+                    // Remove any existing # and add new one
+                    const cleaned = newValue.replace(/#/g, "").toUpperCase();
+                    // Only allow hex characters
+                    if (/^[0-9A-Fa-f]{0,6}$/.test(cleaned)) {
+                      const hex = cleaned.length > 0 ? `#${cleaned}` : "#";
+                      onChange(hex);
+                    }
+                  };
+
+                  const handleColorPickerChange = (e: ChangeEvent<HTMLInputElement>) => {
+                    onChange(e.target.value.toUpperCase());
+                  };
+
+                  const handleBlur = () => {
+                    // Ensure valid HEX format on blur
+                    if (value && !/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                      // If incomplete, pad with zeros or set to default
+                      const cleaned = (value.replace(/#/g, "") || "000000").padEnd(6, "0").substring(0, 6);
+                      onChange(`#${cleaned.toUpperCase()}`);
+                    } else if (!value || value === "#") {
+                      onChange("#000000");
+                    }
+                  };
+
+                  return (
+                    <div className="d-flex gap-2 align-items-center">
+                      <div className="position-relative">
+                        <Form.Control
+                          type="color"
+                          value={hexValue}
+                          onChange={handleColorPickerChange}
+                          disabled={isLoading}
+                          style={{
+                            width: "60px",
+                            height: "38px",
+                            padding: "2px",
+                            cursor: isLoading ? "not-allowed" : "pointer",
+                          }}
+                          title="Pick a color"
+                        />
+                      </div>
+                      <div className="flex-grow-1">
+                        <Form.Control
+                          {...field}
+                          type="text"
+                          value={value || ""}
+                          onChange={(e) => handleColorChange(e.target.value)}
+                          onBlur={handleBlur}
+                          placeholder="#000000"
+                          isInvalid={!!errors.variants?.[index]?.color}
+                          disabled={isLoading}
+                          maxLength={7}
+                          style={{
+                            fontFamily: "monospace",
+                            textTransform: "uppercase",
+                          }}
+                        />
+                        {errors.variants?.[index]?.color && (
+                          <Form.Control.Feedback type="invalid">
+                            {errors.variants[index]?.color?.message}
+                          </Form.Control.Feedback>
+                        )}
+                        <Form.Text className="text-muted">
+                          Enter HEX color code (e.g., #FF5733)
+                        </Form.Text>
+                      </div>
+                      <div
+                        style={{
+                          width: "40px",
+                          height: "38px",
+                          backgroundColor: hexValue,
+                          border: "1px solid #dee2e6",
+                          borderRadius: "0.375rem",
+                          flexShrink: 0,
+                        }}
+                        title={`Selected color: ${hexValue}`}
+                      />
+                    </div>
+                  );
+                }}
               />
-              {errors.variants?.[index]?.color && (
-                <Form.Control.Feedback type="invalid">
-                  {errors.variants[index]?.color?.message}
-                </Form.Control.Feedback>
-              )}
             </Form.Group>
           </Col>
           <Col md={6}>

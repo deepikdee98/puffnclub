@@ -55,7 +55,7 @@ export default function RootLayout({
       </head>
       <body className={`${instrumentSans.variable} ${bebasNeue.variable} ${instrumentSans.className}`}>
         <NextTopLoader
-          color="#007bff"
+          color="#000000"
           initialPosition={0.08}
           crawlSpeed={200}
           height={3}

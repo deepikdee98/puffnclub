@@ -7,6 +7,7 @@ export interface Banner {
   title: string;
   subtitle?: string;
   image: string;
+  imageMobile: string;
   buttonText?: string;
   buttonLink?: string;
 }
@@ -74,18 +75,42 @@ const HeroCarousel: React.FC<HeroCarouselProps> = ({ banners, loading }) => {
         {banners.map((banner) => (
           <Carousel.Item key={banner._id}>
             <div
-              className="hero-slide d-flex align-items-center justify-content-center text-white"
+              className="hero-slide d-flex align-items-center justify-content-center text-white position-relative"
               style={{
-                backgroundImage: `url(${banner.image})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
                 height: "650px",
               }}
             >
-              <Container>
+              {/* Desktop Background Image */}
+              <div
+                className="d-none d-md-block position-absolute w-100 h-100"
+                style={{
+                  backgroundImage: `url(${banner.image})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  top: 0,
+                  left: 0,
+                  zIndex: 0,
+                }}
+              />
+              {/* Mobile Background Image */}
+              <div
+                className="d-block d-md-none position-absolute w-100 h-100"
+                style={{
+                  backgroundImage: `url(${banner.imageMobile})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  top: 0,
+                  left: 0,
+                  zIndex: 0,
+                }}
+              />
+              {/* Content Overlay */}
+              <Container className="position-relative" style={{ zIndex: 1 }}>
                 <Row className="justify-content-start text-start">
                   <Col lg={6} className="py-4">
-                    <h3 className="fw-bold mb-2 text-dark">{banner.title}</h3>
+                    <h3 className=" mb-2 font-bebas text-dark">
+                      {banner.title}
+                    </h3>
                     {banner.subtitle && (
                       <p className="mb-3 text-dark">{banner.subtitle}</p>
                     )}

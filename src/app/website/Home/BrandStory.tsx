@@ -25,7 +25,9 @@ const storyCards = [
 const BrandStory: React.FC = () => (
   <section className="py-5">
     <Container>
-      <h2 className="text-center mb-2">THE STORY BEHIND PUFFN CLUB</h2>
+      <h2 className="text-center mb-2 font-bebas">
+        THE STORY BEHIND PUFFN CLUB
+      </h2>
       <p className="text-center text-muted mb-4">
         A vision, to a men’s clothing brand redefining everyday essentials.
       </p>

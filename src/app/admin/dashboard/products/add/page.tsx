@@ -48,6 +48,10 @@ export default function AddProductPage() {
       featured: false,
       metaTitle: "",
       metaDescription: "",
+      sizeChartImage: null,
+      sizeChartImagePreview: null,
+      sizeChartMeasurements: [],
+      sizeChartUnit: "inches",
     },
   });
 
@@ -143,6 +147,20 @@ export default function AddProductPage() {
         if (data.metaDescription) {
           formData.append("metaDescription", String(data.metaDescription));
           console.log("✓ metaDescription appended");
+        }
+
+        // Add size chart data
+        if (data.sizeChartImage && data.sizeChartImage instanceof File) {
+          formData.append("sizeChartImage", data.sizeChartImage);
+          console.log("✓ sizeChartImage appended");
+        }
+        if (data.sizeChartUnit) {
+          formData.append("sizeChartUnit", data.sizeChartUnit);
+          console.log("✓ sizeChartUnit appended:", data.sizeChartUnit);
+        }
+        if (data.sizeChartMeasurements && Array.isArray(data.sizeChartMeasurements) && data.sizeChartMeasurements.length > 0) {
+          formData.append("sizeChartMeasurements", JSON.stringify(data.sizeChartMeasurements));
+          console.log("✓ sizeChartMeasurements appended:", data.sizeChartMeasurements);
         }
         
         console.log("All basic fields appended successfully");
@@ -343,6 +361,8 @@ export default function AddProductPage() {
               control={control}
               errors={errors}
               isLoading={isLoading}
+              watch={watch}
+              setValue={setValue}
             />
 
             <PricingForm

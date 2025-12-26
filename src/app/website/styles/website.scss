@@ -7,11 +7,9 @@
 
 .main-content {
   flex: 1;
-  padding-top: 60px; // Space for fixed header
+  padding-top: 70px; // Space for fixed header
 
-  @media (max-width: 768px) {
-    padding-top: 70px; // Slightly less padding on mobile
-  }
+  
 }
 
 // Product detail page styles

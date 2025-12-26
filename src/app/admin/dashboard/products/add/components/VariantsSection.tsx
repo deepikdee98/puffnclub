@@ -33,7 +33,7 @@ export default function VariantsSection({
     }));
 
     append({
-      color: "",
+      color: "#000000",
       sizeStocks: initialSizeStocks,
       totalStock: 0,
       images: [],

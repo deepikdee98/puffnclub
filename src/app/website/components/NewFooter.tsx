@@ -102,14 +102,31 @@ export default function Footer() {
               >
                 About us
               </Link>
+              <Link
+                href="/website/terms-of-services"
+                className={classNames(
+                  styles.footerLink,
+                  "text-secondary text-decoration-none"
+                )}
+              >
+                Terms of Services
+              </Link>
+              <Link
+                href="/website/privacy"
+                className={classNames(
+                  styles.footerLink,
+                  "text-secondary text-decoration-none"
+                )}
+              >
+                Privacy Policy
+              </Link>
             </div>
 
             {/* Newsletter Signup (with divider) */}
             <div
               className={classNames(
                 "col-12 col-md-8 col-lg-5 px-4 px-md-5 text-center text-md-start",
-                styles.footerColumn,
-                styles.withDivider
+                styles.footerColumn
               )}
             >
               <h3 className="mb-2">Join the Club</h3>

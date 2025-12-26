@@ -2,7 +2,10 @@
 import type { Product } from "../../../services/productService";
 
 interface ProductInfoProps {
-  product: Pick<Product, "name" | "price" | "comparePrice" | "sku" | "brand" | "category">;
+  product: Pick<
+    Product,
+    "name" | "price" | "comparePrice" | "sku" | "brand" | "category"
+  >;
   getDiscountPercentage: () => number;
 }
 
@@ -14,11 +17,17 @@ export default function ProductInfo({
     <div className="product-details">
       <div className="mb-2">
         {product.brand && (
-          <span className="text-muted small text-uppercase">{product.brand}</span>
+          <span className="text-muted small text-uppercase">
+            {product.brand}
+          </span>
         )}
-        {product.brand && product.category && <span className="text-muted mx-2">•</span>}
+        {product.brand && product.category && (
+          <span className="text-muted mx-2">•</span>
+        )}
         {product.category && (
-          <span className="text-muted small text-uppercase">{product.category}</span>
+          <span className="text-muted small text-uppercase">
+            {product.category}
+          </span>
         )}
       </div>
       <h1 className="h3 mb-2 text-dark">{product.name}</h1>

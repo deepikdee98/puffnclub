@@ -1,12 +1,13 @@
 import React from "react";
 import Image from "next/image";
 import styles from "./style.module.scss";
+import classNames from "classnames";
 
 const ClubStatementBanner: React.FC = () => (
   <section className={styles.clubBanner}>
     <div className={styles.overlay}>
       <div className={styles.content}>
-        <p className={styles.statement}>
+        <p className={classNames("text-white", styles.statement)}>
           Step into a world where every T-shirt isn’t just clothing —<br />
           it’s a statement of who you are.
         </p>

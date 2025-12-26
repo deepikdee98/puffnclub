@@ -1,22 +1,25 @@
 ================================================================================
                     PUFFN CLUB - FONTS DOCUMENTATION
+                    ⚠️ UPDATED: Class-Based Font System
 ================================================================================
 
 📚 FONT FAMILIES
 ================================================================================
 
-1. BEBAS NEUE (Headings Font)
-   - Used for: All headings (h1, h2, h3, h4, h5, h6)
+1. INSTRUMENT SANS (Default/Body Font) ⭐ PRIMARY
+   - Used for: EVERYTHING by default (headings, body text, buttons, labels, etc.)
+   - Weights: 400 (Regular), 500 (Medium), 600 (Semi-Bold), 700 (Bold)
+   - CSS Variable: var(--font-instrument-sans)
+   - Supports: Regular and Italic styles
+   - Default Font: All h1-h6, paragraphs, and all text elements
+
+2. BEBAS NEUE (Display Font) - USE WITH CLASS ONLY
+   - Used for: Special headings/text ONLY WHERE SPECIFIED in Figma
    - Weight: 400 (Regular only)
    - Style: Uppercase, bold display font
    - CSS Variable: var(--font-bebas-neue)
    - Characteristics: Letter-spacing: 1px, Text-transform: uppercase
-
-2. INSTRUMENT SANS (Body Font)
-   - Used for: Body text, paragraphs, buttons, labels, inputs, forms
-   - Weights: 400 (Regular), 500 (Medium), 600 (Semi-Bold), 700 (Bold)
-   - CSS Variable: var(--font-instrument-sans)
-   - Supports: Regular and Italic styles
+   - ⚠️ IMPORTANT: Apply using className only, NOT automatic
 
 
 📋 FONT WEIGHT REFERENCE
@@ -49,16 +52,25 @@ CSS Variable              Hex Code    Color Name
 💻 USAGE EXAMPLES
 ================================================================================
 
-HEADINGS (Automatic - Uses Bebas Neue):
-<h1>Main Heading</h1>
-<h2>Sub Heading</h2>
+⭐ DEFAULT BEHAVIOR (Everything uses Instrument Sans):
+<h1>Main Heading</h1>                    {/* Instrument Sans */}
+<h2>Sub Heading</h2>                     {/* Instrument Sans */}
+<h3>Product Name</h3>                    {/* Instrument Sans */}
+<p>Regular paragraph text</p>            {/* Instrument Sans */}
+<button>Button text</button>             {/* Instrument Sans */}
+<label>Form label</label>                {/* Instrument Sans */}
 
-BODY TEXT (Automatic - Uses Instrument Sans):
-<p>Regular paragraph text</p>
-<button>Button text</button>
-<label>Form label</label>
+🎯 APPLYING BEBAS NEUE (Use className when you want Bebas Neue):
+<h1 className="font-bebas">Hero Heading</h1>
+<h2 className="heading-bebas">Special Title</h2>
+<div className="bebas">Callout Text</div>
 
-FONT WEIGHTS:
+Available Classes:
+- className="font-bebas"      → Bebas Neue font
+- className="heading-bebas"   → Bebas Neue font (same as above)
+- className="bebas"           → Bebas Neue font (shortest)
+
+FONT WEIGHTS (For Instrument Sans):
 <p className="fw-bold">Bold text (700)</p>
 <p className="fw-semibold">Semi-bold (600)</p>
 <p className="fw-normal">Regular (400)</p>
@@ -108,29 +120,39 @@ Applied to Body:
 className={`${instrumentSans.variable} ${bebasNeue.variable} ${instrumentSans.className}`}
 
 
-✅ BEST PRACTICES
+✅ BEST PRACTICES & GUIDELINES
 ================================================================================
 
-1. Use Bebas Neue for:
-   - Page titles
-   - Section headings
-   - Important callouts
-   - Navigation items (if needed uppercase)
+⚠️ NEW APPROACH (Class-Based System):
 
-2. Use Instrument Sans for:
-   - All body copy
-   - Descriptions
-   - Form elements
-   - Buttons
-   - Cards content
+1. DEFAULT FONT (Instrument Sans):
+   - Everything uses Instrument Sans by default
+   - No className needed for normal text
+   - Includes: All headings (h1-h6), body text, forms, buttons, etc.
 
-3. Font Weight Guidelines:
+2. WHEN TO USE BEBAS NEUE (className="font-bebas"):
+   - ✅ Main hero headings on landing pages
+   - ✅ Large section titles (only if specified in Figma)
+   - ✅ Special callout text or banners
+   - ✅ Promotional text/badges
+   - ❌ DO NOT use for: Product names, card titles, regular headings
+   - ❌ ONLY apply where Figma design specifically shows it
+
+3. HOW TO APPLY BEBAS NEUE:
+   Step 1: Check Figma design
+   Step 2: If Bebas Neue is specified, add className
+   Step 3: Use any of these: "font-bebas", "heading-bebas", or "bebas"
+
+   Example:
+   <h1 className="font-bebas">WELCOME TO PUFFN CLUB</h1>
+
+4. Font Weight Guidelines (Instrument Sans):
    - 400 (Regular): Default body text
    - 500 (Medium): Emphasis, subtle highlighting
    - 600 (Semi-Bold): Subheadings, important labels
    - 700 (Bold): Strong emphasis, key information
 
-4. Color Usage:
+5. Color Usage:
    - Use CSS variables for consistency
    - Prefer Bootstrap classes for common colors
    - Use hex codes only when necessary

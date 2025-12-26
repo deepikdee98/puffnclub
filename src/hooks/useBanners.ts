@@ -10,6 +10,7 @@ export interface Banner {
   buttonLink?: string;
   targetUrl?: string;
   image: string;
+  imageMobile: string;
   isActive: boolean;
   order: number;
   createdAt: string;
@@ -34,6 +35,7 @@ export interface BannerFormData {
   targetUrl?: string;
   isActive: boolean;
   image?: File;
+  imageMobile?: File;
 }
 
 export interface UseBannersReturn {
@@ -122,6 +124,9 @@ export const useBanners = (): UseBannersReturn => {
       if (data.image) {
         formData.append('image', data.image);
       }
+      if (data.imageMobile) {
+        formData.append('imageMobile', data.imageMobile);
+      }
 
       const response = await bannerAPI.createBanner(formData, onProgress) as unknown as {
         success?: boolean;
@@ -168,6 +173,9 @@ export const useBanners = (): UseBannersReturn => {
       
       if (data.image) {
         formData.append('image', data.image);
+      }
+      if (data.imageMobile) {
+        formData.append('imageMobile', data.imageMobile);
       }
 
       const response = await bannerAPI.updateBanner(id, formData, onProgress) as unknown as {

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { FiHeart, FiMenu, FiX } from "react-icons/fi";
+import { FiHeart, FiMenu, FiX, FiSearch } from "react-icons/fi";
 import styles from "./NewHeader.module.scss";
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/navigation";
@@ -163,7 +163,8 @@ export default function Header() {
     >
       <nav className="py-3">
         <div className="container">
-          <div className="d-flex justify-content-between align-items-center">
+          {/* Desktop Header */}
+          <div className={`d-none d-lg-flex justify-content-between align-items-center`}>
             {/* Logo */}
             <Link
               href="/website"
@@ -179,56 +180,47 @@ export default function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className={styles.desktopMenu}>
-              <div className="d-flex align-items-center gap-4">
-                <Link
-                  href="/website/products"
-                  className="text-dark text-decoration-none fs-6"
-                >
-                  Products
-                </Link>
-                <Link
-                  href="/website/collections"
-                  className="text-dark text-decoration-none fs-6"
-                >
-                  New Collection
-                </Link>
-                <Link
-                  href="/website/about"
-                  className="text-dark text-decoration-none fs-6"
-                >
-                  About
-                </Link>
-                <Link
-                  href="/website/contactus"
-                  className="text-dark text-decoration-none fs-6"
-                >
-                  Contact
-                </Link>
-              </div>
+            <div className="d-flex align-items-center gap-4">
+              <Link
+                href="/website"
+                className="text-dark text-decoration-none fs-6"
+              >
+                Home
+              </Link>
+              <Link
+                href="/website/products"
+                className="text-dark text-decoration-none fs-6"
+              >
+                Products
+              </Link>
+              <Link
+                href="/website/collections"
+                className="text-dark text-decoration-none fs-6"
+              >
+                New Collection
+              </Link>
+              <Link
+                href="/website/contactus"
+                className="text-dark text-decoration-none fs-6"
+              >
+                Contact Us
+              </Link>
             </div>
 
-            {/* Icons */}
+            {/* Desktop Icons */}
             <div className="d-flex align-items-center gap-4">
-              {/* Wishlist - Hidden on mobile */}
+              {/* Wishlist */}
               <Link
                 href="/website/wishlist"
-                className="text-dark position-relative d-none d-lg-block"
+                className="text-dark position-relative"
               >
                 <FiHeart size={20} />
-                {/* {wishlistCount > 0 && (
-                  <span
-                    className={`${styles.cartCount} rounded-circle px-2 py-1`}
-                  >
-                    {wishlistCount}
-                  </span>
-                )} */}
               </Link>
 
-              {/* Cart - Hidden on mobile */}
+              {/* Cart */}
               <Link
                 href="/website/cart"
-                className="text-dark position-relative d-none d-lg-block"
+                className="text-dark position-relative"
               >
                 <Image
                   src="/images/cart-icon.svg"
@@ -236,137 +228,217 @@ export default function Header() {
                   width={20}
                   height={20}
                 />
-                {/* {cartCount > 0 && (
-                  <span
-                    className={`${styles.cartCount} rounded-circle px-2 py-1`}
-                  >
-                    {cartCount}
-                  </span>
-                )} */}
               </Link>
 
-              <div className="position-relative">
-                {/* Mobile - Profile link with auth check */}
-                {isAuthenticated ? (
-                  <Link
-                    href="/website/profile"
-                    className="btn btn-link text-dark p-0 border-0 d-lg-none"
-                  >
-                    <Image
-                      src="/images/profile-icon.svg"
-                      alt="Profile"
-                      width={20}
-                      height={20}
-                    />
-                  </Link>
-                ) : (
-                  <button
-                    onClick={() => setShowLoginPopup(true)}
-                    className="btn btn-link text-dark p-0 border-0 d-lg-none"
-                  >
-                    <Image
-                      src="/images/profile-icon.svg"
-                      alt="Profile"
-                      width={20}
-                      height={20}
-                    />
-                  </button>
-                )}
+              {/* Desktop Profile Dropdown */}
+              <div className={`position-relative ${styles.profileDropdown}`}>
+                <button
+                  className={`btn btn-link text-dark p-0 border-0 ${styles.profileDropdownTrigger}`}
+                >
+                  <Image
+                    src="/images/profile-icon.svg"
+                    alt="Profile"
+                    width={20}
+                    height={20}
+                  />
+                </button>
 
-                {/* Desktop - Profile dropdown */}
-                <div className={`d-none d-lg-block ${styles.profileDropdown}`}>
-                  <button
-                    className={`btn btn-link text-dark p-0 border-0 ${styles.profileDropdownTrigger}`}
-                  >
-                    <Image
-                      src="/images/profile-icon.svg"
-                      alt="Profile"
-                      width={20}
-                      height={20}
-                    />
-                  </button>
-
-                  {/* Profile Menu - Desktop only */}
-                  <div className={styles.profileMenu}>
-                    {customer ? (
-                      <>
-                        <Link
-                          href="/website/profile"
-                          className={classNames(
-                            "text-dark fw-bold",
-                            styles.profileMenuItem
-                          )}
-                        >
-                          My Profile
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className={`${styles.profileMenuItem} fw-bold text-danger`}
-                        >
-                          Logout
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => setShowLoginPopup(true)}
+                <div className={styles.profileMenu}>
+                  {customer ? (
+                    <>
+                      <Link
+                        href="/website/profile"
                         className={classNames(
-                          "text-danger fw-bold",
+                          "text-dark fw-bold",
                           styles.profileMenuItem
                         )}
                       >
-                        Login
+                        My Profile
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className={`${styles.profileMenuItem} fw-bold text-danger`}
+                      >
+                        Logout
                       </button>
-                    )}
-                  </div>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setShowLoginPopup(true)}
+                      className={classNames(
+                        "text-danger fw-bold",
+                        styles.profileMenuItem
+                      )}
+                    >
+                      Login
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {/* Mobile Menu Button */}
-              <button
-                className={`btn btn-link text-dark p-0 border-0 ${styles.mobileMenu}`}
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Toggle navigation"
-              >
-                {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-              </button>
             </div>
           </div>
 
-          {/* Mobile Navigation */}
-          {mobileMenuOpen && (
-            <div className="d-flex flex-column gap-3 py-3 mt-3 border-top">
-              <Link
-                href="/website/products"
-                className="text-dark text-decoration-none"
-                onClick={() => setMobileMenuOpen(false)}
+          {/* Mobile Header */}
+          <div className={`d-flex d-lg-none justify-content-between align-items-center ${styles.mobileHeader}`}>
+            {/* Left: Hamburger Menu */}
+            <button
+              className="btn btn-link text-dark p-0 border-0"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle navigation"
+            >
+              <FiMenu size={24} />
+            </button>
+
+            {/* Center: Logo */}
+            <Link
+              href="/website"
+              className="text-decoration-none d-flex align-items-center"
+            >
+              <Image
+                src="/images/logo.svg"
+                alt="PUFFN CLUB"
+                height={30}
+                width={120}
+                className="object-fit-contain"
+              />
+            </Link>
+
+            {/* Right: Search, Cart and Profile */}
+            <div className="d-flex align-items-center gap-3">
+              <button
+                className="btn btn-link text-dark p-0 border-0"
+                aria-label="Search"
               >
-                Products
+                <FiSearch size={20} />
+              </button>
+
+              <Link
+                href="/website/cart"
+                className="text-dark position-relative"
+              >
+                <Image
+                  src="/images/cart-icon.svg"
+                  alt="Cart"
+                  width={20}
+                  height={20}
+                />
               </Link>
+
               <Link
-                href="/website/collections"
-                className="text-dark text-decoration-none"
-                onClick={() => setMobileMenuOpen(false)}
+                href="/website/profile"
+                className="text-dark"
               >
-                New Collection
-              </Link>
-              <Link
-                href="/website/about"
-                className="text-dark text-decoration-none"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                About
-              </Link>
-              <Link
-                href="/website/contactus"
-                className="text-dark text-decoration-none"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Contact
+                <Image
+                  src="/images/profile-icon.svg"
+                  alt="Profile"
+                  width={20}
+                  height={20}
+                />
               </Link>
             </div>
-          )}
+          </div>
         </div>
       </nav>
+
+      {/* Mobile Off-Canvas Menu */}
+      <div className={`${styles.offcanvas} ${mobileMenuOpen ? styles.offcanvasOpen : ''}`}>
+        <div className={styles.offcanvasHeader}>
+          <Link
+            href="/website"
+            className="text-decoration-none"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Image
+              src="/images/logo.svg"
+              alt="PUFFN CLUB"
+              height={35}
+              width={140}
+              className="object-fit-contain"
+            />
+          </Link>
+          <button
+            className="btn btn-link text-dark p-0 border-0"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <FiX size={24} />
+          </button>
+        </div>
+        <div className={styles.offcanvasBody}>
+          <Link
+            href="/website"
+            className={styles.offcanvasLink}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Image
+              src="/images/home-menuicon.svg"
+              alt=""
+              width={20}
+              height={20}
+              className={styles.menuIcon}
+            />
+            Home
+          </Link>
+          <Link
+            href="/website/products"
+            className={styles.offcanvasLink}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Image
+              src="/images/products-menuicon.svg"
+              alt=""
+              width={20}
+              height={20}
+              className={styles.menuIcon}
+            />
+            Products
+          </Link>
+          <Link
+            href="/website/collections"
+            className={styles.offcanvasLink}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Image
+              src="/images/collections-menuicon.svg"
+              alt=""
+              width={20}
+              height={20}
+              className={styles.menuIcon}
+            />
+            New Collection
+          </Link>
+          <Link
+            href="/website/wishlist"
+            className={styles.offcanvasLink}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <FiHeart size={20} className={styles.menuIcon} />
+            Wishlist
+          </Link>
+          <Link
+            href="/website/contactus"
+            className={styles.offcanvasLink}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Image
+              src="/images/contact-menuicon.svg"
+              alt=""
+              width={20}
+              height={20}
+              className={styles.menuIcon}
+            />
+            Contact
+          </Link>
+        </div>
+      </div>
+
+      {/* Overlay for Off-Canvas */}
+      {mobileMenuOpen && (
+        <div
+          className={styles.offcanvasOverlay}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
       {/* Login Popups */}
       <MobileLoginPopup

@@ -19,9 +19,7 @@ export default function ColorSelector({
 
   return (
     <div className={`${styles.colorSelector} mb-4`}>
-      <h6 className="fw-bold mb-3">
-        Color: <span className="fw-normal text-muted">{selectedColor}</span>
-      </h6>
+      <h6 className="fw-bold mb-3">Choose colour</h6>
 
       {/* Color Thumbnails Row */}
       <div className={`${styles.colorThumbnails} d-flex gap-3`}>

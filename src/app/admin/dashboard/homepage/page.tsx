@@ -102,6 +102,7 @@ const bannerSchema = yup.object().shape({
 // Form validation interface (extends the hook interface)
 interface FormBannerData extends BannerFormData {
   image?: File;
+  imageMobile?: File;
 }
 
 export default function HomepageManagementPage() {
@@ -122,7 +123,9 @@ export default function HomepageManagementPage() {
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string>("");
+  const [uploadedImageMobile, setUploadedImageMobile] = useState<string>("");
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [selectedImageMobileFile, setSelectedImageMobileFile] = useState<File | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState<Banner | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -149,16 +152,15 @@ export default function HomepageManagementPage() {
   });
 
   const openModal = (banner?: Banner) => {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "http://localhost:8080";
+    
     if (banner) {
       setEditingBanner(banner);
-      // For existing banners, show the current image from server
-      setUploadedImage(
-        `${
-          process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
-          "http://localhost:8080"
-        }/${banner.image}`
-      );
+      // For existing banners, show the current images from server
+      setUploadedImage(`${apiBaseUrl}/${banner.image}`);
+      setUploadedImageMobile(`${apiBaseUrl}/${banner.imageMobile}`);
       setSelectedImageFile(null);
+      setSelectedImageMobileFile(null);
       reset({
         title: banner.title,
         subtitle: banner.subtitle || "",
@@ -170,7 +172,9 @@ export default function HomepageManagementPage() {
     } else {
       setEditingBanner(null);
       setUploadedImage("");
+      setUploadedImageMobile("");
       setSelectedImageFile(null);
+      setSelectedImageMobileFile(null);
       reset({
         title: "",
         subtitle: "",
@@ -188,7 +192,9 @@ export default function HomepageManagementPage() {
     setShowModal(false);
     setEditingBanner(null);
     setUploadedImage("");
+    setUploadedImageMobile("");
     setSelectedImageFile(null);
+    setSelectedImageMobileFile(null);
     setUploadProgress(0);
     reset();
   };
@@ -196,15 +202,25 @@ export default function HomepageManagementPage() {
   const onSubmit = async (data: FormBannerData) => {
     console.log("Form submission started with data:", data);
 
-    // For new banners, require image file
-    // For existing banners, image is optional (keep existing if not changed)
-    if (!editingBanner && !selectedImageFile) {
-      console.log("No image file selected for new banner");
-      setError("root", {
-        type: "manual",
-        message: "Please upload a banner image",
-      });
-      return;
+    // For new banners, require both image files
+    // For existing banners, images are optional (keep existing if not changed)
+    if (!editingBanner) {
+      if (!selectedImageFile) {
+        console.log("No desktop image file selected for new banner");
+        setError("root", {
+          type: "manual",
+          message: "Please upload a desktop banner image",
+        });
+        return;
+      }
+      if (!selectedImageMobileFile) {
+        console.log("No mobile image file selected for new banner");
+        setError("root", {
+          type: "manual",
+          message: "Please upload a mobile banner image",
+        });
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -235,6 +251,7 @@ export default function HomepageManagementPage() {
         targetUrl: cleanUrl(data.targetUrl || ""),
         isActive: data.isActive,
         image: selectedImageFile || undefined,
+        imageMobile: selectedImageMobileFile || undefined,
       };
 
       console.log("Banner data prepared:", {
@@ -298,7 +315,7 @@ export default function HomepageManagementPage() {
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'desktop' | 'mobile') => {
     const file = event.target.files?.[0];
     if (file) {
       // Validate file type
@@ -313,16 +330,27 @@ export default function HomepageManagementPage() {
         return;
       }
 
-      setSelectedImageFile(file);
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          setUploadedImage(e.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+      if (type === 'desktop') {
+        setSelectedImageFile(file);
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            setUploadedImage(e.target.result as string);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setSelectedImageMobileFile(file);
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            setUploadedImageMobile(e.target.result as string);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -450,21 +478,44 @@ export default function HomepageManagementPage() {
                         </div>
                       </td>
                       <td>
-                        <img
-                          src={`${
-                            process.env.NEXT_PUBLIC_API_URL?.replace(
-                              "/api",
-                              ""
-                            ) || "http://localhost:8080"
-                          }/${banner.image}`}
-                          alt={banner.title}
-                          className="rounded"
-                          style={{
-                            width: "80px",
-                            height: "50px",
-                            objectFit: "cover",
-                          }}
-                        />
+                        <div className="d-flex gap-2">
+                          <div>
+                            <small className="text-muted d-block mb-1">Desktop</small>
+                            <img
+                              src={`${
+                                process.env.NEXT_PUBLIC_API_URL?.replace(
+                                  "/api",
+                                  ""
+                                ) || "http://localhost:8080"
+                              }/${banner.image}`}
+                              alt={`${banner.title} - Desktop`}
+                              className="rounded"
+                              style={{
+                                width: "80px",
+                                height: "50px",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <small className="text-muted d-block mb-1">Mobile</small>
+                            <img
+                              src={`${
+                                process.env.NEXT_PUBLIC_API_URL?.replace(
+                                  "/api",
+                                  ""
+                                ) || "http://localhost:8080"
+                              }/${banner.imageMobile}`}
+                              alt={`${banner.title} - Mobile`}
+                              className="rounded"
+                              style={{
+                                width: "80px",
+                                height: "50px",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </div>
+                        </div>
                       </td>
                       <td>
                         <div>
@@ -567,74 +618,125 @@ export default function HomepageManagementPage() {
               </div>
             )}
 
-            {/* Image Upload */}
-            <div className="mb-4">
-              <Form.Label>Banner Image *</Form.Label>
-              <div className="border-2 border-dashed border-light rounded p-4 text-center">
-                {uploadedImage ? (
-                  <div className="position-relative">
-                    <img
-                      src={uploadedImage}
-                      alt="Banner preview"
-                      className="img-fluid rounded mb-3"
-                      style={{ maxHeight: "200px" }}
-                    />
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      className="position-absolute top-0 end-0 m-2"
-                      onClick={() => {
-                        setUploadedImage("");
-                        setSelectedImageFile(null);
-                      }}
-                    >
-                      <FiX size={14} />
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <FiUpload size={32} className="text-muted mb-2" />
-                    <p className="text-muted mb-2">Upload banner image</p>
-                  </>
-                )}
-                <Form.Control
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="d-none"
-                  id="bannerImageUpload"
-                />
-                <Button
-                  variant="outline-primary"
-                  as="label"
-                  htmlFor="bannerImageUpload"
-                  className="cursor-pointer"
-                  disabled={isLoading}
-                >
-                  {uploadedImage ? "Change Image" : "Choose Image"}
-                </Button>
-              </div>
-
-              {/* Upload Progress */}
-              {uploadProgress > 0 && uploadProgress < 100 && (
-                <div className="mt-3">
-                  <div className="d-flex justify-content-between align-items-center mb-1">
-                    <small className="text-muted">Uploading...</small>
-                    <small className="text-muted">{uploadProgress}%</small>
-                  </div>
-                  <div className="progress" style={{ height: "4px" }}>
-                    <div
-                      className="progress-bar"
-                      role="progressbar"
-                      style={{ width: `${uploadProgress}%` }}
-                      aria-valuenow={uploadProgress}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                    ></div>
-                  </div>
+            {/* Image Upload - Desktop and Mobile */}
+            <Row className="mb-4">
+              <Col md={6}>
+                <Form.Label>Desktop Banner Image *</Form.Label>
+                <div className="border-2 border-dashed border-light rounded p-4 text-center">
+                  {uploadedImage ? (
+                    <div className="position-relative">
+                      <img
+                        src={uploadedImage}
+                        alt="Desktop banner preview"
+                        className="img-fluid rounded mb-3"
+                        style={{ maxHeight: "200px" }}
+                      />
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="position-absolute top-0 end-0 m-2"
+                        onClick={() => {
+                          setUploadedImage("");
+                          setSelectedImageFile(null);
+                        }}
+                      >
+                        <FiX size={14} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <FiUpload size={32} className="text-muted mb-2" />
+                      <p className="text-muted mb-2 small">Upload desktop banner</p>
+                    </>
+                  )}
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e as React.ChangeEvent<HTMLInputElement>, 'desktop')}
+                    className="d-none"
+                    id="bannerImageUploadDesktop"
+                  />
+                  <Button
+                    variant="outline-primary"
+                    as="label"
+                    htmlFor="bannerImageUploadDesktop"
+                    className="cursor-pointer"
+                    disabled={isLoading}
+                    size="sm"
+                  >
+                    {uploadedImage ? "Change" : "Choose Image"}
+                  </Button>
                 </div>
-              )}
-            </div>
+              </Col>
+              <Col md={6}>
+                <Form.Label>Mobile Banner Image *</Form.Label>
+                <div className="border-2 border-dashed border-light rounded p-4 text-center">
+                  {uploadedImageMobile ? (
+                    <div className="position-relative">
+                      <img
+                        src={uploadedImageMobile}
+                        alt="Mobile banner preview"
+                        className="img-fluid rounded mb-3"
+                        style={{ maxHeight: "200px" }}
+                      />
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="position-absolute top-0 end-0 m-2"
+                        onClick={() => {
+                          setUploadedImageMobile("");
+                          setSelectedImageMobileFile(null);
+                        }}
+                      >
+                        <FiX size={14} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <FiUpload size={32} className="text-muted mb-2" />
+                      <p className="text-muted mb-2 small">Upload mobile banner</p>
+                    </>
+                  )}
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e as React.ChangeEvent<HTMLInputElement>, 'mobile')}
+                    className="d-none"
+                    id="bannerImageUploadMobile"
+                  />
+                  <Button
+                    variant="outline-primary"
+                    as="label"
+                    htmlFor="bannerImageUploadMobile"
+                    className="cursor-pointer"
+                    disabled={isLoading}
+                    size="sm"
+                  >
+                    {uploadedImageMobile ? "Change" : "Choose Image"}
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+
+            {/* Upload Progress */}
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="mt-3 mb-4">
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                  <small className="text-muted">Uploading...</small>
+                  <small className="text-muted">{uploadProgress}%</small>
+                </div>
+                <div className="progress" style={{ height: "4px" }}>
+                  <div
+                    className="progress-bar"
+                    role="progressbar"
+                    style={{ width: `${uploadProgress}%` }}
+                    aria-valuenow={uploadProgress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  ></div>
+                </div>
+              </div>
+            )}
 
             <Row>
               <Col md={6}>

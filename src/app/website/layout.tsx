@@ -2,6 +2,7 @@
 
 import { Container } from "react-bootstrap";
 import Header from "./components/NewHeader";
+import Breadcrumbs from "./components/Breadcrumbs";
 // import Footer from "./components/Footer";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
@@ -21,7 +22,14 @@ export default function WebsiteLayout({ children }: WebsiteLayoutProps) {
         <WishlistProvider>
           <div className="website-layout">
             <Header />
-            <main className="main-content">{children}</main>
+            <main className="main-content">
+              <Container>
+                <div className="d-block d-lg-none">
+                  <Breadcrumbs />
+                </div>
+              </Container>
+              {children}
+            </main>
             <Footer />
           </div>
         </WishlistProvider>

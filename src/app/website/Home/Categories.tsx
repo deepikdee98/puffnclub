@@ -20,7 +20,10 @@ const Categories: React.FC<CategoriesProps> = ({ categories, loading }) => {
   // Debug: Log category slugs to console
   useEffect(() => {
     if (categories.length > 0) {
-      console.log('Category slugs:', categories.map(cat => cat.slug));
+      console.log(
+        "Category slugs:",
+        categories.map((cat) => cat.slug)
+      );
     }
   }, [categories]);
 
@@ -30,24 +33,30 @@ const Categories: React.FC<CategoriesProps> = ({ categories, loading }) => {
     const normalizedSlug = slug.toLowerCase();
 
     // Check if slug contains these keywords
-    if (normalizedSlug.includes('hoodie')) {
-      return '/images/hoodies-mobile.png';
+    if (normalizedSlug.includes("hoodie")) {
+      return "/images/hoodies-mobile.png";
     }
-    if (normalizedSlug.includes('oversized') || normalizedSlug.includes('over-sized')) {
-      return '/images/oversized-mobile.png';
+    if (
+      normalizedSlug.includes("oversized") ||
+      normalizedSlug.includes("over-sized")
+    ) {
+      return "/images/oversized-mobile.png";
     }
-    if (normalizedSlug.includes('regular') || normalizedSlug.includes('regular-fit')) {
-      return '/images/regular-fit-mobile.png';
+    if (
+      normalizedSlug.includes("regular") ||
+      normalizedSlug.includes("regular-fit")
+    ) {
+      return "/images/regular-fit-mobile.png";
     }
 
     // Fallback: exact match
     const mobileImageMap: Record<string, string> = {
-      'hoodies': '/images/hoodies-mobile.png',
-      'oversized': '/images/oversized-mobile.png',
-      'regular-fit': '/images/regular-fit-mobile.png',
+      hoodies: "/images/hoodies-mobile.png",
+      oversized: "/images/oversized-mobile.png",
+      "regular-fit": "/images/regular-fit-mobile.png",
     };
 
-    return mobileImageMap[normalizedSlug] || '';
+    return mobileImageMap[normalizedSlug] || "";
   };
 
   if (loading) {
@@ -69,7 +78,7 @@ const Categories: React.FC<CategoriesProps> = ({ categories, loading }) => {
   return (
     <section className={`${styles.relatableSection} py-5`}>
       <Container className="text-center">
-        <h2 className=" mb-2">REDEFINING MEN'S STYLE</h2>
+        <h2 className=" mb-2 font-bebas">REDEFINING MEN'S STYLE</h2>
         <p className="mb-4 text-muted">
           Drop-ready fits built to move with your hustle.
         </p>
@@ -99,7 +108,11 @@ const Categories: React.FC<CategoriesProps> = ({ categories, loading }) => {
                       width={400}
                       height={400}
                       className={`img-fluid rounded-2 ${styles.desktopImage}`}
-                      style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                      style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                      }}
                     />
                     {/* Mobile Image - Only show if mobile image exists */}
                     {mobileImage && (
@@ -109,7 +122,11 @@ const Categories: React.FC<CategoriesProps> = ({ categories, loading }) => {
                         width={400}
                         height={400}
                         className={`img-fluid rounded-2 ${styles.mobileImage}`}
-                        style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                        style={{
+                          objectFit: "cover",
+                          width: "100%",
+                          height: "100%",
+                        }}
                       />
                     )}
                     <span

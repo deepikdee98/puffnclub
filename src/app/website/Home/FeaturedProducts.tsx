@@ -33,17 +33,26 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
     console.log("Number of products:", products.length);
     if (products.length > 0) {
       console.log("First product:", products[0]);
-      console.log("Product images:", products.map(p => ({ name: p.name, image: p.images?.[0] })));
+      console.log(
+        "Product images:",
+        products.map((p) => ({ name: p.name, image: p.images?.[0] }))
+      );
     }
   }, [products]);
   return (
     <div className={styles.featuredProductsContainer}>
       <Row className="mb-5">
         <Col>
-          <h2 className="text-center fw-bold mb-3" style={{ fontSize: '2.5rem', letterSpacing: '-0.5px' }}>
+          <h2
+            className="text-center font-bebas mb-3"
+            style={{ fontSize: "2.5rem", letterSpacing: "-0.5px" }}
+          >
             OUR BEST PICKS FOR YOU
           </h2>
-          <p className="text-center text-muted" style={{ fontSize: '1.1rem', maxWidth: '700px', margin: '0 auto' }}>
+          <p
+            className="text-center text-muted"
+            style={{ fontSize: "1.1rem", maxWidth: "700px", margin: "0 auto" }}
+          >
             Discover versatile staples and bold statement pieces designed
             <br />
             to elevate your style, season after season.
@@ -85,10 +94,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                   href={`/website/products/${product._id}`}
                   passHref
                 >
-
                   <img
                     src={
-                      product.images?.[0] || "https://via.placeholder.com/300x300"
+                      product.images?.[0] ||
+                      "https://via.placeholder.com/300x300"
                     }
                     alt={product.name}
                     className={styles.productImage}
@@ -112,16 +121,21 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                   passHref
                 >
                   <div className={`mb-2 ${styles.productNameRatingContainer}`}>
-                    <strong className={styles.productName}>{product.name}</strong>
-                    
-                    {product.rating && product.rating > 0 && product.reviewCount && product.reviewCount > 0 && (
-                      <div className={styles.ratingBadge}>
-                        <span className={styles.ratingText}>
-                          {product.rating.toFixed(1)}
-                        </span>
-                        <FiStar className={styles.ratingIcon} size={12} />
-                      </div>
-                    )}
+                    <strong className={styles.productName}>
+                      {product.name}
+                    </strong>
+
+                    {product.rating &&
+                      product.rating > 0 &&
+                      product.reviewCount &&
+                      product.reviewCount > 0 && (
+                        <div className={styles.ratingBadge}>
+                          <span className={styles.ratingText}>
+                            {product.rating.toFixed(1)}
+                          </span>
+                          <FiStar className={styles.ratingIcon} size={12} />
+                        </div>
+                      )}
                   </div>
                 </Link>
 

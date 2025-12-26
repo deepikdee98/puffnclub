@@ -12,7 +12,7 @@ const PrivacyPolicy = () => {
         <Row>
           <Col lg={10} className="mx-auto">
             <Link
-              href="/"
+              href="/website"
               className="back-link d-inline-flex align-items-center text-decoration-none mb-4"
             >
               <svg
@@ -30,7 +30,7 @@ const PrivacyPolicy = () => {
                   strokeLinejoin="round"
                 />
               </svg>
-              <span>Privacy Policy</span>
+              <span className="text-dark fw-semibold">Privacy Policy</span>
             </Link>
           </Col>
         </Row>
@@ -60,7 +60,7 @@ const PrivacyPolicy = () => {
 
             {/* Information We Collect */}
             <section className="mb-4">
-              <h5 className="fw-bold mb-3">Information We Collect</h5>
+              <h5 className="fw-semibold mb-3">Information We Collect</h5>
               <p className="text-muted mb-2">
                 Personal Information: Name, email address, phone number,
                 shipping & billing address.
@@ -80,7 +80,7 @@ const PrivacyPolicy = () => {
 
             {/* How We Use Your Information */}
             <section className="mb-4">
-              <h5 className="fw-bold mb-3">How We Use Your Information</h5>
+              <h5 className="fw-semibold mb-3">How We Use Your Information</h5>
               <p className="text-muted mb-2">Process and fulfill orders.</p>
               <p className="text-muted mb-2">
                 Communicate order updates and support inquiries.
@@ -96,7 +96,7 @@ const PrivacyPolicy = () => {
 
             {/* Data Security */}
             <section className="mb-4">
-              <h5 className="fw-bold mb-3">Data Security</h5>
+              <h5 className="fw-semibold mb-3">Data Security</h5>
               <p className="text-muted mb-2">
                 We implement industry-standard encryption, firewalls, and
                 security measures to protect your personal data.
@@ -108,7 +108,7 @@ const PrivacyPolicy = () => {
 
             {/* Sharing Your Information */}
             <section className="mb-4">
-              <h5 className="fw-bold mb-3">Sharing Your Information</h5>
+              <h5 className="fw-semibold mb-3">Sharing Your Information</h5>
               <p className="text-muted mb-2">
                 We respect your privacy and do not sell or rent your personal
                 data. Your information may only be shared with:
@@ -126,7 +126,7 @@ const PrivacyPolicy = () => {
 
             {/* Cookies */}
             <section className="mb-4">
-              <h5 className="fw-bold mb-3">Cookies</h5>
+              <h5 className="fw-semibold mb-3">Cookies</h5>
               <p className="text-muted mb-2">
                 Our website uses cookies to personalise your browsing
                 experience, analyse traffic, and improve site performance.
@@ -138,7 +138,7 @@ const PrivacyPolicy = () => {
 
             {/* Your Rights */}
             <section className="mb-4">
-              <h5 className="fw-bold mb-3">Your Rights</h5>
+              <h5 className="fw-semibold mb-3">Your Rights</h5>
               <p className="text-muted mb-2">
                 Access the personal information we hold about you.
               </p>
@@ -150,7 +150,7 @@ const PrivacyPolicy = () => {
 
             {/* Contact Us */}
             <section className="mb-5">
-              <h5 className="fw-bold mb-3">Contact Us</h5>
+              <h5 className="fw-semibold mb-3">Contact Us</h5>
               <div className="d-flex align-items-start mb-2">
                 <Image
                   src="/images/mail-icon.svg"

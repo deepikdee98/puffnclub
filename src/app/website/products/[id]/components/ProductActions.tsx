@@ -22,13 +22,14 @@ export default function ProductActions({
   onWishlistToggle,
 }: ProductActionsProps) {
   return (
-    <div className="d-flex w-50 align-items-center gap-3 mb-4">
+    <div className="d-flex text-white w-50 align-items-center gap-3 mb-4">
       <Button
         variant={isAddedToCart ? "dark" : "outline-dark"}
         size="lg"
         className={`flex-grow-1 ${styles.goToCartBtn}`}
         onClick={isAddedToCart ? onGoToCart : onAddToBag}
         disabled={!selectedSize}
+        style={{ backgroundColor: "#000", border: "none" }}
       >
         {isAddedToCart ? "Go to Cart" : "Add to Bag"}
       </Button>
@@ -40,7 +41,11 @@ export default function ProductActions({
         style={{ cursor: "pointer" }}
       >
         <Image
-          src={isWishlisted ? "/images/whishlist-icon.svg" : "/images/add-whislisht.svg"}
+          src={
+            isWishlisted
+              ? "/images/whishlist-icon.svg"
+              : "/images/add-whislisht.svg"
+          }
           alt={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
           width={36}
           height={36}

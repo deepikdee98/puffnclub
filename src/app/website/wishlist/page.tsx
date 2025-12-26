@@ -14,144 +14,24 @@ import { FlipYOnScroll } from "../constants/FadeUpOnScroll";
 import MobileLoginPopup from "../auth/login-new/components/MobileLoginPopup";
 import OtpPopup from "../auth/login-new/components/OtpPopup";
 import { API_ENDPOINTS, setAuthToken } from "../services/api";
-import { useRouter } from "next/navigation";
 
 export default function WishlistPage() {
   const { isAuthenticated } = useAuth();
-  const router = useRouter();
-  
-  // Login popup states
+  const { wishlist, isLoading, refreshWishlist, removeFromWishlist } =
+    useWishlist();
+  const { addToCart } = useCart();
+
+  // Login popup state
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [showOtpPopup, setShowOtpPopup] = useState(false);
   const [otpMobile, setOtpMobile] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
-  const { wishlist, isLoading, refreshWishlist, removeFromWishlist } =
-    useWishlist();
-  const { addToCart } = useCart();
 
   useEffect(() => {
     if (isAuthenticated) refreshWishlist();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
-
-  const handleOtpRequested = async (mobile: string) => {
-    console.log("🔵 handleOtpRequested called with mobile:", mobile);
-    setLoginLoading(true);
-
-    try {
-      console.log(
-        "🔵 Sending OTP request to:",
-        API_ENDPOINTS.WEBSITE.AUTH.SEND_OTP
-      );
-      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.SEND_OTP, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobile }),
-      });
-
-      const data = await response.json();
-      console.log("🔵 Response:", data);
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to send OTP");
-      }
-
-      // Store session info
-      setSessionId(data.sessionId);
-      setOtpMobile(mobile);
-
-      // Close login popup and open OTP popup
-      setShowLoginPopup(false);
-      setShowOtpPopup(true);
-    } catch (err: any) {
-      console.error("❌ Error sending OTP:", err);
-      toast.error(err.message || "Failed to send OTP. Please try again.");
-    } finally {
-      setLoginLoading(false);
-    }
-  };
-
-  const handleOtpConfirm = async (otp: string) => {
-    console.log("🔵 handleOtpConfirm called with OTP:", otp);
-    setLoginLoading(true);
-
-    try {
-      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.VERIFY_OTP, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          mobile: otpMobile,
-          otp,
-        }),
-      });
-
-      const data = await response.json();
-      console.log("🔵 Verify OTP Response:", data);
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Invalid OTP");
-      }
-
-      // Store auth token
-      if (data.token) {
-        setAuthToken(data.token);
-
-        // Store user data if available
-        if (data.user) {
-          localStorage.setItem("website_user", JSON.stringify(data.user));
-        }
-
-        // Close modal and refresh wishlist
-        setShowOtpPopup(false);
-        toast.success("Login successful!");
-        setTimeout(() => {
-          window.location.reload(); // Reload to update auth context and refresh wishlist
-        }, 500);
-      }
-    } catch (err: any) {
-      console.error("❌ Error verifying OTP:", err);
-      toast.error(err.message || "Invalid OTP. Please try again.");
-    } finally {
-      setLoginLoading(false);
-    }
-  };
-
-  const handleOtpResend = async () => {
-    console.log("🔵 handleOtpResend called for mobile:", otpMobile);
-    setLoginLoading(true);
-
-    try {
-      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.RESEND_OTP, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          mobile: otpMobile,
-        }),
-      });
-
-      const data = await response.json();
-      console.log("🔵 Resend OTP Response:", data);
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to resend OTP");
-      }
-
-      // Update session ID if backend returns a new one
-      if (data.sessionId) {
-        setSessionId(data.sessionId);
-      }
-
-      toast.success(data.message || "OTP resent successfully!");
-    } catch (err: any) {
-      console.error("❌ Error resending OTP:", err);
-      toast.error(err.message || "Failed to resend OTP. Please try again.");
-    } finally {
-      setLoginLoading(false);
-    }
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -194,6 +74,110 @@ export default function WishlistPage() {
     }
   };
 
+  // Login popup handlers
+  const handleOtpRequested = async (mobile: string) => {
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.SEND_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to send OTP");
+      }
+
+      setSessionId(data.sessionId);
+      setOtpMobile(mobile);
+      setShowLoginPopup(false);
+      setShowOtpPopup(true);
+    } catch (err: any) {
+      console.error("Error sending OTP:", err);
+      toast.error(err.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleOtpConfirm = async (otp: string) => {
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.VERIFY_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          mobile: otpMobile,
+          otp,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Invalid OTP");
+      }
+
+      if (data.token) {
+        setAuthToken(data.token);
+
+        if (data.user) {
+          localStorage.setItem("website_user", JSON.stringify(data.user));
+        }
+
+        setShowOtpPopup(false);
+        toast.success("Login successful!");
+
+        // Reload to update auth context
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
+    } catch (err: any) {
+      console.error("Error verifying OTP:", err);
+      toast.error(err.message || "Invalid OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleOtpResend = async () => {
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.RESEND_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          mobile: otpMobile,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to resend OTP");
+      }
+
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+      }
+
+      toast.success(data.message || "OTP resent successfully!");
+    } catch (err: any) {
+      console.error("Error resending OTP:", err);
+      toast.error(err.message || "Failed to resend OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
   // Not logged in state
   if (!isAuthenticated) {
     return (
@@ -207,9 +191,9 @@ export default function WishlistPage() {
             <p className="text-muted mb-4">
               You need to be logged in to view your wishlist
             </p>
-            <Button 
-              onClick={() => setShowLoginPopup(true)} 
-              variant="dark" 
+            <Button
+              onClick={() => setShowLoginPopup(true)}
+              variant="dark"
               size="lg"
             >
               Login / Sign Up
@@ -279,8 +263,10 @@ export default function WishlistPage() {
         <Col>
           {/* Page Header */}
           <div className="mb-4">
-            <h2 className="mb-1">My Wishlist</h2>
-            <p className="text-muted mb-0">Keep track of what you love and purchase later.</p>
+            <h2 className="mb-1 fw-semibold">My Wishlist</h2>
+            <p className="text-muted mb-0">
+              Keep track of what you love and purchase later.
+            </p>
           </div>
 
           {/* Wishlist Items */}
@@ -325,7 +311,10 @@ export default function WishlistPage() {
 
                     {/* Product Details */}
                     <div className="mb-2">
-                      <h6 className="mb-1" style={{ fontSize: "14px", fontWeight: "500" }}>
+                      <h6
+                        className="mb-1"
+                        style={{ fontSize: "14px", fontWeight: "500" }}
+                      >
                         {product.name}
                       </h6>
 
@@ -384,23 +373,6 @@ export default function WishlistPage() {
           </Row>
         </Col>
       </Row>
-
-      {/* Login Popups */}
-      <MobileLoginPopup
-        show={showLoginPopup}
-        onHide={() => setShowLoginPopup(false)}
-        onOtpRequested={handleOtpRequested}
-        loading={loginLoading}
-      />
-
-      <OtpPopup
-        show={showOtpPopup}
-        onHide={() => setShowOtpPopup(false)}
-        onConfirm={handleOtpConfirm}
-        onResend={handleOtpResend}
-        identifier={otpMobile}
-        loading={loginLoading}
-      />
     </Container>
   );
 }

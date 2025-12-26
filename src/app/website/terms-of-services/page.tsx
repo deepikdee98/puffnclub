@@ -11,7 +11,7 @@ const TermsOfService = () => {
       <Row>
         <Col lg={10} className="mx-auto">
           <Link
-            href="/"
+            href="/website"
             className="back-link d-inline-flex align-items-center text-decoration-none mb-4"
           >
             <svg
@@ -29,7 +29,7 @@ const TermsOfService = () => {
                 strokeLinejoin="round"
               />
             </svg>
-            <span>Terms and Condition</span>
+            <span className="text-dark fw-semibold">Terms and Condition</span>
           </Link>
         </Col>
       </Row>
@@ -57,7 +57,7 @@ const TermsOfService = () => {
 
           {/* Eligibility */}
           <section className="mb-4">
-            <h5 className="fw-bold mb-3">Eligibility</h5>
+            <h5 className="fw-semibold mb-3">Eligibility</h5>
             <p className="text-muted">
               You must be at least 18 years old to use this website or make a
               purchase.
@@ -66,7 +66,7 @@ const TermsOfService = () => {
 
           {/* Account Responsibilities */}
           <section className="mb-4">
-            <h5 className="fw-bold mb-3">Account Responsibilities</h5>
+            <h5 className="fw-semibold mb-3">Account Responsibilities</h5>
             <ul className="list-unstyled ps-0 mb-0">
               <li className="text-muted mb-2 position-relative ps-3">
                 <span className="position-absolute start-0">•</span>
@@ -83,7 +83,7 @@ const TermsOfService = () => {
 
           {/* Orders and Payments */}
           <section className="mb-4">
-            <h5 className="fw-bold mb-3">Orders and Payments</h5>
+            <h5 className="fw-semibold mb-3">Orders and Payments</h5>
             <ul className="list-unstyled ps-0 mb-0">
               <li className="text-muted mb-2 position-relative ps-3">
                 <span className="position-absolute start-0">•</span>
@@ -100,7 +100,7 @@ const TermsOfService = () => {
 
           {/* Shipping and Delivery */}
           <section className="mb-4">
-            <h5 className="fw-bold mb-3">Shipping and Delivery</h5>
+            <h5 className="fw-semibold mb-3">Shipping and Delivery</h5>
             <ul className="list-unstyled ps-0 mb-0">
               <li className="text-muted mb-2 position-relative ps-3">
                 <span className="position-absolute start-0">•</span>
@@ -117,7 +117,7 @@ const TermsOfService = () => {
 
           {/* Intellectual Property */}
           <section className="mb-4">
-            <h5 className="fw-bold mb-3">Intellectual Property</h5>
+            <h5 className="fw-semibold mb-3">Intellectual Property</h5>
             <ul className="list-unstyled ps-0 mb-0">
               <li className="text-muted mb-2 position-relative ps-3">
                 <span className="position-absolute start-0">•</span>
@@ -134,7 +134,7 @@ const TermsOfService = () => {
 
           {/* Limitation of Liability */}
           <section className="mb-4">
-            <h5 className="fw-bold mb-3">Limitation of Liability</h5>
+            <h5 className="fw-semibold mb-3">Limitation of Liability</h5>
             <ul className="list-unstyled ps-0 mb-0">
               <li className="text-muted mb-2 position-relative ps-3">
                 <span className="position-absolute start-0">•</span>
@@ -150,7 +150,7 @@ const TermsOfService = () => {
 
           {/* Prohibited Activities */}
           <section className="mb-4">
-            <h5 className="fw-bold mb-3">Prohibited Activities</h5>
+            <h5 className="fw-semibold mb-3">Prohibited Activities</h5>
             <ul className="list-unstyled ps-0 mb-0">
               <li className="text-muted mb-2 position-relative ps-3">
                 <span className="position-absolute start-0">•</span>
@@ -169,7 +169,7 @@ const TermsOfService = () => {
 
           {/* Governing Law */}
           <section className="mb-4">
-            <h5 className="fw-bold mb-3">Governing Law</h5>
+            <h5 className="fw-semibold mb-3">Governing Law</h5>
             <ul className="list-unstyled ps-0 mb-0">
               <li className="text-muted mb-2 position-relative ps-3">
                 <span className="position-absolute start-0">•</span>
@@ -184,7 +184,7 @@ const TermsOfService = () => {
 
           {/* Changes to Terms */}
           <section className="mb-4">
-            <h5 className="fw-bold mb-3">Changes to Terms</h5>
+            <h5 className="fw-semibold mb-3">Changes to Terms</h5>
             <ul className="list-unstyled ps-0 mb-0">
               <li className="text-muted mb-2 position-relative ps-3">
                 <span className="position-absolute start-0">•</span>
@@ -200,7 +200,7 @@ const TermsOfService = () => {
 
           {/* Contact Us */}
           <section className="mb-5">
-            <h5 className="fw-bold mb-3">Contact Us</h5>
+            <h5 className="fw-semibold mb-3">Contact Us</h5>
             <div className="d-flex align-items-start mb-2">
               <Image
                 src="/images/mail-icon.svg"
@@ -236,7 +236,7 @@ const TermsOfService = () => {
           </div>
 
           <section className="mb-4">
-            <h4 className="fw-bold mb-4">Refund & Return Policy</h4>
+            <h4 className="fw-semibold mb-4">Refund & Return Policy</h4>
             <p className="text-muted mb-4">
               At Puffin Club, we want you to be satisfied with your purchases.
             </p>
@@ -247,7 +247,7 @@ const TermsOfService = () => {
 
           {/* Return Eligibility */}
           <section className="mb-4">
-            <h5 className="fw-bold mb-3">Return Eligibility</h5>
+            <h5 className="fw-semibold mb-3">Return Eligibility</h5>
             <ul className="list-unstyled ps-0 mb-0">
               <li className="text-muted mb-2 position-relative ps-3">
                 <span className="position-absolute start-0">•</span>

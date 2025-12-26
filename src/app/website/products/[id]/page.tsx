@@ -37,6 +37,10 @@ import styles from "./styles.module.scss";
 import classNames from "classnames";
 import ProductDescriptionAndReviews from "./components/ProductDescriptionAndReviews";
 import ProductAdditionalDetails from "./components/ProductAdditionalDetails";
+import MobileLoginPopup from "../../auth/login-new/components/MobileLoginPopup";
+import OtpPopup from "../../auth/login-new/components/OtpPopup";
+import { API_ENDPOINTS, setAuthToken } from "../../services/api";
+import SizeChartModal from "./components/SizeChartModal";
 
 // Category mapping for display names and API values
 const categoryMapping = {
@@ -60,6 +64,19 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState("description");
   const [isAddedToCart, setIsAddedToCart] = useState(false);
   const router = useRouter();
+
+  // Login popup state
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [showOtpPopup, setShowOtpPopup] = useState(false);
+  const [otpMobile, setOtpMobile] = useState("");
+  const [sessionId, setSessionId] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [pendingAction, setPendingAction] = useState<
+    "cart" | "wishlist" | null
+  >(null);
+
+  // Size chart modal state
+  const [showSizeChart, setShowSizeChart] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -89,19 +106,24 @@ export default function ProductDetailPage() {
         const normalizedProduct = normalizeProductData(response.product);
 
         setProduct(normalizedProduct);
-        
+
         // Fetch review stats for related products
         const relatedProductsWithReviews = await Promise.all(
           (response.relatedProducts || []).map(async (product: Product) => {
             try {
-              const reviewStats = await reviewService.getProductReviewStats(product._id);
+              const reviewStats = await reviewService.getProductReviewStats(
+                product._id
+              );
               return {
                 ...product,
                 rating: reviewStats.averageRating || 0,
                 reviewCount: reviewStats.totalReviews || 0,
               };
             } catch (error) {
-              console.error(`Error loading reviews for product ${product._id}:`, error);
+              console.error(
+                `Error loading reviews for product ${product._id}:`,
+                error
+              );
               return {
                 ...product,
                 rating: 0,
@@ -110,7 +132,7 @@ export default function ProductDetailPage() {
             }
           })
         );
-        
+
         setRelatedProducts(relatedProductsWithReviews);
 
         // Check if product is in wishlist
@@ -146,6 +168,110 @@ export default function ProductDetailPage() {
       style: "currency",
       currency: "USD",
     }).format(amount);
+  };
+
+  // Login popup handlers
+  const handleOtpRequested = async (mobile: string) => {
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.SEND_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to send OTP");
+      }
+
+      setSessionId(data.sessionId);
+      setOtpMobile(mobile);
+      setShowLoginPopup(false);
+      setShowOtpPopup(true);
+    } catch (err: any) {
+      console.error("Error sending OTP:", err);
+      toast.error(err.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleOtpConfirm = async (otp: string) => {
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.VERIFY_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          mobile: otpMobile,
+          otp,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Invalid OTP");
+      }
+
+      if (data.token) {
+        setAuthToken(data.token);
+
+        if (data.user) {
+          localStorage.setItem("website_user", JSON.stringify(data.user));
+        }
+
+        setShowOtpPopup(false);
+        toast.success("Login successful!");
+
+        // Reload to update auth context
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
+    } catch (err: any) {
+      console.error("Error verifying OTP:", err);
+      toast.error(err.message || "Invalid OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleOtpResend = async () => {
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.RESEND_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          mobile: otpMobile,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to resend OTP");
+      }
+
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+      }
+
+      toast.success(data.message || "OTP resent successfully!");
+    } catch (err: any) {
+      console.error("Error resending OTP:", err);
+      toast.error(err.message || "Failed to resend OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -186,8 +312,8 @@ export default function ProductDetailPage() {
     }
 
     if (!isAuthenticated) {
-      toast.error("Please login to add items to cart");
-      router.push("/website/auth/login");
+      setPendingAction("cart");
+      setShowLoginPopup(true);
       return;
     }
 
@@ -215,9 +341,8 @@ export default function ProductDetailPage() {
       if (!product) return;
 
       if (!isAuthenticated) {
-        toast.error("Please login to add items to wishlist");
-        router.push("/website/auth/login");
-
+        setPendingAction("wishlist");
+        setShowLoginPopup(true);
         return;
       }
 
@@ -265,22 +390,30 @@ export default function ProductDetailPage() {
     if (!product?.variants) return [];
     const variant = product.variants.find((v) => v.color === color);
     if (!variant) return [];
-    
+
     // Handle new structure with sizeStocks
     const variantAny = variant as any;
-    if (variantAny.sizeStocks && Array.isArray(variantAny.sizeStocks) && variantAny.sizeStocks.length > 0) {
+    if (
+      variantAny.sizeStocks &&
+      Array.isArray(variantAny.sizeStocks) &&
+      variantAny.sizeStocks.length > 0
+    ) {
       return variantAny.sizeStocks.map((sizeStock: any) => ({
         size: sizeStock.size,
         available: sizeStock.available || (sizeStock.stock ?? 0) > 0,
       }));
     }
-    
+
     // Handle legacy structure with sizes array
-    if (variant.sizes && Array.isArray(variant.sizes) && variant.sizes.length > 0) {
+    if (
+      variant.sizes &&
+      Array.isArray(variant.sizes) &&
+      variant.sizes.length > 0
+    ) {
       const isAvailable = (variant.stock ?? 0) > 0;
       return variant.sizes.map((s) => ({ size: s, available: isAvailable }));
     }
-    
+
     return [];
   };
 
@@ -345,23 +478,18 @@ export default function ProductDetailPage() {
                   name: product.name,
                   price: product.price,
                   comparePrice: product.comparePrice,
-                  sku: product.sku || '',
+                  sku: product.sku || "",
                   brand: product.brand,
                   category: product.category,
                 }}
                 getDiscountPercentage={getDiscountPercentage}
               />
 
-              <ColorSelector
-                variants={product.variants || []}
-                selectedColor={selectedColor}
-                onColorSelect={setSelectedColor}
-              />
-
               <SizeSelector
                 sizes={getAvailableSizesForColor(selectedColor)}
                 selectedSize={selectedSize}
                 onSizeSelect={setSelectedSize}
+                onSizeChartClick={() => setShowSizeChart(true)}
               />
 
               {/* <QuantitySelector
@@ -400,8 +528,8 @@ export default function ProductDetailPage() {
           </Col>
         </Row>
 
-        <ProductDescriptionAndReviews 
-          description={product.description} 
+        <ProductDescriptionAndReviews
+          description={product.description}
           productId={product._id}
         />
 
@@ -419,6 +547,29 @@ export default function ProductDetailPage() {
           renderStars={renderStars}
         />
       </Container>
+
+      {/* Login Popups */}
+      <MobileLoginPopup
+        show={showLoginPopup}
+        onHide={() => setShowLoginPopup(false)}
+        onOtpRequested={handleOtpRequested}
+        loading={loginLoading}
+      />
+
+      <OtpPopup
+        show={showOtpPopup}
+        onHide={() => setShowOtpPopup(false)}
+        onConfirm={handleOtpConfirm}
+        onResend={handleOtpResend}
+        identifier={otpMobile}
+        loading={loginLoading}
+      />
+
+      {/* Size Chart Modal */}
+      <SizeChartModal
+        show={showSizeChart}
+        onHide={() => setShowSizeChart(false)}
+      />
     </div>
   );
 }

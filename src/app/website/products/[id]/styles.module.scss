@@ -283,7 +283,7 @@
     transition: border-color 0.3s ease;
     
     &.selected {
-      border-color: #000;
+      border-color: #1A1A1A4D;
       border-width: 2px;
     }
   }
@@ -702,6 +702,18 @@ text-decoration: none;
     border-color: black !important;
   }
 }
+
+.sizeChartBtn {
+  color: #000;
+  font-size: 0.9rem;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.7;
+    color: #000;
+  }
+}
+
 
 .goToCartBtn {
   height: 52px !important;

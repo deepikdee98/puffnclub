@@ -289,46 +289,33 @@ export default function ProductImageGallery({
         <img
           src={currentImages[selectedImage]}
           alt={productName}
-          className="img-fluid rounded-4 w-100 main-product-image-style"
+          className="img-fluid w-100 main-product-image-style"
+          style={{
+            borderRadius: "24px",
+            cursor: "pointer"
+          }}
           onClick={() => openModal(selectedImage)}
         />
-        {/* Badge */}
-        {/* {badge && (
-          <Badge
-            bg={
-              badge === "Sale" ? "danger" : badge === "New" ? "success" : "dark"
-            }
-            className="position-absolute top-0 start-0 m-3 px-3 py-2"
-          >
-            {badge}
-          </Badge>
-        )} */}
-        {/* Wishlist button */}
-        {/* <Button
-          variant={isWishlisted ? "danger" : "light"}
-          className="position-absolute top-0 end-0 m-3 rounded-circle"
-          onClick={onWishlistToggle}
-        >
-          <FiHeart fill={isWishlisted ? "currentColor" : "none"} />
-        </Button> */}
 
-        {/* Thumbnails */}
-        <div className="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-2 p-2 thumbnail-container-style">
+        {/* Thumbnails - Overlay at bottom of main image */}
+        <div className="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-3 p-3 thumbnail-container-style">
           {currentImages.map((image: string, index: number) => (
             <img
               key={index}
               src={image}
               alt={`${productName} thumbnail ${index + 1}`}
-              className={`thumbnail-image-style ${
+              className={`thumbnail-image-style border ${
                 selectedImage === index
-                  ? "border-dark border-2"
-                  : "border-light"
+                  ? "border-dark border-3"
+                  : "border-2"
               }`}
               style={{
-                width: "80px",
-                height: "80px",
+                width: "120px",
+                height: "90px",
                 objectFit: "cover",
                 cursor: "pointer",
+                borderRadius: "16px",
+                borderColor: selectedImage === index ? "#000" : "#e0e0e0"
               }}
               onClick={() => setSelectedImage(index)}
             />

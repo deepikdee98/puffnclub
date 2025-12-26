@@ -387,6 +387,11 @@
   height: 500px;
   background: url('/images/joinclub-banner.png') center/cover no-repeat;
   overflow: hidden;
+
+  @media (max-width: 991px) {
+    height: 600px;
+    background: url('/images/joinclub-mobilebanner.png') center/cover no-repeat;
+  }
 }
 
 .overlay {
@@ -395,6 +400,59 @@
   inset: 0;
   background-color: rgba(0, 0, 0, 0.36);
   z-index: 1;
+}
+
+.desktopLayout {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.mobileLayout {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+.mobileContent {
+  width: 100%;
+  padding: 0 2rem;
+  color: white;
+}
+
+.mobileTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.mobileText {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 2rem;
+  font-weight: 300;
+}
+
+.mobileLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: end;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url('/images/arrow-right.svg') center/contain no-repeat;
+  }
 }
 
 

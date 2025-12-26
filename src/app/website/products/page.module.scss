@@ -3,7 +3,283 @@
   padding-right: 20px;
 
   @media (max-width: 991px) {
-    border-right: none;
-    padding-right: 15px;
+    display: none;
+  }
+}
+
+// Mobile/Desktop visibility classes
+.mobileOnly {
+  display: block;
+
+  @media (min-width: 992px) {
+    display: none;
+  }
+}
+
+.desktopOnly {
+  display: block;
+
+  @media (max-width: 991px) {
+    display: none;
+  }
+}
+
+// Mobile Filter Off-Canvas
+.filterOffcanvas {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: 320px;
+  height: 100vh;
+  background: #ffffff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: left 0.3s ease-in-out;
+  z-index: 1050;
+  overflow-y: auto;
+}
+
+.filterOffcanvasOpen {
+  left: 0;
+}
+
+.filterOffcanvasHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.25rem;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 10;
+}
+
+.filterOffcanvasTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #000000;
+}
+
+.filterOffcanvasBody {
+  padding: 1.5rem 1.25rem;
+}
+
+.filterOffcanvasOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Mobile Sort Dropdown
+.sortOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.sortDropdown {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1050;
+  min-width: 280px;
+  max-width: 90%;
+  animation: slideUp 0.3s ease-out;
+}
+
+.sortHeader {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sortCloseBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.7;
+  }
+
+  &:active {
+    opacity: 0.5;
+  }
+}
+
+.sortOption {
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  color: #000000;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+
+  &:active {
+    background-color: #e9ecef;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+// Custom Price Range Slider Styling
+.priceRangeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  outline: none;
+
+  // Webkit browsers (Chrome, Safari, Edge)
+  &::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #000 0%, #000 var(--value), #d3d3d3 var(--value), #d3d3d3 100%);
+    border-radius: 2px;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #000 !important;
+    cursor: pointer;
+    margin-top: -7px;
+    border: none;
+    box-shadow: none;
+  }
+
+  &:focus::-webkit-slider-thumb {
+    background: #000 !important;
+    border: none;
+    box-shadow: none;
+    outline: none;
+  }
+
+  // Firefox
+  &::-moz-range-track {
+    width: 100%;
+    height: 4px;
+    background: #d3d3d3;
+    border-radius: 2px;
+    border: none;
+  }
+
+  &::-moz-range-progress {
+    height: 4px;
+    background: #000;
+    border-radius: 2px;
+  }
+
+  &::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #000 !important;
+    cursor: pointer;
+    border: none;
+    box-shadow: none;
+  }
+
+  &:focus::-moz-range-thumb {
+    background: #000 !important;
+    border: none;
+    box-shadow: none;
+    outline: none;
+  }
+
+  // IE/Edge
+  &::-ms-track {
+    width: 100%;
+    height: 4px;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+  }
+
+  &::-ms-fill-lower {
+    background: #000;
+    border-radius: 2px;
+  }
+
+  &::-ms-fill-upper {
+    background: #d3d3d3;
+    border-radius: 2px;
+  }
+
+  &::-ms-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #000 !important;
+    cursor: pointer;
+    border: none;
+    box-shadow: none;
+  }
+
+  &:focus::-ms-thumb {
+    background: #000 !important;
+    border: none;
+    box-shadow: none;
+    outline: none;
+  }
+
+  // Remove focus outline
+  &:focus {
+    outline: none;
   }
 }

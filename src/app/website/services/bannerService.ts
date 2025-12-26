@@ -8,6 +8,7 @@ export interface Banner {
   buttonLink: string;
   targetUrl: string;
   image: string;
+  imageMobile: string;
   isActive: boolean;
   order: number;
   createdAt: string;

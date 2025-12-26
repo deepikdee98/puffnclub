@@ -19,6 +19,8 @@
 /* Add border-left (vertical divider) only to specific columns */
 .withDivider {
   border-left: 1px solid #ececec;
+    border-right: 1px solid #ececec;
+
 }
 
 .contactEmail {
@@ -211,5 +213,6 @@
   .withDivider {
     border-left: none;
     padding-top: 1rem;
+     border-right: none;
   }
 }
