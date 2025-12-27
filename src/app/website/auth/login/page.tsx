@@ -8,7 +8,6 @@ import {
   Card,
   Form,
   Button,
-  Alert,
 } from "react-bootstrap";
 import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi";
 import Link from "next/link";
@@ -25,7 +24,6 @@ export default function LoginPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,14 +32,11 @@ export default function LoginPage() {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
-    if (error) setError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
     try {
       // Use AuthContext to update global auth state so Header reacts immediately
@@ -55,7 +50,6 @@ export default function LoginPage() {
       router.push(redirectTo);
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please try again.";
-      setError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -72,12 +66,6 @@ export default function LoginPage() {
                 <h2 className="fw-bold">Welcome Back</h2>
                 <p className="text-muted">Sign in to your account</p>
               </div>
-
-              {error && (
-                <Alert variant="danger" className="mb-4">
-                  {error}
-                </Alert>
-              )}
 
               <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">

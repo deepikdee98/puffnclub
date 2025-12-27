@@ -823,7 +823,7 @@ function ProductsPageContent() {
                     <FlipYOnScroll>
                       <div className="product-item">
                         {/* Product Image */}
-                        <div className="position-relative mb-3">
+                        <div className={`position-relative mb-3 ${styles.productImageContainer}`}>
                           <Link href={`/website/products/${product._id}`}>
                             <img
                               src={
@@ -838,12 +838,31 @@ function ProductsPageContent() {
                                 aspectRatio: "1/1",
                                 borderRadius: "8px",
                                 cursor: "pointer",
+                                opacity: ((product.totalStock !== undefined && product.totalStock === 0) || 
+                                         (product.stockQuantity !== undefined && product.stockQuantity === 0)) ? 0.6 : 1,
+                                transition: "opacity 0.3s ease",
                               }}
                             />
                           </Link>
 
+                          {/* Out of Stock Overlay */}
+                          {((product.totalStock !== undefined && product.totalStock === 0) || 
+                            (product.stockQuantity !== undefined && product.stockQuantity === 0)) && (
+                            <div className={styles.outOfStockOverlay} />
+                          )}
+
+                          {/* Out of Stock Ribbon */}
+                          {((product.totalStock !== undefined && product.totalStock === 0) || 
+                            (product.stockQuantity !== undefined && product.stockQuantity === 0)) && (
+                            <div className={`${styles.outOfStockRibbon} position-absolute`}>
+                              Out of Stock
+                            </div>
+                          )}
+
                           {/* Product Badge/Tag */}
-                          {product.tags?.length > 0 && (
+                          {product.tags?.length > 0 && 
+                           !((product.totalStock !== undefined && product.totalStock === 0) || 
+                             (product.stockQuantity !== undefined && product.stockQuantity === 0)) && (
                             <Badge
                               bg={
                                 product.tags.includes("Sale")

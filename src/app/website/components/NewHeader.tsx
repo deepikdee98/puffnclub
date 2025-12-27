@@ -11,6 +11,7 @@ import MobileLoginPopup from "../auth/login-new/components/MobileLoginPopup";
 import OtpPopup from "../auth/login-new/components/OtpPopup";
 import classNames from "classnames";
 import { API_ENDPOINTS, setAuthToken } from "../services/api";
+import { toast } from "react-toastify";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -64,7 +65,7 @@ export default function Header() {
     } catch (err: any) {
       console.error("❌ Error sending OTP:", err);
       setError(err.message || "Failed to send OTP. Please try again.");
-      alert(err.message || "Failed to send OTP. Please try again.");
+      toast.error(err.message || "Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -104,7 +105,7 @@ export default function Header() {
 
         // Close modal and redirect
         setShowOtpPopup(false);
-        alert("Login successful! Redirecting...");
+        toast.success("Login successful! Redirecting...");
         setTimeout(() => {
           router.push("/website");
           window.location.reload(); // Reload to update auth context
@@ -113,7 +114,7 @@ export default function Header() {
     } catch (err: any) {
       console.error("❌ Error verifying OTP:", err);
       setError(err.message || "Invalid OTP. Please try again.");
-      alert(err.message || "Invalid OTP. Please try again.");
+      toast.error(err.message || "Invalid OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -146,11 +147,11 @@ export default function Header() {
         setSessionId(data.sessionId);
       }
 
-      alert(data.message || "OTP resent successfully!");
+      toast.success(data.message || "OTP resent successfully!");
     } catch (err: any) {
       console.error("❌ Error resending OTP:", err);
       setError(err.message || "Failed to resend OTP. Please try again.");
-      alert(err.message || "Failed to resend OTP. Please try again.");
+      toast.error(err.message || "Failed to resend OTP. Please try again.");
     } finally {
       setLoading(false);
     }
