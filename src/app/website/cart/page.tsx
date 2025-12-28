@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { LoadingSpinner } from "@/app/components";
 import { useCart } from "../contexts/CartContext";
+import { useWishlist } from "../contexts/WishlistContext";
 import CartItem from "./components/CartItem";
 import OrderSummary from "./components/OrderSummary";
 import CouponSection from "./components/CouponSection";
@@ -14,6 +15,7 @@ export default function CartPage() {
   const router = useRouter();
   const { cart, isLoading, updateCartItem, removeFromCart, refreshCart, addToCart } =
     useCart();
+  const { addToWishlist } = useWishlist();
 
   const [appliedCoupons, setAppliedCoupons] = useState<any[]>([]);
 
@@ -62,21 +64,29 @@ export default function CartPage() {
 
   const moveToWishlist = async (itemId: string) => {
     try {
-      // Get item details for toast message
+      // Get item details
       const item = cartItems.find((item: any) => item._id === itemId);
-      const productName = item?.product?.name || "Product";
+      if (!item) {
+        toast.error("Item not found in cart");
+        return;
+      }
 
-      // TODO: Implement actual wishlist functionality when API is ready
-      // await addToWishlist(itemId);
-      // await removeFromCart(itemId);
+      const productId = item.product._id || item.product;
 
-      // For now, just remove from cart
+      // Add to wishlist first
+      await addToWishlist({
+        productId,
+        size: item.size,
+        color: item.color,
+      });
+
+      // Then remove from cart
       await removeFromCart(itemId);
 
       toast.success(`Product moved to wishlist from your bag`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error moving item to wishlist:", error);
-      toast.error("Failed to move item to wishlist. Please try again.");
+      toast.error(error.message || "Failed to move item to wishlist. Please try again.");
     }
   };
 

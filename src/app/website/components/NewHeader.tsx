@@ -12,6 +12,8 @@ import OtpPopup from "../auth/login-new/components/OtpPopup";
 import classNames from "classnames";
 import { API_ENDPOINTS, setAuthToken } from "../services/api";
 import { toast } from "react-toastify";
+import { useCart } from "../contexts/CartContext";
+import { useWishlist } from "../contexts/WishlistContext";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -24,8 +26,11 @@ export default function Header() {
   const router = useRouter();
 
   const { customer, isAuthenticated, logout } = useAuth();
-  const [cartCount] = useState(3); // Replace with actual cart count
-  const [wishlistCount] = useState(5); // Replace with actual wishlist count
+  const { getCartCount } = useCart();
+  const { getWishlistCount } = useWishlist();
+  
+  const cartCount = getCartCount();
+  const wishlistCount = getWishlistCount();
 
   const handleLogout = async () => {
     await logout();
@@ -210,18 +215,38 @@ export default function Header() {
 
             {/* Desktop Icons */}
             <div className="d-flex align-items-center gap-4">
+              {/* Search */}
+              <button
+                className="btn btn-link text-dark p-0 border-0"
+                onClick={() => router.push("/website/products")}
+                aria-label="Search"
+                title="Search Products"
+              >
+                <FiSearch size={20} />
+              </button>
+
               {/* Wishlist */}
               <Link
                 href="/website/wishlist"
                 className="text-dark position-relative"
+                title="Wishlist"
               >
                 <FiHeart size={20} />
+                {wishlistCount > 0 && (
+                  <span
+                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark"
+                    style={{ fontSize: "0.65rem", minWidth: "18px", height: "18px", padding: "2px 5px" }}
+                  >
+                    {wishlistCount > 99 ? "99+" : wishlistCount}
+                  </span>
+                )}
               </Link>
 
               {/* Cart */}
               <Link
                 href="/website/cart"
                 className="text-dark position-relative"
+                title="Shopping Cart"
               >
                 <Image
                   src="/images/cart-icon.svg"
@@ -229,6 +254,14 @@ export default function Header() {
                   width={20}
                   height={20}
                 />
+                {cartCount > 0 && (
+                  <span
+                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark"
+                    style={{ fontSize: "0.65rem", minWidth: "18px", height: "18px", padding: "2px 5px" }}
+                  >
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
               </Link>
 
               {/* Desktop Profile Dropdown */}
@@ -309,6 +342,8 @@ export default function Header() {
               <button
                 className="btn btn-link text-dark p-0 border-0"
                 aria-label="Search"
+                onClick={() => router.push("/website/products")}
+                title="Search Products"
               >
                 <FiSearch size={20} />
               </button>
@@ -316,6 +351,7 @@ export default function Header() {
               <Link
                 href="/website/cart"
                 className="text-dark position-relative"
+                title="Shopping Cart"
               >
                 <Image
                   src="/images/cart-icon.svg"
@@ -323,11 +359,20 @@ export default function Header() {
                   width={20}
                   height={20}
                 />
+                {cartCount > 0 && (
+                  <span
+                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark"
+                    style={{ fontSize: "0.65rem", minWidth: "18px", height: "18px", padding: "2px 5px" }}
+                  >
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
               </Link>
 
               <Link
                 href="/website/profile"
                 className="text-dark"
+                title="Profile"
               >
                 <Image
                   src="/images/profile-icon.svg"
