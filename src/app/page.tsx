@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Container,
   Row,
@@ -11,107 +12,256 @@ import {
 } from "react-bootstrap";
 import { FiArrowRight, FiStar, FiHeart, FiShoppingBag } from "react-icons/fi";
 import Link from "next/link";
+import { LoadingSpinner } from "@/app/components";
+import { productService, Product } from "./services/productService";
+import { bannerService, Banner } from "./services/bannerService";
+import { contactService } from "./services/contactService";
+import { apiRequest, API_ENDPOINTS, setAuthToken } from "./services/api";
+import { useWishlist } from "./contexts/WishlistContext";
+import { useAuth } from "./contexts/AuthContext";
+import { normalizeProductData } from "./utils/productUtils";
+import { toast } from "react-toastify";
+import { reviewService } from "./services/reviewService";
+import {
+  FlipXOnScroll,
+  FlipYOnScroll,
+  ZoomInOnScroll,
+} from "./constants/FadeUpOnScroll";
+import Categories from "./Home/Categories";
+import FeaturedProducts from "./Home/FeaturedProducts";
+import HeroCarousel from "./Home/HeroCarousel";
+import BrandStory from "./Home/BrandStory";
+import ClubStatementBanner from "./Home/ClubStatementBanner";
+import JoinClubBanner from "./Home/JoinClubBanner";
+import MobileLoginPopup from "./auth/login-new/components/MobileLoginPopup";
+import OtpPopup from "./auth/login-new/components/OtpPopup";
 
-// Mock data for homepage
-const heroSlides = [
-  {
-    id: 1,
-    image:
-      "https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    title: "Summer Collection 2024",
-    subtitle: "Discover the latest trends in fashion",
-    buttonText: "Shop Now",
-    buttonLink: "/website/products",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.pexels.com/photos/1020585/pexels-photo-1020585.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    title: "New Arrivals",
-    subtitle: "Fresh styles just landed",
-    buttonText: "Explore",
-    buttonLink: "/website/products?filter=new",
-  },
-];
-
-const featuredProducts = [
-  {
-    id: "1",
-    name: "Premium Cotton T-Shirt",
-    price: 29.99,
-    comparePrice: 39.99,
-    image:
-      "https://images.pexels.com/photos/1020585/pexels-photo-1020585.jpeg?auto=compress&cs=tinysrgb&w=400",
-    rating: 4.5,
-    reviews: 128,
-    badge: "Trending",
-  },
-  {
-    id: "2",
-    name: "Denim Jacket Classic",
-    price: 89.99,
-    comparePrice: 120.0,
-    image:
-      "https://images.pexels.com/photos/1124468/pexels-photo-1124468.jpeg?auto=compress&cs=tinysrgb&w=400",
-    rating: 4.8,
-    reviews: 95,
-    badge: "Sale",
-  },
-  {
-    id: "3",
-    name: "Summer Floral Dress",
-    price: 65.99,
-    image:
-      "https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=400",
-    rating: 4.3,
-    reviews: 67,
-    badge: "New",
-  },
-  {
-    id: "4",
-    name: "Casual Sneakers",
-    price: 79.99,
-    comparePrice: 99.99,
-    image:
-      "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=400",
-    rating: 4.6,
-    reviews: 203,
-    badge: "Best Seller",
-  },
-];
-
-const categories = [
-  {
-    id: 1,
-    name: "Men's Fashion",
-    image:
-      "https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=400",
-    link: "/website/products?category=T-Shirt",
-  },
-  {
-    id: 2,
-    name: "Women's Fashion",
-    image:
-      "https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=400",
-    link: "/website/products?category=Over_Size",
-  },
-  {
-    id: 3,
-    name: "Kids Fashion",
-    image:
-      "https://images.pexels.com/photos/1620760/pexels-photo-1620760.jpeg?auto=compress&cs=tinysrgb&w=400",
-    link: "/website/products?category=kids",
-  },
-  {
-    id: 4,
-    name: "Accessories",
-    image:
-      "https://images.pexels.com/photos/1927259/pexels-photo-1927259.jpeg?auto=compress&cs=tinysrgb&w=400",
-    link: "/website/products?category=accessories",
-  },
-];
+// Categories loaded from API
+type CategoryItem = { _id: string; name: string; slug: string; image?: string };
 
 export default function HomePage() {
+  const { addToWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [bannersLoading, setBannersLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+  // Login popup state
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [showOtpPopup, setShowOtpPopup] = useState(false);
+  const [otpMobile, setOtpMobile] = useState("");
+  const [sessionId, setSessionId] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    await Promise.all([
+      loadFeaturedProducts(),
+      loadBanners(),
+      loadCategories(),
+    ]);
+  };
+
+  const loadCategories = async () => {
+    try {
+      setCategoriesLoading(true);
+      const data = await apiRequest<CategoryItem[]>(
+        API_ENDPOINTS.WEBSITE.CATEGORIES_DROPDOWN
+      );
+      setCategories(data);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+      toast.error("Failed to load categories");
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
+  const loadFeaturedProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await productService.getFeaturedProducts(4);
+      // Normalize product data to ensure arrays are always defined
+      const normalizedProducts = response.products.map(normalizeProductData);
+      
+      // Fetch review stats for each product
+      const productsWithReviews = await Promise.all(
+        normalizedProducts.map(async (product) => {
+          try {
+            const reviewStats = await reviewService.getProductReviewStats(product._id);
+            return {
+              ...product,
+              rating: reviewStats.averageRating || 0,
+              reviewCount: reviewStats.totalReviews || 0,
+            };
+          } catch (error) {
+            console.error(`Error loading reviews for product ${product._id}:`, error);
+            return {
+              ...product,
+              rating: 0,
+              reviewCount: 0,
+            };
+          }
+        })
+      );
+      
+      setFeaturedProducts(productsWithReviews);
+    } catch (error) {
+      console.error("Error loading featured products:", error);
+      toast.error("Failed to load featured products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadBanners = async () => {
+    try {
+      setBannersLoading(true);
+      // Using API data instead of mock data
+      const response = await bannerService.getBanners();
+      setBanners(response.banners);
+      console.log("🎯 Website: Successfully loaded banners from API");
+    } catch (error) {
+      console.error("❌ Error loading banners from API:", error);
+      toast.error("Failed to load banners");
+    } finally {
+      setBannersLoading(false);
+    }
+  };
+
+  // Login popup handlers
+  const handleOtpRequested = async (mobile: string) => {
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.SEND_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to send OTP");
+      }
+
+      setSessionId(data.sessionId);
+      setOtpMobile(mobile);
+      setShowLoginPopup(false);
+      setShowOtpPopup(true);
+    } catch (err: any) {
+      console.error("Error sending OTP:", err);
+      toast.error(err.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleOtpConfirm = async (otp: string) => {
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.VERIFY_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          mobile: otpMobile,
+          otp,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Invalid OTP");
+      }
+
+      if (data.token) {
+        setAuthToken(data.token);
+
+        if (data.user) {
+          localStorage.setItem("website_user", JSON.stringify(data.user));
+        }
+
+        setShowOtpPopup(false);
+        toast.success("Login successful!");
+
+        // Reload to update auth context
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
+    } catch (err: any) {
+      console.error("Error verifying OTP:", err);
+      toast.error(err.message || "Invalid OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleOtpResend = async () => {
+    setLoginLoading(true);
+
+    try {
+      const response = await fetch(API_ENDPOINTS.WEBSITE.AUTH.RESEND_OTP, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          mobile: otpMobile,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to resend OTP");
+      }
+
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+      }
+
+      toast.success(data.message || "OTP resent successfully!");
+    } catch (err: any) {
+      console.error("Error resending OTP:", err);
+      toast.error(err.message || "Failed to resend OTP. Please try again.");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleAddToWishlist = async (productId: string) => {
+    try {
+      if (!isAuthenticated) {
+        setShowLoginPopup(true);
+        return;
+      }
+
+      await addToWishlist({ productId });
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+    }
+  };
+
+  const handleSubscribeNewsletter = async (email: string) => {
+    try {
+      await contactService.subscribeNewsletter({ email });
+      toast.success("Successfully subscribed to newsletter!");
+    } catch (error) {
+      console.error("Error subscribing to newsletter:", error);
+      toast.error("Failed to subscribe to newsletter");
+    }
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -119,7 +269,7 @@ export default function HomePage() {
     }).format(amount);
   };
 
-  const renderStars = (rating: number) => {
+  const renderStars = (rating: number = 4.5) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
@@ -145,207 +295,39 @@ export default function HomePage() {
   return (
     <div className="homepage">
       {/* Hero Carousel */}
-      <Carousel className="hero-carousel" indicators={false}>
-        {heroSlides.map((slide) => (
-          <Carousel.Item key={slide.id}>
-            <div
-              className="hero-slide d-flex align-items-center justify-content-center text-white"
-              style={{
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${slide.image})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                height: "500px",
-              }}
-            >
-              <Container>
-                <Row className="justify-content-center text-center">
-                  <Col lg={8}>
-                    <h1 className="display-4 fw-bold mb-3">{slide.title}</h1>
-                    <p className="lead mb-4">{slide.subtitle}</p>
-                    <Button
-                      as="a"
-                      href={slide.buttonLink}
-                      variant="light"
-                      size="lg"
-                      className="px-4 py-2"
-                    >
-                      {slide.buttonText} <FiArrowRight className="ms-2" />
-                    </Button>
-                  </Col>
-                </Row>
-              </Container>
-            </div>
-          </Carousel.Item>
-        ))}
-      </Carousel>
-
+      <HeroCarousel banners={banners} loading={bannersLoading} />
       {/* Categories Section */}
-      <Container className="py-5">
-        <Row className="mb-4">
-          <Col>
-            <h2 className="text-center fw-bold">Shop by Category</h2>
-            <p className="text-center text-muted">
-              Discover our wide range of products
-            </p>
-          </Col>
-        </Row>
-        <Row>
-          {categories.map((category) => (
-            <Col lg={3} md={6} key={category.id} className="mb-4">
-              <Card className="border-0 shadow-sm h-100 category-card">
-                <div className="position-relative overflow-hidden">
-                  <Card.Img
-                    variant="top"
-                    src={category.image}
-                    style={{ height: "250px", objectFit: "cover" }}
-                  />
-                  <div className="category-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
-                    <Button
-                      as="a"
-                      href={category.link}
-                      variant="light"
-                      className="fw-bold"
-                    >
-                      Shop Now
-                    </Button>
-                  </div>
-                </div>
-                <Card.Body className="text-center">
-                  <Card.Title className="fw-bold">{category.name}</Card.Title>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+      <Container className="">
+        <Categories categories={categories} loading={categoriesLoading} />
       </Container>
-
-      {/* Featured Products */}
-      <Container className="py-5">
-        <Row className="mb-4">
-          <Col>
-            <h2 className="text-center fw-bold">Featured Products</h2>
-            <p className="text-center text-muted">
-              Handpicked items just for you
-            </p>
-          </Col>
-        </Row>
-        <Row>
-          {featuredProducts.map((product) => (
-            <Col lg={3} md={6} key={product.id} className="mb-4">
-              <Card className="border-0 shadow-sm h-100 product-card">
-                <div className="position-relative">
-                  <Card.Img
-                    variant="top"
-                    src={product.image}
-                    style={{ height: "300px", objectFit: "cover" }}
-                  />
-                  {product.badge && (
-                    <Badge
-                      bg={
-                        product.badge === "Sale"
-                          ? "danger"
-                          : product.badge === "New"
-                          ? "success"
-                          : "primary"
-                      }
-                      className="position-absolute top-0 start-0 m-2"
-                    >
-                      {product.badge}
-                    </Badge>
-                  )}
-                  <div className="product-actions position-absolute top-0 end-0 m-2">
-                    <Button
-                      variant="light"
-                      size="sm"
-                      className="rounded-circle me-1"
-                    >
-                      <FiHeart size={16} />
-                    </Button>
-                  </div>
-                </div>
-                <Card.Body>
-                  <Card.Title className="h6 mb-2">{product.name}</Card.Title>
-                  <div className="d-flex align-items-center mb-2">
-                    <div className="me-2">{renderStars(product.rating)}</div>
-                    <small className="text-muted">({product.reviews})</small>
-                  </div>
-                  <div className="d-flex align-items-center justify-content-between">
-                    <div>
-                      <span className="fw-bold text-dark">
-                        {formatCurrency(product.price)}
-                      </span>
-                      {product.comparePrice && (
-                        <small className="text-muted text-decoration-line-through ms-2">
-                          {formatCurrency(product.comparePrice)}
-                        </small>
-                      )}
-                    </div>
-                    <Button
-                      as="a"
-                      href={`/website/products/${product.id}`}
-                      variant="dark"
-                      size="sm"
-                    >
-                      <FiShoppingBag size={14} />
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-        <Row>
-          <Col className="text-center">
-            <Button
-              as="a"
-              href="/website/products"
-              variant="outline-dark"
-              size="lg"
-            >
-              View All Products <FiArrowRight className="ms-2" />
-            </Button>
-          </Col>
-        </Row>
+      {/* Our Best Picks For You */}
+      <Container className="pb-5">
+        <FeaturedProducts
+          loading={loading}
+          products={featuredProducts}
+          handleAddToWishlist={handleAddToWishlist}
+        />
       </Container>
+      <ClubStatementBanner />
+      <BrandStory />
+      <JoinClubBanner />
 
-      {/* Newsletter Section */}
-      {/* <div className="bg-dark text-white py-5">
-        <Container>
-          <Row className="justify-content-center text-center">
-            <Col lg={6}>
-              <h3 className="fw-bold mb-3">Stay Updated</h3>
-              <p className="mb-4">Subscribe to our newsletter for the latest updates and exclusive offers</p>
-              <div className="d-flex gap-2">
-                <input 
-                  type="email" 
-                  className="form-control" 
-                  placeholder="Enter your email"
-                />
-                <Button variant="light">Subscribe</Button>
-              </div>
-            </Col>
-          </Row>
-        </Container>
-      </div> */}
+      {/* Login Popups */}
+      <MobileLoginPopup
+        show={showLoginPopup}
+        onHide={() => setShowLoginPopup(false)}
+        onOtpRequested={handleOtpRequested}
+        loading={loginLoading}
+      />
 
-      {/* Admin Access Link */}
-      <div className="bg-light py-3">
-        <Container>
-          <Row>
-            <Col className="text-center">
-              <small className="text-muted">
-                Store Management:
-                <Link
-                  href="/admin/dashboard"
-                  className="ms-2 text-decoration-none"
-                >
-                  Access Admin Panel
-                </Link>
-              </small>
-            </Col>
-          </Row>
-        </Container>
-      </div>
+      <OtpPopup
+        show={showOtpPopup}
+        onHide={() => setShowOtpPopup(false)}
+        onConfirm={handleOtpConfirm}
+        onResend={handleOtpResend}
+        identifier={otpMobile}
+        loading={loginLoading}
+      />
     </div>
   );
 }

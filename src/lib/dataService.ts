@@ -1,7 +1,7 @@
 import { apiClient, dashboardAPI, productsAPI, ordersAPI, categoriesAPI, homepageAPI } from './api';
 import { toast } from 'react-toastify';
 import { DashboardMetrics, RecentOrder, TopProduct, SalesChartData, RecentActivity } from '@/types/dashboard';
-import type { ProductsResponse } from '@/app/website/services/productService';
+import type { ProductsResponse } from '@/app/services/productService';
 
 // Local SimpleProduct type used by admin sample data
 interface SimpleProduct {

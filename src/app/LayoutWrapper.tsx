@@ -1,11 +1,15 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import Header from './website/components/Header';
-import Footer from './website/components/Footer';
-import { AuthProvider } from './website/contexts/AuthContext';
-import { CartProvider } from './website/contexts/CartContext';
-import { WishlistProvider } from './website/contexts/WishlistContext';
+import { Container } from "react-bootstrap";
+import Header from './website-components/NewHeader';
+import Breadcrumbs from './website-components/Breadcrumbs';
+import Footer from './website-components/NewFooter';
+import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
+import { WishlistProvider } from './contexts/WishlistContext';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./styles/website.scss";
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -14,18 +18,22 @@ interface LayoutWrapperProps {
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith('/admin');
-  const isWebsiteRoute = pathname?.startsWith('/website');
 
   return (
     <>
-      {/* Show website layout only for root routes (not /admin or /website) */}
-      {!isAdminRoute && !isWebsiteRoute ? (
+      {/* Show website layout for all routes except admin */}
+      {!isAdminRoute ? (
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>
               <div className="website-layout">
                 <Header />
                 <main className="main-content">
+                  <Container>
+                    <div className="d-block d-lg-none">
+                      <Breadcrumbs />
+                    </div>
+                  </Container>
                   {children}
                 </main>
                 <Footer />
@@ -34,7 +42,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
           </CartProvider>
         </AuthProvider>
       ) : (
-        // Admin and website routes use their own layouts
+        // Admin routes use their own layouts
         children
       )}
     </>
